@@ -11,7 +11,7 @@ target/
 .settings
 .springBeans
 .sts4-cache
-.Ds_Store
+.DS_Store
 
 ### IntelliJ IDEA ###
 .idea

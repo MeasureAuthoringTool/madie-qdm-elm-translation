@@ -37,6 +37,6 @@ public class OpenApiConfig {
 
     public Info buildInfo() {
         return new Info().title("CQL-to-ELM Translator").description(
-                "This is a SpringBoot v2.3.x restful service for converting CQL-to-ELM.");
+                "This is a SpringBoot v2.6.x restful service for converting CQL-to-ELM.");
     }
 }
