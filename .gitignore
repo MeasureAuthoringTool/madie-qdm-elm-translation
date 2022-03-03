@@ -11,6 +11,7 @@ target/
 .settings
 .springBeans
 .sts4-cache
+.Ds_Store
 
 ### IntelliJ IDEA ###
 .idea
@@ -31,3 +32,6 @@ build/
 
 .mvn
 .jpb
+
+
+**/*.log
