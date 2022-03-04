@@ -82,6 +82,7 @@ public class CqlConversionController {
             @RequestParam(value = "disable-method-invocation", defaultValue = "true") Boolean disableMethodInvocation,
             @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits) {
 
+        // Todo This end point is to capture cqlModel from MAT's Measure XML, so we can remove this feature for MADiE
         String cqlData = matXmlConversionService.processCqlXml(xml);
 
         cqlConversionService.setUpMatLibrarySourceProvider(cqlData);
