@@ -1,6 +1,6 @@
-FROM openjdk:15.0-jdk
-ARG JAR_FILE=target/cql-elm-translation-0.0.1.jar
-COPY ${JAR_FILE} app.jar
+## Use whatever base image
+FROM adoptopenjdk/openjdk16:jre-16_36
+COPY target/*.jar app.jar
 
 RUN curl -O https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.jar \
     && curl -O https://download.newrelic.com/newrelic/java-agent/newrelic-agent/current/newrelic.yml
