@@ -16,43 +16,67 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     @Getter
     private final String cqlData;
     private final boolean showWarnings;
-    private final List<CqlTranslatorException> exceptions;
+    private final List<CqlTranslatorException> cqlTranslatorExceptions;
 
     public CqlTranslatorExceptionFilter(String cqlData,
                                         boolean showWarnings,
-                                        List<CqlTranslatorException> exceptions) {
+                                        List<CqlTranslatorException> cqlTranslatorExceptions) {
         this.cqlData = cqlData;
         this.showWarnings = showWarnings;
-        this.exceptions = exceptions;
+        this.cqlTranslatorExceptions = cqlTranslatorExceptions;
     }
 
+    /*
+    * if showWarnings is true, then removes warnings from the cqlTranslatorExceptions List.
+    * Then the cqlTranslatorExceptions are filtered out if they are not pointed to the parent library. ( reason: unknown )
+    * */
     public List<CqlTranslatorException> filter() {
-        if (CollectionUtils.isEmpty(exceptions)) {
+        if (CollectionUtils.isEmpty(cqlTranslatorExceptions)) {
+            log.debug("No CQL Errors found");
             return Collections.emptyList();
         } else {
-            List<CqlTranslatorException> warningsRemovedErrors = filterOutWarnings();
+            List<CqlTranslatorException> filteredCqlTranslatorExceptions = filterOutWarnings();
 
-            if (warningsRemovedErrors.isEmpty()) {
+            if (filteredCqlTranslatorExceptions.isEmpty()) {
                 return Collections.emptyList();
             } else {
-                return filterByLibrary(warningsRemovedErrors);
+                return filterByLibrary(filteredCqlTranslatorExceptions);
             }
         }
     }
 
-    private List<CqlTranslatorException> filterByLibrary(List<CqlTranslatorException> errors) {
-        LibraryProperties libraryProperties = parseLibrary();
+    private List<CqlTranslatorException> filterOutWarnings() {
+        if (showWarnings) {
+            return cqlTranslatorExceptions;
+        } else {
+             return cqlTranslatorExceptions.stream()
+                    .filter(this::isError)
+                    .collect(Collectors.toList());
+        }
+    }
 
-        return errors.stream()
+    private boolean isError(CqlTranslatorException cqlTranslatorException) {
+        return cqlTranslatorException != null && cqlTranslatorException.getSeverity() != null &&
+                cqlTranslatorException.getSeverity() == CqlTranslatorException.ErrorSeverity.Error;
+    }
+
+    /*
+    * Few exceptions from CqlTranslator doesn't have a library.version, so they are removed.
+    * This filter also removes if there are any errors caught by translator in any of the included libraries
+    * */
+    private List<CqlTranslatorException> filterByLibrary(List<CqlTranslatorException> filteredCqlTranslatorExceptions) {
+        var libraryProperties = parseLibrary();
+
+        return filteredCqlTranslatorExceptions.stream()
                 .filter(e -> filterOutInclude(e, libraryProperties))
                 .collect(Collectors.toList());
     }
 
-    private boolean filterOutInclude(CqlTranslatorException translatorException, LibraryProperties libraryProperties) {
-        if (translatorException.getLocator() == null || translatorException.getLocator().getLibrary() == null) {
+    private boolean filterOutInclude(CqlTranslatorException cqlTranslatorException, LibraryProperties libraryProperties) {
+        if (cqlTranslatorException.getLocator() == null || cqlTranslatorException.getLocator().getLibrary() == null) {
             return false;
         } else {
-            VersionedIdentifier versionedIdentifier = translatorException.getLocator().getLibrary();
+            VersionedIdentifier versionedIdentifier = cqlTranslatorException.getLocator().getLibrary();
             log.debug("versionedIdentifier : {}", versionedIdentifier);
             return isPointingToSameLibrary(libraryProperties, versionedIdentifier);
         }
@@ -60,25 +84,5 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
 
     private boolean isPointingToSameLibrary(LibraryProperties p, VersionedIdentifier v) {
         return p.getName().equals(v.getId()) && p.getVersion().equals(v.getVersion());
-    }
-
-
-    private List<CqlTranslatorException> filterOutWarnings() {
-        List<CqlTranslatorException> warningsRemovedList;
-
-        if (showWarnings) {
-            warningsRemovedList = exceptions;
-        } else {
-            warningsRemovedList = exceptions.stream()
-                    .filter(this::isError)
-                    .collect(Collectors.toList());
-        }
-
-        return warningsRemovedList;
-    }
-
-    private boolean isError(CqlTranslatorException e) {
-        return e != null && e.getSeverity() != null &&
-                e.getSeverity() == CqlTranslatorException.ErrorSeverity.Error;
     }
 }
