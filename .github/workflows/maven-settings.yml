@@ -1,0 +1,26 @@
+- name: maven-settings-xml-action
+  uses: whelk-io/maven-settings-xml-action@v20
+  with:
+    repositories: >
+      [
+        {
+          "id": "central",
+          "url": "https://repo1.maven.org/maven2",
+        },
+        {
+          "id": "github",
+          "url": "https://maven.pkg.github.com/MeasureAuthoringTool/madie-server-commons",
+        },
+        {
+          "id": "github",
+          "url": "https://maven.pkg.github.com/MeasureAuthoringTool/madie-rest-commons",
+        }
+      ]
+    servers: >
+      [
+        {
+          "id": "github",
+          "username": "${{ github.actor }}",
+          "password": "${{ secrets.USER_NAME }}"
+        }
+      ]
