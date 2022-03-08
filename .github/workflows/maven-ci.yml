@@ -19,6 +19,7 @@ jobs:
         with:
           java-version: '16'
           distribution: 'adopt'
+
       - name: maven-settings
         uses: s4u/maven-settings-action@v2
         with:
