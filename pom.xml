@@ -19,6 +19,7 @@
         <cqframework.version>1.5.4</cqframework.version>
     </properties>
 
+<!--    Required to fetch artifacts from repositories other than maven central -->
     <repositories>
         <repository>
             <id>github</id>
