@@ -174,15 +174,8 @@
             <artifactId>madie-server-commons</artifactId>
             <version>0.0.1</version>
         </dependency>
-    </dependencies>
 
-    <repositories>
-        <repository>
-            <id>nexus-repo</id>
-            <name>Hcqis nexus repository</name>
-            <url>https://nexus-cloud.hcqis.org/repository/mat-maven</url>
-        </repository>
-    </repositories>
+    </dependencies>
 
     <build>
         <plugins>
