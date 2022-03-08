@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 @Service
 @Slf4j
 public class MatXmlConversionService {
+    // Todo Irrelevant for MADiE
     public String processCqlXml(String xml) {
         CQLModel cqlModel = CQLUtilityClass.getCQLModelFromXML(xml);
         return CQLUtilityClass.getCqlString(cqlModel, "").getLeft();

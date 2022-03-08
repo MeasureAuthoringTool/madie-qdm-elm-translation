@@ -17,12 +17,11 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
 import java.io.UncheckedIOException;
 
 @RestController
 @RequestMapping(path = "/cql/translator")
-@Tag(name = "Conversion-Controller", description = "API for converting stuff - TODO.")
+@Tag(name = "Conversion-Controller", description = "API for converting CQL to ELM.")
 @Slf4j
 public class CqlConversionController {
     private final CqlConversionService cqlConversionService;
@@ -45,6 +44,7 @@ public class CqlConversionController {
             @RequestParam(value = "disable-list-promotion", defaultValue = "true") Boolean disableListPromotion,
             @RequestParam(value = "disable-method-invocation", defaultValue = "true") Boolean disableMethodInvocation,
             @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits) {
+
         RequestData requestData = RequestData.builder()
                 .cqlData(cqlData)
                 .showWarnings(showWarnings)
@@ -57,23 +57,21 @@ public class CqlConversionController {
                 .validateUnits(validateUnits)
                 .build();
 
-        cqlConversionService.setUpMatLibrarySourceProvider(cqlData);
+        cqlConversionService.setUpLibrarySourceProvider(cqlData);
 
-        CqlConversionPayload payload = cqlConversionService.processCqlDataWithErrors(requestData);
-        TranslatorOptionsRemover remover = new TranslatorOptionsRemover(payload.getJson());
+        CqlConversionPayload cqlConversionPayload = cqlConversionService.processCqlDataWithErrors(requestData);
+        // Todo Do we need to remove empty annotations from library object, Also why are we removing translatorOptions from annotations, Could be MAT specific.
+        TranslatorOptionsRemover remover = new TranslatorOptionsRemover(cqlConversionPayload.getJson());
         String cleanedJson =  remover.clean();
-        payload.setJson(cleanedJson);
-        return payload;
+        cqlConversionPayload.setJson(cleanedJson);
+        return cqlConversionPayload;
     }
 
     @PutMapping(path = "/xml", consumes = "text/plain", produces = "application/elm+json")
     public String xmlToElmJson(
             @RequestBody String xml,
             @RequestParam(defaultValue = "false") Boolean showWarnings,
-
             @RequestParam(defaultValue = "true") Boolean isDraft,
-
-
             @RequestParam(required = false) LibraryBuilder.SignatureLevel signatures,
             @RequestParam(defaultValue = "true") Boolean annotations,
             @RequestParam(defaultValue = "true") Boolean locators,
@@ -85,7 +83,7 @@ public class CqlConversionController {
         // Todo This end point is to capture cqlModel from MAT's Measure XML, so we can remove this feature for MADiE
         String cqlData = matXmlConversionService.processCqlXml(xml);
 
-        cqlConversionService.setUpMatLibrarySourceProvider(cqlData);
+        cqlConversionService.setUpLibrarySourceProvider(cqlData);
 
         RequestData requestData = RequestData.builder()
                 .cqlData(cqlData)

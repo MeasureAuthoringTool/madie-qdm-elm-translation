@@ -19,6 +19,22 @@
         <cqframework.version>1.5.4</cqframework.version>
     </properties>
 
+<!--    Required to fetch artifacts from repositories other than maven central -->
+    <repositories>
+        <repository>
+            <id>github</id>
+            <name>Github madie rest commons</name>
+            <url>https://maven.pkg.github.com/MeasureAuthoringTool/madie-rest-commons</url>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+        <repository>
+            <id>github-madie-server-commons</id>
+            <name>Github madie server commons</name>
+            <url>https://maven.pkg.github.com/MeasureAuthoringTool/madie-server-commons</url>
+            <releases><enabled>true</enabled></releases>
+        </repository>
+    </repositories>
+
     <dependencies>
 
         <dependency>
@@ -174,15 +190,8 @@
             <artifactId>madie-server-commons</artifactId>
             <version>0.0.1</version>
         </dependency>
-    </dependencies>
 
-    <repositories>
-        <repository>
-            <id>nexus-repo</id>
-            <name>Hcqis nexus repository</name>
-            <url>https://nexus-cloud.hcqis.org/repository/mat-maven</url>
-        </repository>
-    </repositories>
+    </dependencies>
 
     <build>
         <plugins>
@@ -204,6 +213,26 @@
                 <groupId>pl.project13.maven</groupId>
                 <artifactId>git-commit-id-plugin</artifactId>
                 <version>4.0.3</version>
+            </plugin>
+
+            <plugin>
+                <groupId>org.jacoco</groupId>
+                <artifactId>jacoco-maven-plugin</artifactId>
+                <version>0.8.7</version>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>prepare-agent</goal>
+                        </goals>
+                    </execution>
+                    <execution>
+                        <id>report</id>
+                        <phase>prepare-package</phase>
+                        <goals>
+                            <goal>report</goal>
+                        </goals>
+                    </execution>
+                </executions>
             </plugin>
 
         </plugins>

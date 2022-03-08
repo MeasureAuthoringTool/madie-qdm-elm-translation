@@ -1,6 +1,10 @@
 package gov.cms.mat.cql_elm_translation.cql_translator;
 
-import org.cqframework.cql.cql2elm.*;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
@@ -14,7 +18,7 @@ import java.util.List;
 
 public class TranslationResource {
 
-    private static final MultivaluedMap<String, CqlTranslator.Options> PARAMS_TO_OPTIONS_MAP = new MultivaluedHashMap<String, CqlTranslator.Options>() {{
+    private static final MultivaluedMap<String, CqlTranslator.Options> PARAMS_TO_OPTIONS_MAP = new MultivaluedHashMap<>() {{
         putSingle("date-range-optimization", CqlTranslator.Options.EnableDateRangeOptimization);
         putSingle("annotations", CqlTranslator.Options.EnableAnnotations);
         putSingle("locators", CqlTranslator.Options.EnableLocators);
@@ -27,6 +31,8 @@ public class TranslationResource {
         putSingle("enable-interval-promotion", CqlTranslator.Options.EnableIntervalPromotion);
         putSingle("disable-method-invocation", CqlTranslator.Options.DisableMethodInvocation);
         putSingle("require-from-keyword", CqlTranslator.Options.RequireFromKeyword);
+
+        // Todo Do we even use these consolidated options ?
         put("strict", Arrays.asList(
                 CqlTranslator.Options.DisableListTraversal,
                 CqlTranslator.Options.DisableListDemotion,
@@ -61,6 +67,8 @@ public class TranslationResource {
         this.libraryManager = new LibraryManager(modelManager);
     }
 
+    /*sets the options and calls cql-elm-translator using MatLibrarySourceProvider,
+    which helps the translator to fetch the CQL of the included libraries from HAPI FHIR Server*/
     public CqlTranslator buildTranslator(InputStream cqlStream, MultivaluedMap<String, String> params) {
         try {
             UcumService ucumService = null;

@@ -8,26 +8,30 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.elements.LibraryProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-
 @Slf4j
 public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
+
     @Getter
     private final String cqlData;
     private final boolean showWarnings;
     private final String json;
 
     private LibraryProperties libraryProperties;
-
     private List<JsonNode> keeperList = new ArrayList<>();
-
     private List<JsonNode> externalList = new ArrayList<>();
     private ObjectMapper objectMapper = new ObjectMapper();
 
+    /*
+    * This class is similar to CqlTranslatorExceptionFilter, Here we filter out the annotation Node.
+    * Verifies if the Annotation node in cqlTranslationResult is present. If present,
+    * then the errors are filtered out if they are not pointed to the parent library.
+    * This service also adds a new node "externalErrors" which contains a list of errors that are not part of current cql library.
+    * */
+    // Todo Do we even need these annotations ?
     public AnnotationErrorFilter(String cqlData, boolean showWarnings, String json) {
         this.cqlData = cqlData;
         this.showWarnings = showWarnings;
@@ -38,13 +42,13 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
         try {
             JsonNode rootNode = readRootNode();
 
-            Optional<ArrayNode> optionalArrayNode = getAnnotationNode(rootNode);
+            Optional<ArrayNode> annotationNode = getAnnotationNode(rootNode);
 
-            if (optionalArrayNode.isEmpty()) {
+            if (annotationNode.isEmpty()) {
                 return json;
             } else {
                 libraryProperties = parseLibrary();
-                return processArrayNode(rootNode, optionalArrayNode.get());
+                return processArrayNode(rootNode, annotationNode.get());
             }
         } catch (Exception e) {
             log.info("Error filtering annotations", e);
@@ -54,6 +58,32 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
 
     private JsonNode readRootNode() throws JsonProcessingException {
         return objectMapper.readTree(json);
+    }
+
+    private Optional<ArrayNode> getAnnotationNode(JsonNode rootNode) {
+        JsonNode libraryNode = rootNode.get("library");
+        JsonNode annotationNode = libraryNode.get("annotation");
+
+        return validateArrayNode(annotationNode);
+    }
+
+    private Optional<ArrayNode> validateArrayNode(JsonNode annotationNode) {
+        if (annotationNode == null || annotationNode.isMissingNode()) {
+            log.info("Annotation node is missing");
+            return Optional.empty();
+        }
+
+        if (annotationNode.isEmpty()) {
+            log.info("Annotation node is empty");
+            return Optional.empty();
+        }
+
+        if (annotationNode instanceof ArrayNode) {
+            return Optional.of((ArrayNode) annotationNode);
+        } else {
+            log.info("Annotation node is not a ArrayNode, class: {}", annotationNode.getClass().getSimpleName());
+            return Optional.empty();
+        }
     }
 
     private String processArrayNode(JsonNode rootNode, ArrayNode annotationArrayNode) {
@@ -70,9 +100,7 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
 
             rootObjectNode.set("externalErrors", arrayNode);
         }
-
-        String cleanedJson = rootNode.toPrettyString();
-        return fixErrorTags(cleanedJson);
+        return fixErrorTags(rootNode.toPrettyString());
     }
 
     private void filterByNode(JsonNode jsonNode) {
@@ -90,42 +118,6 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
             externalList.add(jsonNode);
         }
     }
-
-    private boolean isTargetLibrary(JsonNode jsonNode) {
-        return filterNodeByLibrary(jsonNode);
-    }
-
-    private String fixErrorTags(String cleanedJson) {
-        return cleanedJson.replace("\"errorSeverity\" : \"error\"",
-                "\"errorSeverity\" : \"Error\"");
-    }
-
-    private Optional<ArrayNode> getAnnotationNode(JsonNode rootNode) {
-        JsonNode libraryNode = rootNode.get("library");
-        JsonNode annotationNode = libraryNode.get("annotation");
-
-        return validateArrayNode(annotationNode);
-    }
-
-    private Optional<ArrayNode> validateArrayNode(JsonNode annotationNode) {
-        if (annotationNode == null || annotationNode.isMissingNode()) {
-            log.info("Annotation node is missing");
-            return Optional.empty();
-        }
-
-        if (annotationNode.size() == 0) {
-            log.info("Annotation node is empty");
-            return Optional.empty();
-        }
-
-        if (annotationNode instanceof ArrayNode) {
-            return Optional.of((ArrayNode) annotationNode);
-        } else {
-            log.info("Annotation node is not a ArrayNode, class: {}", annotationNode.getClass().getSimpleName());
-            return Optional.empty();
-        }
-    }
-
 
     private boolean filterNodeByLibrary(JsonNode node) {
         Optional<String> optionalLibraryId = getLibraryId(node);
@@ -148,18 +140,22 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
         return getTextFromNodeId(node, "libraryVersion");
     }
 
+    private boolean isPointingToSameLibrary(LibraryProperties p,
+                                            String libraryId,
+                                            String version) {
+        return p.getName().equals(libraryId) && p.getVersion().equals(version);
+    }
+
+    private String fixErrorTags(String cleanedJson) {
+        return cleanedJson.replace("\"errorSeverity\" : \"error\"",
+                "\"errorSeverity\" : \"Error\"");
+    }
+
     private boolean isLibraryNodeValid(JsonNode node) {
         Optional<String> optionalLibraryId = getLibraryId(node);
         Optional<String> optionalLibraryVersion = getLibraryVersion(node);
 
         return optionalLibraryId.isPresent() && optionalLibraryVersion.isPresent();
-    }
-
-
-    private boolean isPointingToSameLibrary(LibraryProperties p,
-                                            String libraryId,
-                                            String version) {
-        return p.getName().equals(libraryId) && p.getVersion().equals(version);
     }
 
     private boolean isError(JsonNode node) {
@@ -174,6 +170,4 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
         var optional = getTextFromNode(errorSeverityNode);
         return optional.map(s -> s.toLowerCase().trim());
     }
-
-
 }

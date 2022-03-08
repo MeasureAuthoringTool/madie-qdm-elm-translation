@@ -7,8 +7,7 @@ import java.util.Optional;
 
 public interface JsonHelpers {
     default Optional<String> getTextFromNodeId(JsonNode node, String id) {
-        JsonNode jsonNode = node.path(id);
-        return getTextFromNode(jsonNode);
+        return getTextFromNode(node.path(id));
     }
 
     default Optional<String> getTextFromNode(JsonNode jsonNode) {
@@ -17,13 +16,9 @@ public interface JsonHelpers {
         }
 
         String textValue = jsonNode.toString();
-
         if (StringUtils.isEmpty(textValue)) {
             return Optional.empty();
         }
-
-        textValue = StringUtils.replace(textValue, "\"", "");
-
-        return Optional.of(textValue);
+        return Optional.of(StringUtils.replace(textValue, "\"", ""));
     }
 }

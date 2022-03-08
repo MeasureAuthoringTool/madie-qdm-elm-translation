@@ -11,12 +11,14 @@ import java.io.InputStream;
 
 @Builder
 public class RequestData {
+
+    @Getter
     String cqlData;
-    LibraryBuilder.SignatureLevel signatures;
 
     @Getter
     boolean showWarnings;
 
+    LibraryBuilder.SignatureLevel signatures;
     Boolean annotations;
     Boolean locators;
     Boolean disableListDemotion;
@@ -28,13 +30,9 @@ public class RequestData {
         return new ByteArrayInputStream(cqlData.getBytes());
     }
 
-    public String getCqlData() {
-        return new String(cqlData.getBytes());
-    }
-
     public MultivaluedMap<String, String> createMap() {
-        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
 
+        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
         map.add("annotations", annotations.toString());
         map.add("locators", locators.toString());
         map.add("disable-list-demotion", disableListDemotion.toString());
@@ -43,8 +41,8 @@ public class RequestData {
         map.add("validate-units", validateUnits.toString());
         map.add("validate-units", validateUnits.toString());
 
+        // Enforcing detailed errors and not providing an option to Client
         map.add("detailed-errors", Boolean.TRUE.toString());
-
 
         if (signatures != null) {
             map.add("signatures", signatures.name());

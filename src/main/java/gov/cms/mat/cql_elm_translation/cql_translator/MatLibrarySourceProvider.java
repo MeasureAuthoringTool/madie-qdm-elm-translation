@@ -42,7 +42,7 @@ public class MatLibrarySourceProvider implements LibrarySourceProvider {
         }
     }
 
-    public InputStream processLibrary(VersionedIdentifier libraryIdentifier, String key) {
+    private InputStream processLibrary(VersionedIdentifier libraryIdentifier, String key) {
         if (threadLocalValue.get().getLibraryType().equals("QDM")) {
             throw new RuntimeException("QDM is not supported FHIR only.");
         } else if (threadLocalValue.get().getLibraryType().equals("FHIR")) {
@@ -53,7 +53,7 @@ public class MatLibrarySourceProvider implements LibrarySourceProvider {
         }
     }
 
-    public InputStream getInputStream(VersionedIdentifier libraryIdentifier, String key) {
+    private InputStream getInputStream(VersionedIdentifier libraryIdentifier, String key) {
         String cql = matFhirServices.getHapiFhirCql(libraryIdentifier.getId(),
                 libraryIdentifier.getVersion());
         return processCqlFromService(key, cql);
@@ -69,7 +69,7 @@ public class MatLibrarySourceProvider implements LibrarySourceProvider {
         }
     }
 
-    public InputStream getInputStream(String cql) {
+    private InputStream getInputStream(String cql) {
         return IOUtils.toInputStream(cql, StandardCharsets.UTF_8);
     }
 }
