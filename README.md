@@ -2,10 +2,10 @@
 
 This is a Springboot application to translate CQL to ELM.
 
-Transltion service uses madie-rest-commons and madie-server-commons as dependencies, these artifacts are hosted on github packages.
+Translation service uses madie-rest-commons and madie-server-commons as dependencies, these artifacts are hosted on GitHub packages.
 
 
-Github requires authentication before downloading artifacts, So Add github credentials ( recommended to use Github Access Token ).
+GitHub requires authentication before downloading artifacts, So Add GitHub credentials ( recommended to use GitHub Access Token ).
 
 Add the following server in ./m2/settings.xml
 ```
