@@ -13,4 +13,4 @@ services:
       MAT_API_KEY: ${MAT_API_KEY}
       LOG_LEVEL: ${LOG_LEVEL}
     ports:
-      - 8081:8081
+      - 8083:8083
