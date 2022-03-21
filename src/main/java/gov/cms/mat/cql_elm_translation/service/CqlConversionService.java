@@ -3,12 +3,13 @@ package gov.cms.mat.cql_elm_translation.service;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.cql_translator.MatLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
+import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -18,20 +19,16 @@ import java.util.List;
 
 @Service
 @Slf4j
+@RequiredArgsConstructor
 public class CqlConversionService {
 
     private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
-    private final MatFhirServices matFhirServices;
+    private final MadieFhirServices madieFhirServices;
 
-    public CqlConversionService(MatFhirServices matFhirServices) {
-        this.matFhirServices = matFhirServices;
-    }
-
-    /* MatLibrarySourceProvider places version and service in thread local */
+    /* MadieLibrarySourceProvider places version and service in thread local */
     public void setUpLibrarySourceProvider(String cql) {
-        MatLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-        // Todo Modify the service to fetch libraries from hapi fhir MADiE service
-        MatLibrarySourceProvider.setFhirServicesService(matFhirServices);
+        MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+        MadieLibrarySourceProvider.setFhirServicesService(madieFhirServices);
     }
 
     public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {

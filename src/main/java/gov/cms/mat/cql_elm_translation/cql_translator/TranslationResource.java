@@ -87,7 +87,7 @@ public class TranslationResource {
 
             CqlTranslator.Options[] options = optionsList.toArray(new CqlTranslator.Options[0]);
 
-            libraryManager.getLibrarySourceLoader().registerProvider(new MatLibrarySourceProvider());
+            libraryManager.getLibrarySourceLoader().registerProvider(new MadieLibrarySourceProvider());
 
             return CqlTranslator.fromStream(cqlStream,
                     modelManager,

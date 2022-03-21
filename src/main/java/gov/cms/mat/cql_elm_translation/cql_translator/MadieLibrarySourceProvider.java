@@ -1,7 +1,7 @@
 package gov.cms.mat.cql_elm_translation.cql_translator;
 
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.service.MatFhirServices;
+import gov.cms.mat.cql_elm_translation.service.MadieFhirServices;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -13,13 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class MatLibrarySourceProvider implements LibrarySourceProvider {
+public class MadieLibrarySourceProvider implements LibrarySourceProvider {
     private static final ConcurrentHashMap<String, String> cqlLibraries = new ConcurrentHashMap<>();
     private static final ThreadLocal<UsingProperties> threadLocalValue = new ThreadLocal<>();
-    private static MatFhirServices matFhirServices;
+    private static MadieFhirServices madieFhirServices;
 
-    public static void setFhirServicesService(MatFhirServices matFhirServices) {
-        MatLibrarySourceProvider.matFhirServices = matFhirServices;
+    public static void setFhirServicesService(MadieFhirServices madieFhirServices) {
+        MadieLibrarySourceProvider.madieFhirServices = madieFhirServices;
     }
 
     public static void setUsing(UsingProperties usingProperties) {
@@ -54,7 +54,7 @@ public class MatLibrarySourceProvider implements LibrarySourceProvider {
     }
 
     private InputStream getInputStream(VersionedIdentifier libraryIdentifier, String key) {
-        String cql = matFhirServices.getHapiFhirCql(libraryIdentifier.getId(),
+        String cql = madieFhirServices.getHapiFhirCql(libraryIdentifier.getId(),
                 libraryIdentifier.getVersion());
         return processCqlFromService(key, cql);
     }

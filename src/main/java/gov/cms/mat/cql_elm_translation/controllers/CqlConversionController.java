@@ -10,6 +10,7 @@ import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.MatXmlConversionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -23,15 +24,11 @@ import java.io.UncheckedIOException;
 @RequestMapping(path = "/cql/translator")
 @Tag(name = "Conversion-Controller", description = "API for converting CQL to ELM.")
 @Slf4j
+@RequiredArgsConstructor
 public class CqlConversionController {
+
     private final CqlConversionService cqlConversionService;
     private final MatXmlConversionService matXmlConversionService;
-
-    public CqlConversionController(CqlConversionService cqlConversionService,
-                                   MatXmlConversionService matXmlConversionService) {
-        this.cqlConversionService = cqlConversionService;
-        this.matXmlConversionService = matXmlConversionService;
-    }
 
     @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
     public CqlConversionPayload cqlToElmJson(
