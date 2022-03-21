@@ -26,9 +26,10 @@ public class CqlConversionService {
     private final MadieFhirServices madieFhirServices;
 
     /* MadieLibrarySourceProvider places version and service in thread local */
-    public void setUpLibrarySourceProvider(String cql) {
+    public void setUpLibrarySourceProvider(String cql, String accessToken) {
         MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
         MadieLibrarySourceProvider.setFhirServicesService(madieFhirServices);
+        MadieLibrarySourceProvider.setAccessToken(accessToken);
     }
 
     public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
