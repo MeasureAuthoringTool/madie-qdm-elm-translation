@@ -23,7 +23,7 @@ public class MadieFhirServices {
     @Value("${madie.fhir.service.baseUrl}")
     private String madieFhirService;
 
-    @Value("${madie.fhir.service.libraries.uri}")
+    @Value("${madie.fhir.service.hapi-fhir.libraries.uri}")
     private String librariesUri;
 
     public String getHapiFhirCql(String name, String version, String accessToken) {

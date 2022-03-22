@@ -26,8 +26,9 @@ madie:
   fhir:
     service:
       baseUrl: ${FHIR_SERVICES_URL:http://localhost:8085/api}
-      libraries:
-        uri: /hapiFhir/libraries
+      hapi-fhir:
+        libraries:
+          uri: /hapiFhir/libraries
 
 springdoc:
   swagger-ui:
