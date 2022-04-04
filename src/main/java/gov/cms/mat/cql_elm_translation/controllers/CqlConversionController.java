@@ -10,10 +10,12 @@ import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.MatXmlConversionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,15 +25,11 @@ import java.io.UncheckedIOException;
 @RequestMapping(path = "/cql/translator")
 @Tag(name = "Conversion-Controller", description = "API for converting CQL to ELM.")
 @Slf4j
+@RequiredArgsConstructor
 public class CqlConversionController {
+
     private final CqlConversionService cqlConversionService;
     private final MatXmlConversionService matXmlConversionService;
-
-    public CqlConversionController(CqlConversionService cqlConversionService,
-                                   MatXmlConversionService matXmlConversionService) {
-        this.cqlConversionService = cqlConversionService;
-        this.matXmlConversionService = matXmlConversionService;
-    }
 
     @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
     public CqlConversionPayload cqlToElmJson(
@@ -43,7 +41,8 @@ public class CqlConversionController {
             @RequestParam(value = "disable-list-demotion", defaultValue = "true") Boolean disableListDemotion,
             @RequestParam(value = "disable-list-promotion", defaultValue = "true") Boolean disableListPromotion,
             @RequestParam(value = "disable-method-invocation", defaultValue = "true") Boolean disableMethodInvocation,
-            @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits) {
+            @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
+            @RequestHeader("Authorization") String accessToken) {
 
         RequestData requestData = RequestData.builder()
                 .cqlData(cqlData)
@@ -57,7 +56,7 @@ public class CqlConversionController {
                 .validateUnits(validateUnits)
                 .build();
 
-        cqlConversionService.setUpLibrarySourceProvider(cqlData);
+        cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);
 
         CqlConversionPayload cqlConversionPayload = cqlConversionService.processCqlDataWithErrors(requestData);
         // Todo Do we need to remove empty annotations from library object, Also why are we removing translatorOptions from annotations, Could be MAT specific.
@@ -78,12 +77,13 @@ public class CqlConversionController {
             @RequestParam(value = "disable-list-demotion", defaultValue = "true") Boolean disableListDemotion,
             @RequestParam(value = "disable-list-promotion", defaultValue = "true") Boolean disableListPromotion,
             @RequestParam(value = "disable-method-invocation", defaultValue = "true") Boolean disableMethodInvocation,
-            @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits) {
+            @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
+            @RequestHeader(value = "Authorization") String accessToken) {
 
         // Todo This end point is to capture cqlModel from MAT's Measure XML, so we can remove this feature for MADiE
         String cqlData = matXmlConversionService.processCqlXml(xml);
 
-        cqlConversionService.setUpLibrarySourceProvider(cqlData);
+        cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);
 
         RequestData requestData = RequestData.builder()
                 .cqlData(cqlData)

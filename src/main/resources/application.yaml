@@ -1,5 +1,7 @@
 server:
-  port: 7070
+  port: 8084
+  servlet:
+    context-path: /api
 
 spring:
   profiles:
@@ -20,9 +22,13 @@ info:
   app:
     name: Cql Elm Translation Services
 
-fhir:
-  conversion:
-    baseurl: ${FHIR_SERVICES_URL:http://host.docker.internal:9080}
+madie:
+  fhir:
+    service:
+      baseUrl: ${FHIR_SERVICES_URL:http://localhost:8085/api}
+      hapi-fhir:
+        libraries:
+          uri: /hapiFhir/libraries
 
 springdoc:
   swagger-ui:
@@ -30,6 +36,11 @@ springdoc:
 
 logging:
   level:
-    root: ${LOG_LEVEL:WARN}
+    root: ${LOG_LEVEL:INFO}
   pattern:
     console: "%d{dd-MM-yyyy HH:mm:ss.SSS} [%thread] %mdc %-5level %logger{36}.%M - %msg%n"
+
+okta:
+  oauth2:
+    issuer: ${OKTA_ISSUER:https://dev-53861726.okta.com/oauth2/default}
+    audience: ${OKTA_AUDIENCE:api://default}
