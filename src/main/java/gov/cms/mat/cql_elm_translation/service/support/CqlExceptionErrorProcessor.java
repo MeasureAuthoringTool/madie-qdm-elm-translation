@@ -67,12 +67,16 @@ public class CqlExceptionErrorProcessor {
         return matCqlConversionException;
     }
 
-    private MatCqlConversionException buildMatError(CqlTranslatorException c) {
+    private MatCqlConversionException buildMatError(CqlTranslatorException cqlTranslatorException) {
         MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
-        matCqlConversionException.setErrorSeverity(c.getSeverity().name());
+        matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
 
         try {
-            String payload = escape(c.getMessage());
+            String payload = escape(cqlTranslatorException.getMessage());
+
+            if (payload.equals("Cannot invoke \\\"gov.cms.mat.cql.elements.UsingProperties.getVersion()\\\" because the return value of \\\"java.lang.ThreadLocal.get()\\\" is null")) {
+                payload = "Model Type and version are required";
+            }
             matCqlConversionException.setMessage(payload);
         } catch (Exception e) {
             log.debug("Error building MatError", e);
