@@ -70,11 +70,13 @@ public class CqlExceptionErrorProcessor {
     private MatCqlConversionException buildMatError(CqlTranslatorException cqlTranslatorException) {
         MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
         matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
-
+        log.debug("MADiE: Building errors");
+       
         try {
             String payload = escape(cqlTranslatorException.getMessage());
-
+            log.debug("MADiE: Payload is {}.", payload);
             if (payload.equals("Cannot invoke \\\"gov.cms.mat.cql.elements.UsingProperties.getVersion()\\\" because the return value of \\\"java.lang.ThreadLocal.get()\\\" is null")) {
+                log.debug("MADiE: Changing payload to prettier value");
                 payload = "Model Type and version are required";
             }
             matCqlConversionException.setMessage(payload);
