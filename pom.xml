@@ -16,7 +16,7 @@
 
     <properties>
         <java.version>16</java.version>
-        <cqframework.version>1.5.7</cqframework.version>
+        <cqframework.version>1.5.8</cqframework.version>
     </properties>
 
 <!--    Required to fetch artifacts from repositories other than maven central -->
