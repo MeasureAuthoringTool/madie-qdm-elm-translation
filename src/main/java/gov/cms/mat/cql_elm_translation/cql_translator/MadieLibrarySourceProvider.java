@@ -54,7 +54,7 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
         return getInputStream(libraryIdentifier, key); 
       }
       else {
-        throw new RuntimeException(String.format("%s is not supported FHIR only.",threadLocalValue.get().getLibraryType()));
+        throw new RuntimeException(String.format("%s is not supported.",threadLocalValue.get().getLibraryType()));
       }
 
     }
