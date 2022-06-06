@@ -10,6 +10,7 @@ import org.hl7.elm.r1.VersionedIdentifier;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.Arrays;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
@@ -48,14 +49,14 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
     }
 
     private InputStream processLibrary(VersionedIdentifier libraryIdentifier, String key) {
-        if (threadLocalValue.get().getLibraryType().equals("QDM")) {
-            throw new RuntimeException("QDM is not supported FHIR only.");
-        } else if (threadLocalValue.get().getLibraryType().equals("FHIR")) {
-            return getInputStream(libraryIdentifier, key);
-        } else {
-            log.error("Cannot process Library for key: {}", key);
-            return null;
-        }
+      String[] supportedLibraries = new String[] {"FHIR", "QICore"};  
+      if (Arrays.stream(supportedLibraries).anyMatch(threadLocalValue.get().getLibraryType()::contains)) {
+        return getInputStream(libraryIdentifier, key); 
+      }
+      else {
+        throw new RuntimeException(String.format("%s is not supported FHIR only.",threadLocalValue.get().getLibraryType()));
+      }
+
     }
 
     private InputStream getInputStream(VersionedIdentifier libraryIdentifier, String key) {
