@@ -40,7 +40,7 @@ public class CqlConversionController {
             @RequestParam(defaultValue = "true") Boolean locators,
             @RequestParam(value = "disable-list-demotion", defaultValue = "true") Boolean disableListDemotion,
             @RequestParam(value = "disable-list-promotion", defaultValue = "true") Boolean disableListPromotion,
-            @RequestParam(value = "disable-method-invocation", defaultValue = "true") Boolean disableMethodInvocation,
+            @RequestParam(value = "disable-method-invocation", defaultValue = "false") Boolean disableMethodInvocation,
             @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
             @RequestHeader("Authorization") String accessToken) {
 
