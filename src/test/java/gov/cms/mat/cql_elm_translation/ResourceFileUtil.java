@@ -6,13 +6,13 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 
 public interface ResourceFileUtil {
-    default String getData(String resource) {
-        File inputXmlFile = new File(this.getClass().getResource(resource).getFile());
+  default String getData(String resource) {
+    File inputXmlFile = new File(this.getClass().getResource(resource).getFile());
 
-        try {
-            return new String(Files.readAllBytes(inputXmlFile.toPath()));
-        } catch (IOException e) {
-            throw new UncheckedIOException(e);
-        }
+    try {
+      return new String(Files.readAllBytes(inputXmlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
     }
+  }
 }

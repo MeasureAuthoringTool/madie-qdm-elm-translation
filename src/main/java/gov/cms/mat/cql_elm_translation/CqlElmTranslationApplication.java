@@ -21,49 +21,47 @@ import java.util.TimeZone;
 @Slf4j
 public class CqlElmTranslationApplication {
 
-    public static void main(String[] args) {
-        SpringApplication.run(CqlElmTranslationApplication.class, args);
-    }
+  public static void main(String[] args) {
+    SpringApplication.run(CqlElmTranslationApplication.class, args);
+  }
 
-    /**
-     *  Force UTC timezone locally.
-     */
-    @PostConstruct
-    public void init() {
-        TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
-        log.info("Set timezone to UTC.");
-    }
+  /** Force UTC timezone locally. */
+  @PostConstruct
+  public void init() {
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+    log.info("Set timezone to UTC.");
+  }
 
-    @Bean(name="FilterRegistrationBeanSecurityFilter")
-    public FilterRegistrationBean<SecurityFilter> securityFilter(SecurityFilter securityFilter){
-        FilterRegistrationBean<SecurityFilter> registrationBean
-                = new FilterRegistrationBean<>(securityFilter);
-        registrationBean.setFilter(securityFilter);
-        registrationBean.addUrlPatterns("/*");
-        return registrationBean;
-    }
+  @Bean(name = "FilterRegistrationBeanSecurityFilter")
+  public FilterRegistrationBean<SecurityFilter> securityFilter(SecurityFilter securityFilter) {
+    FilterRegistrationBean<SecurityFilter> registrationBean =
+        new FilterRegistrationBean<>(securityFilter);
+    registrationBean.setFilter(securityFilter);
+    registrationBean.addUrlPatterns("/*");
+    return registrationBean;
+  }
 
-    @Bean
-    public WebMvcConfigurer corsConfigurer(@Autowired LogInterceptor logInterceptor) {
-        return new WebMvcConfigurer() {
+  @Bean
+  public WebMvcConfigurer corsConfigurer(@Autowired LogInterceptor logInterceptor) {
+    return new WebMvcConfigurer() {
 
-            @Override
-            public void addInterceptors(InterceptorRegistry registry) {
-                WebMvcConfigurer.super.addInterceptors(registry);
-                registry.addInterceptor(logInterceptor);
-            }
+      @Override
+      public void addInterceptors(InterceptorRegistry registry) {
+        WebMvcConfigurer.super.addInterceptors(registry);
+        registry.addInterceptor(logInterceptor);
+      }
 
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry
-                    .addMapping("/**")
-                    .allowedMethods("PUT", "POST", "GET")
-                    .allowedOrigins(
-                        "http://localhost:9000",
-                        "https://dev-madie.hcqis.org",
-                        "https://test-madie.hcqis.org",
-                        "https://impl-madie.hcqis.org");
-            }
-        };
-    }
+      @Override
+      public void addCorsMappings(CorsRegistry registry) {
+        registry
+            .addMapping("/**")
+            .allowedMethods("PUT", "POST", "GET")
+            .allowedOrigins(
+                "http://localhost:9000",
+                "https://dev-madie.hcqis.org",
+                "https://test-madie.hcqis.org",
+                "https://impl-madie.hcqis.org");
+      }
+    };
+  }
 }

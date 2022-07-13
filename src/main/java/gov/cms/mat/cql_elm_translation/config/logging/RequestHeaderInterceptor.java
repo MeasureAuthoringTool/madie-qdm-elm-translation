@@ -22,90 +22,88 @@ import java.util.stream.Collectors;
 import static gov.cms.mat.config.logging.MdcHeaderString.MDC_PARAMS_ID;
 import static gov.cms.mat.config.logging.MdcHeaderString.MDC_START_KEY;
 
-/**
- * Class that get the header data from the request and set in the MDC context
- */
+/** Class that get the header data from the request and set in the MDC context */
 @Slf4j
 public class RequestHeaderInterceptor extends HandlerInterceptorAdapter {
-    private static final String HEADER_TEMPLATE = "%s:\"%s\"";
+  private static final String HEADER_TEMPLATE = "%s:\"%s\"";
 
-    @Override
-    public boolean preHandle(HttpServletRequest request,
-                             HttpServletResponse response, /* not used */
-                             Object object /* not used */) {
-        request.setAttribute(MDC_START_KEY, System.currentTimeMillis());
-        String params = request.getHeader(MDC_PARAMS_ID);
+  @Override
+  public boolean preHandle(
+      HttpServletRequest request,
+      HttpServletResponse response, /* not used */
+      Object object /* not used */) {
+    request.setAttribute(MDC_START_KEY, System.currentTimeMillis());
+    String params = request.getHeader(MDC_PARAMS_ID);
 
-        MdcPairParser.parseAndSetInMdc(params);
-        logRequest(request);
-        return true;
+    MdcPairParser.parseAndSetInMdc(params);
+    logRequest(request);
+    return true;
+  }
+
+  @Override
+  public void afterCompletion(
+      HttpServletRequest request,
+      HttpServletResponse response,
+      Object handler,
+      @Nullable Exception ex)
+      throws Exception {
+    long executionTime = -1;
+
+    Object attribute = request.getAttribute(MDC_START_KEY);
+    if (attribute instanceof Long) {
+      Long startTime = (Long) attribute;
+      executionTime = System.currentTimeMillis() - startTime;
     }
 
-    @Override
-    public void afterCompletion(HttpServletRequest request,
-                                HttpServletResponse response,
-                                Object handler,
-                                @Nullable Exception ex) throws Exception {
-        long executionTime = -1;
+    logResponse(response, executionTime);
+    MDC.clear();
+  }
 
-        Object attribute = request.getAttribute(MDC_START_KEY);
-        if (attribute instanceof Long) {
-            Long startTime = (Long) attribute;
-            executionTime = System.currentTimeMillis() - startTime;
-        }
+  public void logRequest(HttpServletRequest request) {
+    if (log.isDebugEnabled()) {
+      String body = "";
 
-        logResponse(response, executionTime);
-        MDC.clear();
+      try {
+        body = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
+      } catch (IOException e) {
+        log.debug("Cannot find body", e);
+      }
+
+      String headers = processRequestHeaders(request);
+      ServletLogging.logIncomingRequest(
+          request.getRequestURI(), request.getQueryString(), request.getMethod(), headers, body);
+    }
+  }
+
+  private String processRequestHeaders(HttpServletRequest request) {
+    List<String> headers = new ArrayList<>();
+
+    Enumeration<String> headerNames = request.getHeaderNames();
+    while (headerNames.hasMoreElements()) {
+      String name = headerNames.nextElement();
+      String value = request.getHeader(name);
+      headers.add(String.format(HEADER_TEMPLATE, name, value));
     }
 
-    public void logRequest(HttpServletRequest request) {
-        if (log.isDebugEnabled()) {
-            String body = "";
+    return String.join(", ", headers);
+  }
 
-            try {
-                body = IOUtils.toString(request.getInputStream(), StandardCharsets.UTF_8);
-            } catch (IOException e) {
-                log.debug("Cannot find body", e);
-            }
+  private void logResponse(HttpServletResponse response, long executionTime) {
+    if (log.isDebugEnabled()) {
+      HttpStatus httpStatus = HttpStatus.resolve(response.getStatus());
+      String statusText = httpStatus == null ? "" : httpStatus.getReasonPhrase();
+      String status = response.getStatus() + " " + statusText;
 
-            String headers = processRequestHeaders(request);
-            ServletLogging.logIncomingRequest(request.getRequestURI(),
-                    request.getQueryString(),
-                    request.getMethod(),
-                    headers,
-                    body);
-        }
+      String headers = processResponseHeadersForLog(response);
+      String body = ThreadLocalBody.getBody();
+
+      ServletLogging.logIncomingResponse(status, executionTime, headers, body);
     }
+  }
 
-    private String processRequestHeaders(HttpServletRequest request) {
-        List<String> headers = new ArrayList<>();
-
-        Enumeration<String> headerNames = request.getHeaderNames();
-        while (headerNames.hasMoreElements()) {
-            String name = headerNames.nextElement();
-            String value = request.getHeader(name);
-            headers.add(String.format(HEADER_TEMPLATE, name, value));
-        }
-
-        return String.join(", ", headers);
-    }
-
-    private void logResponse(HttpServletResponse response, long executionTime) {
-        if (log.isDebugEnabled()) {
-            HttpStatus httpStatus = HttpStatus.resolve(response.getStatus());
-            String statusText = httpStatus == null ? "" : httpStatus.getReasonPhrase();
-            String status = response.getStatus() + " " + statusText;
-
-            String headers = processResponseHeadersForLog(response);
-            String body = ThreadLocalBody.getBody();
-
-            ServletLogging.logIncomingResponse(status, executionTime, headers, body);
-        }
-    }
-
-    private String processResponseHeadersForLog(HttpServletResponse response) {
-        return response.getHeaderNames().stream()
-                .map(name -> String.format(HEADER_TEMPLATE, name, response.getHeader(name)))
-                .collect(Collectors.joining(", "));
-    }
+  private String processResponseHeadersForLog(HttpServletResponse response) {
+    return response.getHeaderNames().stream()
+        .map(name -> String.format(HEADER_TEMPLATE, name, response.getHeader(name)))
+        .collect(Collectors.joining(", "));
+  }
 }

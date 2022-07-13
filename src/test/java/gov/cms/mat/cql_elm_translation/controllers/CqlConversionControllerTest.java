@@ -15,89 +15,85 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 @ExtendWith(MockitoExtension.class)
 class CqlConversionControllerTest implements ResourceFileUtil {
-    private final static String translatorOptionsTag = "\"translatorOptions\"";
+  private static final String translatorOptionsTag = "\"translatorOptions\"";
 
-    @Mock
-    private CqlConversionService cqlConversionService;
-    @Mock
-    private MatXmlConversionService matXmlConversionService;
-    @Mock
-    private CqlTranslator cqlTranslator;
+  @Mock private CqlConversionService cqlConversionService;
+  @Mock private MatXmlConversionService matXmlConversionService;
+  @Mock private CqlTranslator cqlTranslator;
 
-    @InjectMocks
-    private CqlConversionController cqlConversionController;
+  @InjectMocks private CqlConversionController cqlConversionController;
 
-//    @Test
-//    void cqlToElmJson() {
-//        String cqlData = "cqlData";
-//        String result = "json-data";
-//        when(cqlConversionService.processCqlDataWithErrors(any())).thenReturn(result);
-//
-//        String json = cqlConversionController.cqlToElmJson(cqlData,
-//                LibraryBuilder.SignatureLevel.All,
-//                true,
-//                true,
-//                true,
-//                true,
-//                true,
-//                true);
-//
-//        assertEquals(result, json);
-//        verify(cqlConversionService).processCqlDataWithErrors(any());
-//        //verify(cqlConversionService).processQdmVersion(cqlData);
-//    }
+  //    @Test
+  //    void cqlToElmJson() {
+  //        String cqlData = "cqlData";
+  //        String result = "json-data";
+  //        when(cqlConversionService.processCqlDataWithErrors(any())).thenReturn(result);
+  //
+  //        String json = cqlConversionController.cqlToElmJson(cqlData,
+  //                LibraryBuilder.SignatureLevel.All,
+  //                true,
+  //                true,
+  //                true,
+  //                true,
+  //                true,
+  //                true);
+  //
+  //        assertEquals(result, json);
+  //        verify(cqlConversionService).processCqlDataWithErrors(any());
+  //        //verify(cqlConversionService).processQdmVersion(cqlData);
+  //    }
 
-//    @Test
-//    void xmlToElmJson() {
-//        String cqlData = "cqlData";
-//        String xml = "</xml>";
-//        String result = "json-data";
-//
-//        when(matXmlConversionService.processCqlXml(xml)).thenReturn(cqlData);
-//        when(cqlConversionService.processCqlDataWithErrors(any())).thenReturn(result);
-//
-//        String json = cqlConversionController.xmlToElmJson(xml,
-//                LibraryBuilder.SignatureLevel.All,
-//                true,
-//                true,
-//                true,
-//                true,
-//                true,
-//                true);
-//
-//        assertEquals(result, json);
-//
-//        verify(matXmlConversionService).processCqlXml(xml);
-//        verify(cqlConversionService).processCqlDataWithErrors(any());
-//        //verify(cqlConversionService).processQdmVersion(cqlData);
-//    }
+  //    @Test
+  //    void xmlToElmJson() {
+  //        String cqlData = "cqlData";
+  //        String xml = "</xml>";
+  //        String result = "json-data";
+  //
+  //        when(matXmlConversionService.processCqlXml(xml)).thenReturn(cqlData);
+  //        when(cqlConversionService.processCqlDataWithErrors(any())).thenReturn(result);
+  //
+  //        String json = cqlConversionController.xmlToElmJson(xml,
+  //                LibraryBuilder.SignatureLevel.All,
+  //                true,
+  //                true,
+  //                true,
+  //                true,
+  //                true,
+  //                true);
+  //
+  //        assertEquals(result, json);
+  //
+  //        verify(matXmlConversionService).processCqlXml(xml);
+  //        verify(cqlConversionService).processCqlDataWithErrors(any());
+  //        //verify(cqlConversionService).processQdmVersion(cqlData);
+  //    }
 
-    @Test
-    void translatorOptionsRemoverNoErrors() {
-        String json = getData("/fhir4_std_lib_no_errors.json");
+  @Test
+  void translatorOptionsRemoverNoErrors() {
+    String json = getData("/fhir4_std_lib_no_errors.json");
 
-        assertTrue(json.contains(translatorOptionsTag));
+    assertTrue(json.contains(translatorOptionsTag));
 
-        CqlConversionController.TranslatorOptionsRemover translatorOptionsRemover =
-                new CqlConversionController.TranslatorOptionsRemover(json);
+    CqlConversionController.TranslatorOptionsRemover translatorOptionsRemover =
+        new CqlConversionController.TranslatorOptionsRemover(json);
 
-        String cleaned = translatorOptionsRemover.clean();
+    String cleaned = translatorOptionsRemover.clean();
 
-        assertFalse(cleaned.contains(translatorOptionsTag));
-    }
+    assertFalse(cleaned.contains(translatorOptionsTag));
+  }
 
-    @Test
-    void translatorOptionsRemoverErrors() {
+  @Test
+  void translatorOptionsRemoverErrors() {
 
-        String json = getData("/fhir4_std_lib_errors.json");
+    String json = getData("/fhir4_std_lib_errors.json");
 
-        assertTrue(json.contains(translatorOptionsTag));
+    assertTrue(json.contains(translatorOptionsTag));
 
-        CqlConversionController.TranslatorOptionsRemover translatorOptionsRemover =
-                new CqlConversionController.TranslatorOptionsRemover(json);
+    CqlConversionController.TranslatorOptionsRemover translatorOptionsRemover =
+        new CqlConversionController.TranslatorOptionsRemover(json);
 
-        String cleaned = translatorOptionsRemover.clean();
+    String cleaned = translatorOptionsRemover.clean();
 
-        assertFalse(cleaned.contains(translatorOptionsTag));
-    }
+    assertFalse(cleaned.contains(translatorOptionsTag));
+  }
 }

@@ -10,12 +10,11 @@ import java.util.List;
 @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
 @Slf4j
 public class CqlConversionError extends RuntimeException {
-    @Getter
-    private final List<String> errors;
+  @Getter private final List<String> errors;
 
-    public CqlConversionError(List<String> errors) {
-        super(String.join(",/n", errors));
-        this.errors = errors;
-        log.warn(getMessage());
-    }
+  public CqlConversionError(List<String> errors) {
+    super(String.join(",/n", errors));
+    this.errors = errors;
+    log.warn(getMessage());
+  }
 }
