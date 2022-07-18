@@ -1,6 +1,6 @@
 library OpioidDataWithNoInjectableFormulationsAndBulprenorphine version '0.3.000'
 
-using QDM version '5.5'
+using QICore version '4.1.1'
 
 parameter "Measurement Period" Interval<DateTime>
 

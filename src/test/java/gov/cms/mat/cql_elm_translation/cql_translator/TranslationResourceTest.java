@@ -4,7 +4,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
 class TranslationResourceTest {
-  TranslationResource translationResource = TranslationResource.getInstance("FHIR");
+  TranslationResource translationResource = TranslationResource.getInstance(true);
 
   @Test
   void buildTranslator_checkExceptionHandling() {

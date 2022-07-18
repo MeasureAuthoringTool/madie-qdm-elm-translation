@@ -56,7 +56,8 @@ public class CqlConversionService {
   public CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
-    return TranslationResource.getInstance(usingProperties.getLibraryType())
+    return TranslationResource.getInstance(
+            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
         .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
   }
 

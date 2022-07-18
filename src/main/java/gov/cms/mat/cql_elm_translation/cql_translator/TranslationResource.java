@@ -63,29 +63,22 @@ public class TranslationResource {
         }
       };
 
-  private ModelManager modelManager ;
+  private ModelManager modelManager;
   private LibraryManager libraryManager;
 
   static TranslationResource instance = null;
 
-  private TranslationResource(String model) {
+  private TranslationResource(boolean isFhir) {
     modelManager = new ModelManager();
 
-    switch (model) {
-      case "FHIR":
-        modelManager.resolveModel(model, "4.0.1");
-        break;
-      case "QICore":
-        modelManager.resolveModel("QICore", "4.1.1");
-        break;
-      default:
-        break;
+    if (isFhir) {
+      modelManager.resolveModel("FHIR", "4.0.1");
     }
 
     this.libraryManager = new LibraryManager(modelManager);
   }
 
-  public static TranslationResource getInstance(String model) {
+  public static TranslationResource getInstance(boolean model) {
 
     if (instance == null) {
       instance = new TranslationResource(model);
