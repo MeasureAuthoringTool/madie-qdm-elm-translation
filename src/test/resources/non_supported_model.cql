@@ -1,6 +1,6 @@
 library OpioidDataWithNoInjectableFormulationsAndBulprenorphine version '0.3.000'
 
-using QDM version '5.5'
+using BadModel version '5.5'
 
 parameter "Measurement Period" Interval<DateTime>
 

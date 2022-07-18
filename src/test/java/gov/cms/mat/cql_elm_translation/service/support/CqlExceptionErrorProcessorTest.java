@@ -12,31 +12,28 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 
 class CqlExceptionErrorProcessorTest implements ResourceFileUtil {
-    private CqlExceptionErrorProcessor cqlExceptionErrorProcessor;
+  private CqlExceptionErrorProcessor cqlExceptionErrorProcessor;
 
-    @Test
-    void process_EmptyErrors() {
-        String json = getData("/library-elm.json");
-        cqlExceptionErrorProcessor = new CqlExceptionErrorProcessor(Collections.emptyList(), json);
+  @Test
+  void process_EmptyErrors() {
+    String json = getData("/library-elm.json");
+    cqlExceptionErrorProcessor = new CqlExceptionErrorProcessor(Collections.emptyList(), json);
 
-        assertEquals(json, cqlExceptionErrorProcessor.process()); // since no errors no changes to json
-    }
+    assertEquals(json, cqlExceptionErrorProcessor.process()); // since no errors no changes to json
+  }
 
-    @Test
-    void process_WithError() {
-        String json = getData("/library-elm.json");
+  @Test
+  void process_WithError() {
+    String json = getData("/library-elm.json");
 
-        List<CqlTranslatorException> errors = Collections.singletonList(createError());
+    List<CqlTranslatorException> errors = Collections.singletonList(createError());
 
-        cqlExceptionErrorProcessor = new CqlExceptionErrorProcessor(errors, json);
+    cqlExceptionErrorProcessor = new CqlExceptionErrorProcessor(errors, json);
 
-        assertNotEquals(json, cqlExceptionErrorProcessor.process());
-    }
+    assertNotEquals(json, cqlExceptionErrorProcessor.process());
+  }
 
-    private CqlTranslatorException createError() {
-        return new CqlTranslatorException("message", CqlTranslatorException.ErrorSeverity.Error);
-
-    }
-
-
+  private CqlTranslatorException createError() {
+    return new CqlTranslatorException("message", CqlTranslatorException.ErrorSeverity.Error);
+  }
 }

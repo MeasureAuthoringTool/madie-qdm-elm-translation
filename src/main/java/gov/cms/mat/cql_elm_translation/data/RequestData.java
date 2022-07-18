@@ -12,42 +12,40 @@ import java.io.InputStream;
 @Builder
 public class RequestData {
 
-    @Getter
-    String cqlData;
+  @Getter String cqlData;
 
-    @Getter
-    boolean showWarnings;
+  @Getter boolean showWarnings;
 
-    LibraryBuilder.SignatureLevel signatures;
-    Boolean annotations;
-    Boolean locators;
-    Boolean disableListDemotion;
-    Boolean disableListPromotion;
-    Boolean disableMethodInvocation;
-    Boolean validateUnits;
+  LibraryBuilder.SignatureLevel signatures;
+  Boolean annotations;
+  Boolean locators;
+  Boolean disableListDemotion;
+  Boolean disableListPromotion;
+  Boolean disableMethodInvocation;
+  Boolean validateUnits;
 
-    public InputStream getCqlDataInputStream() {
-        return new ByteArrayInputStream(cqlData.getBytes());
+  public InputStream getCqlDataInputStream() {
+    return new ByteArrayInputStream(cqlData.getBytes());
+  }
+
+  public MultivaluedMap<String, String> createMap() {
+
+    MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
+    map.add("annotations", annotations.toString());
+    map.add("locators", locators.toString());
+    map.add("disable-list-demotion", disableListDemotion.toString());
+    map.add("disable-list-promotion", disableListPromotion.toString());
+    map.add("disable-method-invocation", disableMethodInvocation.toString());
+    map.add("validate-units", validateUnits.toString());
+    map.add("validate-units", validateUnits.toString());
+
+    // Enforcing detailed errors and not providing an option to Client
+    map.add("detailed-errors", Boolean.TRUE.toString());
+
+    if (signatures != null) {
+      map.add("signatures", signatures.name());
     }
 
-    public MultivaluedMap<String, String> createMap() {
-
-        MultivaluedMap<String, String> map = new MultivaluedHashMap<>();
-        map.add("annotations", annotations.toString());
-        map.add("locators", locators.toString());
-        map.add("disable-list-demotion", disableListDemotion.toString());
-        map.add("disable-list-promotion", disableListPromotion.toString());
-        map.add("disable-method-invocation", disableMethodInvocation.toString());
-        map.add("validate-units", validateUnits.toString());
-        map.add("validate-units", validateUnits.toString());
-
-        // Enforcing detailed errors and not providing an option to Client
-        map.add("detailed-errors", Boolean.TRUE.toString());
-
-        if (signatures != null) {
-            map.add("signatures", signatures.name());
-        }
-
-        return map;
-    }
+    return map;
+  }
 }

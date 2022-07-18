@@ -13,30 +13,30 @@ import org.springframework.context.annotation.Configuration;
 @Slf4j
 public class OpenApiConfig {
 
-    @Value("${swagger-server}")
-    private String swaggerServer;
+  @Value("${swagger-server}")
+  private String swaggerServer;
 
-    @Bean
-    public OpenAPI customOpenAPI() {
-        OpenAPI openAPI = new OpenAPI()
-                .info(buildInfo());
+  @Bean
+  public OpenAPI customOpenAPI() {
+    OpenAPI openAPI = new OpenAPI().info(buildInfo());
 
-        configureServerUrl(openAPI);
+    configureServerUrl(openAPI);
 
-        return openAPI;
+    return openAPI;
+  }
+
+  private void configureServerUrl(OpenAPI openAPI) {
+    if (StringUtils.isNotEmpty(swaggerServer)) {
+      log.info("Setting swagger server to: {}", swaggerServer);
+      openAPI.addServersItem(new Server().url(swaggerServer));
+    } else {
+      log.info("Swagger server not set using 'Generated Server url'");
     }
+  }
 
-    private void configureServerUrl(OpenAPI openAPI) {
-        if (StringUtils.isNotEmpty(swaggerServer)) {
-            log.info("Setting swagger server to: {}", swaggerServer);
-            openAPI.addServersItem(new Server().url(swaggerServer));
-        } else {
-            log.info("Swagger server not set using 'Generated Server url'");
-        }
-    }
-
-    public Info buildInfo() {
-        return new Info().title("CQL-to-ELM Translator").description(
-                "This is a SpringBoot v2.6.x restful service for converting CQL-to-ELM.");
-    }
+  public Info buildInfo() {
+    return new Info()
+        .title("CQL-to-ELM Translator")
+        .description("This is a SpringBoot v2.6.x restful service for converting CQL-to-ELM.");
+  }
 }

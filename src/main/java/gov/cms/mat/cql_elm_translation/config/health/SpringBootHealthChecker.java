@@ -12,43 +12,43 @@ import org.springframework.web.client.RestTemplate;
 
 @Slf4j
 public abstract class SpringBootHealthChecker extends HealthCheckerBase {
-    private final RestTemplate restTemplate;
+  private final RestTemplate restTemplate;
 
-    protected SpringBootHealthChecker(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
+  protected SpringBootHealthChecker(RestTemplate restTemplate) {
+    this.restTemplate = restTemplate;
+  }
+
+  @Override
+  Health check() {
+    HealthJson healthFromRest = fetchSpringBootMicroServiceHealth();
+
+    if (healthFromRest == null || healthFromRest.getStatus() == null) {
+      throw new HealthNullStatusException();
+    } else if (healthFromRest.getStatus() == Status.UP) {
+      return Health.up().build();
+    } else {
+      return Health.status(healthFromRest.getStatus()).build();
     }
+  }
 
-    @Override
-    Health check() {
-        HealthJson healthFromRest = fetchSpringBootMicroServiceHealth();
+  private HealthJson fetchSpringBootMicroServiceHealth() {
+    String actuatorHealthUrl = getBaseUrl() + "/actuator/health";
+    log.debug("{} actuatorHealthUrl: {}", getClass().getSimpleName(), actuatorHealthUrl);
 
-        if (healthFromRest == null || healthFromRest.getStatus() == null) {
-            throw new HealthNullStatusException();
-        } else if (healthFromRest.getStatus() == Status.UP) {
-            return Health.up().build();
-        } else {
-            return Health.status(healthFromRest.getStatus()).build();
-        }
+    try {
+      return restTemplate.getForObject(actuatorHealthUrl, HealthJson.class);
+    } catch (RestClientException e) {
+      log.debug("{} rest FAILURE", getClass().getSimpleName(), e);
+      return new HealthJson(Status.DOWN);
     }
+  }
 
-    private HealthJson fetchSpringBootMicroServiceHealth() {
-        String actuatorHealthUrl = getBaseUrl() + "/actuator/health";
-        log.debug("{} actuatorHealthUrl: {}", getClass().getSimpleName(), actuatorHealthUrl);
+  abstract String getBaseUrl();
 
-        try {
-            return restTemplate.getForObject(actuatorHealthUrl, HealthJson.class);
-        } catch (RestClientException e) {
-            log.debug("{} rest FAILURE", getClass().getSimpleName(), e);
-            return new HealthJson(Status.DOWN);
-        }
-    }
-
-    abstract String getBaseUrl();
-
-    @Data
-    @AllArgsConstructor
-    @NoArgsConstructor
-    private static class HealthJson {
-        Status status;
-    }
+  @Data
+  @AllArgsConstructor
+  @NoArgsConstructor
+  private static class HealthJson {
+    Status status;
+  }
 }

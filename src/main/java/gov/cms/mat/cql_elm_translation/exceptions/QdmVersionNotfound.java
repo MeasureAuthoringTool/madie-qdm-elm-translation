@@ -7,8 +7,8 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 @ResponseStatus(value = HttpStatus.UNPROCESSABLE_ENTITY)
 @Slf4j
 public class QdmVersionNotfound extends RuntimeException {
-    public QdmVersionNotfound() {
-        super("Qdm version not found in cql");
-        log.warn(getMessage());
-    }
+  public QdmVersionNotfound() {
+    super("Qdm version not found in cql");
+    log.warn(getMessage());
+  }
 }

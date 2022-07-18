@@ -22,59 +22,60 @@ import java.util.List;
 @RequiredArgsConstructor
 public class CqlConversionService {
 
-    private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
-    private final MadieFhirServices madieFhirServices;
+  private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
+  private final MadieFhirServices madieFhirServices;
 
-    /* MadieLibrarySourceProvider places version and service in thread local */
-    public void setUpLibrarySourceProvider(String cql, String accessToken) {
-        MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-        MadieLibrarySourceProvider.setFhirServicesService(madieFhirServices);
-        MadieLibrarySourceProvider.setAccessToken(accessToken);
-    }
+  /* MadieLibrarySourceProvider places version and service in thread local */
+  public void setUpLibrarySourceProvider(String cql, String accessToken) {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setFhirServicesService(madieFhirServices);
+    MadieLibrarySourceProvider.setAccessToken(accessToken);
+  }
 
-    public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
-        // Gets the translator results
-        CqlTranslator cqlTranslator = processCqlData(requestData);
+  public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
+    // Gets the translator results
+    CqlTranslator cqlTranslator = processCqlData(requestData);
 
-        List<CqlTranslatorException> cqlTranslatorExceptions =
-                processErrors(requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.getExceptions());
+    List<CqlTranslatorException> cqlTranslatorExceptions =
+        processErrors(
+            requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.getExceptions());
 
-        AnnotationErrorFilter annotationErrorFilter =
-                new AnnotationErrorFilter(requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.toJson());
+    AnnotationErrorFilter annotationErrorFilter =
+        new AnnotationErrorFilter(
+            requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.toJson());
 
-        String processedJson = annotationErrorFilter.filter();
+    String processedJson = annotationErrorFilter.filter();
 
-        String jsonWithErrors = new CqlExceptionErrorProcessor(cqlTranslatorExceptions, processedJson).process();
+    String jsonWithErrors =
+        new CqlExceptionErrorProcessor(cqlTranslatorExceptions, processedJson).process();
 
-        return CqlConversionPayload.builder()
-                .json(jsonWithErrors)
-                .xml(cqlTranslator.toXml())
-                .build();
-    }
+    return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
+  }
 
-    @SneakyThrows
-    public CqlTranslator processCqlData(RequestData requestData) {
-        CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
-        UsingProperties usingProperties = cqlTextParser.getUsing();
+  @SneakyThrows
+  public CqlTranslator processCqlData(RequestData requestData) {
+    CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
+    UsingProperties usingProperties = cqlTextParser.getUsing();
+    return TranslationResource.getInstance(
+            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
+        .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
+  }
 
-        return new TranslationResource(usingProperties != null && usingProperties.isFhir())
-                .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
-    }
+  private List<CqlTranslatorException> processErrors(
+      String cqlData, boolean showWarnings, List<CqlTranslatorException> cqlTranslatorExceptions) {
+    logErrors(cqlTranslatorExceptions);
+    return new CqlTranslatorExceptionFilter(cqlData, showWarnings, cqlTranslatorExceptions)
+        .filter();
+  }
 
-    private List<CqlTranslatorException> processErrors(String cqlData,
-                                                       boolean showWarnings,
-                                                       List<CqlTranslatorException> cqlTranslatorExceptions) {
-        logErrors(cqlTranslatorExceptions);
-        return new CqlTranslatorExceptionFilter(cqlData, showWarnings, cqlTranslatorExceptions).filter();
-    }
+  private void logErrors(List<CqlTranslatorException> exceptions) {
+    exceptions.forEach(e -> log.debug(formatMessage(e)));
+  }
 
-    private void logErrors(List<CqlTranslatorException> exceptions) {
-        exceptions.forEach(e -> log.debug(formatMessage(e)));
-    }
-
-    private String formatMessage(CqlTranslatorException e) {
-        return String.format(LOG_MESSAGE_TEMPLATE,
-                e.getSeverity() != null ? e.getSeverity().name() : null,
-                e.getMessage());
-    }
+  private String formatMessage(CqlTranslatorException e) {
+    return String.format(
+        LOG_MESSAGE_TEMPLATE,
+        e.getSeverity() != null ? e.getSeverity().name() : null,
+        e.getMessage());
+  }
 }

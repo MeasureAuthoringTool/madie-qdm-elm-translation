@@ -13,20 +13,22 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 @Slf4j
 @ControllerAdvice
 public class HeaderResponseBodyAdvice implements ResponseBodyAdvice<Object> {
-    @Override
-    public boolean supports(MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
-        return true;
-    }
+  @Override
+  public boolean supports(
+      MethodParameter returnType, Class<? extends HttpMessageConverter<?>> converterType) {
+    return true;
+  }
 
-    @Override
-    public Object beforeBodyWrite(Object body,
-                                  MethodParameter returnType,
-                                  MediaType selectedContentType,
-                                  Class<? extends HttpMessageConverter<?>> selectedConverterType,
-                                  ServerHttpRequest request,
-                                  ServerHttpResponse response) {
+  @Override
+  public Object beforeBodyWrite(
+      Object body,
+      MethodParameter returnType,
+      MediaType selectedContentType,
+      Class<? extends HttpMessageConverter<?>> selectedConverterType,
+      ServerHttpRequest request,
+      ServerHttpResponse response) {
 
-        ThreadLocalBody.setBody(body);
-        return body;
-    }
+    ThreadLocalBody.setBody(body);
+    return body;
+  }
 }

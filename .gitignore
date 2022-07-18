@@ -2,6 +2,7 @@ HELP.md
 target/
 !**/src/main/**
 !**/src/test/**
+*.bak
 
 ### STS ###
 .apt_generated
