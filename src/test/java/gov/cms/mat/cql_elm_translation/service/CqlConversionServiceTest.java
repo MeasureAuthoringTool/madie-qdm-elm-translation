@@ -10,7 +10,6 @@ import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
@@ -68,7 +67,7 @@ class CqlConversionServiceTest {
   }
 
   @Test
-  void testProcessCqlDataWithErrors_NonSupportedModel() {
+  void testProcessCqlDataWithErrorsNonSupportedModel() {
     String cqlData = StringUtils.EMPTY;
     File inputXmlFile = new File(this.getClass().getResource("/non_supported_model.cql").getFile());
 
@@ -103,7 +102,7 @@ class CqlConversionServiceTest {
   }
 
   @Test
-  void testProcessCqlDataWithErrors_QICore() {
+  void testProcessCqlDataWithErrorsQICore() {
     String cqlData = StringUtils.EMPTY;
     File inputXmlFile = new File(this.getClass().getResource("/qicore.cql").getFile());
 
@@ -138,7 +137,7 @@ class CqlConversionServiceTest {
   }
 
   @Test
-  void testProcessCqlDataWithErrors_MissingModel() {
+  void testProcessCqlDataWithErrorsMissingModel() {
     String cqlData = StringUtils.EMPTY;
     File inputXmlFile = new File(this.getClass().getResource("/missing-model.cql").getFile());
 
