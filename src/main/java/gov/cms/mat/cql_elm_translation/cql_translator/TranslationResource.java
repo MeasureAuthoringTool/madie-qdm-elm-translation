@@ -79,11 +79,7 @@ public class TranslationResource {
   }
 
   public static TranslationResource getInstance(boolean model) {
-
-    if (instance == null) {
-      instance = new TranslationResource(model);
-    }
-
+    instance = new TranslationResource(model);
     // returns the singleton object
     return instance;
   }
