@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.mat.fhir.rest.dto.MatCqlConversionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslatorException;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import java.util.List;
@@ -73,11 +74,15 @@ public class CqlExceptionErrorProcessor {
     try {
       String payload = escape(cqlTranslatorException.getMessage());
 
-      if (payload.equals(
-          "Cannot invoke \\\"gov.cms.mat.cql.elements.UsingProperties.getVersion()\\\"  "
-              + "because the return value of \\\"java.lang.ThreadLocal.get()\\\" is null")) {
-        payload = "Model Type and version are required";
+      if (StringUtils.contains(payload, "java.lang.ThreadLocal.get()")) {
+        String rawPayload = clean(payload);
+        if (rawPayload.equals(
+            "CannotinvokegovcmsmatcqlelementsUsingProperties"
+                + "getVersionbecausethereturnvalueofjavalangThreadLocalgetisnull")) {
+          payload = "Model Type and version are required";
+        }
       }
+
       matCqlConversionException.setMessage(payload);
     } catch (Exception e) {
       log.debug("Error building MatError", e);
@@ -108,5 +113,9 @@ public class CqlExceptionErrorProcessor {
     escaped = escaped.replace("\t", "\\t");
     // TODO: escape other non-printing characters using uXXXX notation
     return escaped;
+  }
+
+  private String clean(String raw) {
+    return raw.replaceAll("[^a-zA-Z0-9]", "");
   }
 }
