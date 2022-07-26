@@ -35,10 +35,7 @@ jobs:
           
           
       - name: Upload coverage reports to Codecov
-        run: |
-          curl -Os https://uploader.codecov.io/latest/alpine/codecov        
-          chmod +x codecov
-          ./codecov          
+        uses: codecov/codecov-action@v3
 
       - name: Cache local Maven repository
         uses: actions/cache@v2
