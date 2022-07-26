@@ -32,6 +32,13 @@ jobs:
         run: mvn clean install --file pom.xml
         env:
           GITHUB_TOKEN_REF: ${{ secrets.GH_PAT_FOR_ACTIONS_TOKEN }}
+          
+          
+      - name: Upload coverage reports to Codecov
+        run: |
+          curl -Os https://uploader.codecov.io/latest/alpine/codecov        
+          chmod +x codecov
+          ./codecov          
 
       - name: Cache local Maven repository
         uses: actions/cache@v2
