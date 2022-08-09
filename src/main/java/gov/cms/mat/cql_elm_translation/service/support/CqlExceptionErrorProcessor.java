@@ -70,11 +70,11 @@ public class CqlExceptionErrorProcessor {
   private MatCqlConversionException buildMatError(CqlTranslatorException cqlTranslatorException) {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
-
+    
     try {
       String payload = escape(cqlTranslatorException.getMessage());
-
-      if (StringUtils.contains(payload, "java.lang.ThreadLocal.get()")) {
+      log.debug("cqlTranslatorException: " + payload);
+      if (StringUtils.contains(payload, "UsingProperties.getVersion")) {
         String rawPayload = clean(payload);
         if (rawPayload.equals(
             "CannotinvokegovcmsmatcqlelementsUsingProperties"
