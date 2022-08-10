@@ -73,8 +73,9 @@ public class CqlExceptionErrorProcessor {
     
     try {
       String payload = escape(cqlTranslatorException.getMessage());
-      log.debug("cqlTranslatorException: " + payload);
+      
       if (StringUtils.contains(payload, "UsingProperties.getVersion")) {
+        log.info("cqlTranslatorException: " + payload);
         String rawPayload = clean(payload);
         if (rawPayload.equals(
             "CannotinvokegovcmsmatcqlelementsUsingProperties"
