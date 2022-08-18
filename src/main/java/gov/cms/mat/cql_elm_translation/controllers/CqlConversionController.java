@@ -42,6 +42,7 @@ public class CqlConversionController {
             @RequestParam(value = "disable-list-promotion", defaultValue = "true") Boolean disableListPromotion,
             @RequestParam(value = "disable-method-invocation", defaultValue = "false") Boolean disableMethodInvocation,
             @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
+            @RequestParam(value = "result-types", defaultValue = "true") Boolean resultTypes,
             @RequestHeader("Authorization") String accessToken) {
 
         RequestData requestData = RequestData.builder()
@@ -54,6 +55,7 @@ public class CqlConversionController {
                 .disableListPromotion(disableListPromotion)
                 .disableMethodInvocation(disableMethodInvocation)
                 .validateUnits(validateUnits)
+                .resultTypes(resultTypes)
                 .build();
 
         cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);

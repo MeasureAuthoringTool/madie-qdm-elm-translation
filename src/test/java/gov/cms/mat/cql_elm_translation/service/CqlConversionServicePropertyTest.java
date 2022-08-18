@@ -1,5 +1,10 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -7,7 +12,12 @@ import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
-import static org.junit.jupiter.api.Assertions.*;
+import java.util.Iterator;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
     CqlConversionService cqlConversionService = new CqlConversionService(null);
@@ -20,6 +30,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     Boolean disableListPromotion;
     Boolean disableMethodInvocation;
     Boolean validateUnits;
+    Boolean resultTypes;
 
     @BeforeEach
     public void setUp() {
@@ -30,6 +41,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
         disableListPromotion = Boolean.TRUE;
         disableMethodInvocation = Boolean.TRUE;
         validateUnits = Boolean.TRUE;
+        resultTypes = Boolean.TRUE;
 
         cqlConversionService = new CqlConversionService(null);
     }
@@ -102,6 +114,50 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
         assertEquals(jsonDefault, jsonAnnotations); // NO change TODO not expected
     }
 
+    @Test
+    void testProcessCqlDataWithErrors() throws JsonProcessingException {
+        cqlData = getData("/cv_populations.cql");
+        RequestData requestData = buildRequestData();
+        CqlConversionPayload cqlConversionPayload = cqlConversionService.processCqlDataWithErrors(requestData);
+        String elmJson = cqlConversionPayload.getJson();
+        ObjectMapper objectMapper = new ObjectMapper();
+        JsonNode rootNode = objectMapper.readTree(elmJson);
+        ArrayNode defines = (ArrayNode) rootNode.get("library").get("statements").get("def");
+
+        // initial population
+        JsonNode ipNode = findJsonNodeForCqlDefinition("Initial Population", defines);
+        assertEquals(ipNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
+        assertEquals(ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+          "{http://hl7.org/fhir}Encounter");
+
+        // Measure Population Exclusions
+        JsonNode mpeNode = findJsonNodeForCqlDefinition("Measure Population Exclusions", defines);
+        assertEquals(mpeNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
+        assertEquals(mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+          "{http://hl7.org/fhir}Encounter");
+
+        // Boolean define
+        JsonNode booleanNode = findJsonNodeForCqlDefinition("Unused Boolean Definition", defines);
+        assertEquals(booleanNode.get("resultTypeName").asText(),
+          "{urn:hl7-org:elm-types:r1}Boolean");
+
+        // Integer type for function
+        JsonNode moNode = findJsonNodeForCqlDefinition("Measure Observation", defines);
+        assertEquals(moNode.get("resultTypeName").asText(),
+          "{urn:hl7-org:elm-types:r1}Integer");
+
+    }
+
+    private JsonNode findJsonNodeForCqlDefinition(String cqlDefinition, ArrayNode defines) {
+        Iterator<JsonNode> definitionIterator = defines.iterator();
+        while (definitionIterator.hasNext()) {
+            JsonNode node = definitionIterator.next();
+            if (node.get("name").asText().contains(cqlDefinition)) {
+                return node;
+            }
+        }
+        return null;
+    }
 
     private String getJson() {
         CqlTranslator cqlTranslator = buildCqlTranslator();
@@ -126,6 +182,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
                 .disableListPromotion(disableListPromotion)
                 .disableMethodInvocation(disableMethodInvocation)
                 .validateUnits(validateUnits)
+                .resultTypes(resultTypes)
                 .build();
     }
 }

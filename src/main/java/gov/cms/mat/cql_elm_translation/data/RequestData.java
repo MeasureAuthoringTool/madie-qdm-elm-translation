@@ -25,6 +25,7 @@ public class RequestData {
     Boolean disableListPromotion;
     Boolean disableMethodInvocation;
     Boolean validateUnits;
+    Boolean resultTypes;
 
     public InputStream getCqlDataInputStream() {
         return new ByteArrayInputStream(cqlData.getBytes());
@@ -40,6 +41,7 @@ public class RequestData {
         map.add("disable-method-invocation", disableMethodInvocation.toString());
         map.add("validate-units", validateUnits.toString());
         map.add("validate-units", validateUnits.toString());
+        map.add("result-types", resultTypes.toString());
 
         // Enforcing detailed errors and not providing an option to Client
         map.add("detailed-errors", Boolean.TRUE.toString());
