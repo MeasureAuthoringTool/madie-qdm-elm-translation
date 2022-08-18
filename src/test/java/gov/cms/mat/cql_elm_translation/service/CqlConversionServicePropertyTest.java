@@ -118,7 +118,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
     CqlConversionPayload cqlConversionPayload =
-      cqlConversionService.processCqlDataWithErrors(requestData);
+        cqlConversionService.processCqlDataWithErrors(requestData);
     String elmJson = cqlConversionPayload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode rootNode = objectMapper.readTree(elmJson);
@@ -128,15 +128,15 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     JsonNode ipNode = findJsonNodeForCqlDefinition("Initial Population", defines);
     assertEquals(ipNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
     assertEquals(
-      ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
-      "{http://hl7.org/fhir}Encounter");
+        ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+        "{http://hl7.org/fhir}Encounter");
 
     // Measure Population Exclusions
     JsonNode mpeNode = findJsonNodeForCqlDefinition("Measure Population Exclusions", defines);
     assertEquals(mpeNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
     assertEquals(
-      mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
-      "{http://hl7.org/fhir}Encounter");
+        mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+        "{http://hl7.org/fhir}Encounter");
 
     // Boolean define
     JsonNode booleanNode = findJsonNodeForCqlDefinition("Unused Boolean Definition", defines);
@@ -173,15 +173,15 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   private RequestData buildRequestData() {
     return RequestData.builder()
-      .cqlData(cqlData)
-      .signatures(signatureLevel)
-      .annotations(annotations)
-      .locators(locators)
-      .disableListDemotion(disableListDemotion)
-      .disableListPromotion(disableListPromotion)
-      .disableMethodInvocation(disableMethodInvocation)
-      .validateUnits(validateUnits)
-      .resultTypes(resultTypes)
-      .build();
+        .cqlData(cqlData)
+        .signatures(signatureLevel)
+        .annotations(annotations)
+        .locators(locators)
+        .disableListDemotion(disableListDemotion)
+        .disableListPromotion(disableListPromotion)
+        .disableMethodInvocation(disableMethodInvocation)
+        .validateUnits(validateUnits)
+        .resultTypes(resultTypes)
+        .build();
   }
 }
