@@ -125,29 +125,29 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     ArrayNode defines = (ArrayNode) rootNode.get("library").get("statements").get("def");
 
     // initial population
-    JsonNode ipNode = findJsonNodeForCqlDefinition("Initial Population", defines);
+    JsonNode ipNode = findCqlDefinitionNode("Initial Population", defines);
     assertEquals(ipNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
     assertEquals(
         ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
         "{http://hl7.org/fhir}Encounter");
 
     // Measure Population Exclusions
-    JsonNode mpeNode = findJsonNodeForCqlDefinition("Measure Population Exclusions", defines);
+    JsonNode mpeNode = findCqlDefinitionNode("Measure Population Exclusions", defines);
     assertEquals(mpeNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
     assertEquals(
         mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
         "{http://hl7.org/fhir}Encounter");
 
     // Boolean define
-    JsonNode booleanNode = findJsonNodeForCqlDefinition("Unused Boolean Definition", defines);
+    JsonNode booleanNode = findCqlDefinitionNode("Unused Boolean Definition", defines);
     assertEquals(booleanNode.get("resultTypeName").asText(), "{urn:hl7-org:elm-types:r1}Boolean");
 
     // Integer type for function
-    JsonNode moNode = findJsonNodeForCqlDefinition("Measure Observation", defines);
+    JsonNode moNode = findCqlDefinitionNode("Measure Observation", defines);
     assertEquals(moNode.get("resultTypeName").asText(), "{urn:hl7-org:elm-types:r1}Integer");
   }
 
-  private JsonNode findJsonNodeForCqlDefinition(String cqlDefinition, ArrayNode defines) {
+  private JsonNode findCqlDefinitionNode(String cqlDefinition, ArrayNode defines) {
     Iterator<JsonNode> definitionIterator = defines.iterator();
     while (definitionIterator.hasNext()) {
       JsonNode node = definitionIterator.next();
