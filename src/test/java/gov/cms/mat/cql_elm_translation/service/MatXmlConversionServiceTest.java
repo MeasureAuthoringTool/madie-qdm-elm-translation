@@ -8,24 +8,24 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class MatXmlConversionServiceTest implements ResourceFileUtil {
-    MatXmlConversionService matXmlConversionService;
+  MatXmlConversionService matXmlConversionService;
 
-    @BeforeEach
-    void setUp() {
-        matXmlConversionService = new MatXmlConversionService();
-    }
+  @BeforeEach
+  void setUp() {
+    matXmlConversionService = new MatXmlConversionService();
+  }
 
-    @Test
-    void processCalXml_SendEmptyXml() {
-        String xml = "<xml/>";
-        String cql = matXmlConversionService.processCqlXml(xml);
-        assertEquals("context Patient\n\n", cql);
-    }
+  @Test
+  void processCalXml_SendEmptyXml() {
+    String xml = "<xml/>";
+    String cql = matXmlConversionService.processCqlXml(xml);
+    assertEquals("context Patient\n\n", cql);
+  }
 
-    @Test
-    void processCalXml_SendValidXml() {
-        String xml = getData("/test_mat_cql.xml");
-        String cql = matXmlConversionService.processCqlXml(xml);
-        assertTrue(cql.startsWith("library THKR version '0.0.000'"));
-    }
+  @Test
+  void processCalXml_SendValidXml() {
+    String xml = getData("/test_mat_cql.xml");
+    String cql = matXmlConversionService.processCqlXml(xml);
+    assertTrue(cql.startsWith("library THKR version '0.0.000'"));
+  }
 }

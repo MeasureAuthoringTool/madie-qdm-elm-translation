@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.config.logging;
 
-
 import lombok.extern.slf4j.Slf4j;
 
 import javax.servlet.Filter;
@@ -21,84 +20,80 @@ import java.io.InputStreamReader;
 
 @Slf4j
 public class BufferedStreamFilter implements Filter {
-    @Slf4j
-    public static class NonBufferingRequestWrapper extends HttpServletRequestWrapper {
-        private final String body;
+  @Slf4j
+  public static class NonBufferingRequestWrapper extends HttpServletRequestWrapper {
+    private final String body;
 
-        public NonBufferingRequestWrapper(HttpServletRequest request) {
-            super(request);
+    public NonBufferingRequestWrapper(HttpServletRequest request) {
+      super(request);
 
-            StringBuilder stringBuilder = new StringBuilder();
-            BufferedReader bufferedReader = null;
+      StringBuilder stringBuilder = new StringBuilder();
+      BufferedReader bufferedReader = null;
 
-            try {
-                InputStream inputStream = request.getInputStream();
+      try {
+        InputStream inputStream = request.getInputStream();
 
-                if (inputStream != null) {
-                    bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
+        if (inputStream != null) {
+          bufferedReader = new BufferedReader(new InputStreamReader(inputStream));
 
-                    char[] charBuffer = new char[80000];
-                    int bytesRead;
+          char[] charBuffer = new char[80000];
+          int bytesRead;
 
-                    while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
-                        stringBuilder.append(charBuffer, 0, bytesRead);
-                    }
-                }
-            } catch (IOException ioe) {
-                log.error("Error buffering input stream.",ioe);
-            } finally {
-                if (bufferedReader != null) {
-                    try {
-                        bufferedReader.close();
-                    } catch (IOException ioe) {
-                       log.error("Error closing reader.",ioe);
-                    }
-                }
-            }
-            body = stringBuilder.toString();
+          while ((bytesRead = bufferedReader.read(charBuffer)) > 0) {
+            stringBuilder.append(charBuffer, 0, bytesRead);
+          }
         }
-
-        @Override
-        public ServletInputStream getInputStream()  {
-            final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
-            return new ServletInputStream() {
-                public boolean isFinished() {
-                    return false;
-                }
-
-                public boolean isReady() {
-                    return true;
-                }
-
-                public void setReadListener(ReadListener readListener) {
-                    throw new UnsupportedOperationException();
-                }
-
-                public int read() {
-                    return byteArrayInputStream.read();
-                }
-            };
+      } catch (IOException ioe) {
+        log.error("Error buffering input stream.", ioe);
+      } finally {
+        if (bufferedReader != null) {
+          try {
+            bufferedReader.close();
+          } catch (IOException ioe) {
+            log.error("Error closing reader.", ioe);
+          }
         }
-
-        @Override
-        public BufferedReader getReader()  {
-            return new BufferedReader(new InputStreamReader(getInputStream()));
-        }
+      }
+      body = stringBuilder.toString();
     }
 
     @Override
-    public void init(FilterConfig filterConfig)  {
+    public ServletInputStream getInputStream() {
+      final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(body.getBytes());
+      return new ServletInputStream() {
+        public boolean isFinished() {
+          return false;
+        }
+
+        public boolean isReady() {
+          return true;
+        }
+
+        public void setReadListener(ReadListener readListener) {
+          throw new UnsupportedOperationException();
+        }
+
+        public int read() {
+          return byteArrayInputStream.read();
+        }
+      };
     }
 
     @Override
-    public void doFilter(ServletRequest request, ServletResponse response,
-                         FilterChain chain)
-            throws IOException, ServletException {
-        chain.doFilter(new NonBufferingRequestWrapper((HttpServletRequest)request), response);
+    public BufferedReader getReader() {
+      return new BufferedReader(new InputStreamReader(getInputStream()));
     }
+  }
 
-    @Override
-    public void destroy() {
-    }
+  @Override
+  public void init(FilterConfig filterConfig) {}
+
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    chain.doFilter(new NonBufferingRequestWrapper((HttpServletRequest) request), response);
+  }
+
+  @Override
+  public void destroy() {}
 }
-

@@ -13,22 +13,20 @@ import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CqlXmlMarshalControllerTest {
-    @Mock
-    private MatXmlConversionService matXmlConversionService;
+  @Mock private MatXmlConversionService matXmlConversionService;
 
-    @InjectMocks
-    private CqlXmlMarshalController cqlXmlMarshalController;
+  @InjectMocks private CqlXmlMarshalController cqlXmlMarshalController;
 
-    @Test
-    void convertXmlToCql() {
-        String xml = "<xml>Howdy</xml>";
-        String json = "{}";
+  @Test
+  void convertXmlToCql() {
+    String xml = "<xml>Howdy</xml>";
+    String json = "{}";
 
-        when(matXmlConversionService.processCqlXml(xml)).thenReturn(json);
+    when(matXmlConversionService.processCqlXml(xml)).thenReturn(json);
 
-        String result = cqlXmlMarshalController.convertXmlToCql(xml);
-        assertEquals(json, result);
+    String result = cqlXmlMarshalController.convertXmlToCql(xml);
+    assertEquals(json, result);
 
-        verify(matXmlConversionService).processCqlXml(xml);
-    }
+    verify(matXmlConversionService).processCqlXml(xml);
+  }
 }

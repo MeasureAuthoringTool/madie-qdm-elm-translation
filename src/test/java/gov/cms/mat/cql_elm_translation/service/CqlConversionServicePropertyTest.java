@@ -20,169 +20,168 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
-    CqlConversionService cqlConversionService = new CqlConversionService(null);
+  CqlConversionService cqlConversionService = new CqlConversionService(null);
 
-    String cqlData;
-    LibraryBuilder.SignatureLevel signatureLevel;
-    Boolean annotations;
-    Boolean locators;
-    Boolean disableListDemotion;
-    Boolean disableListPromotion;
-    Boolean disableMethodInvocation;
-    Boolean validateUnits;
-    Boolean resultTypes;
+  String cqlData;
+  LibraryBuilder.SignatureLevel signatureLevel;
+  Boolean annotations;
+  Boolean locators;
+  Boolean disableListDemotion;
+  Boolean disableListPromotion;
+  Boolean disableMethodInvocation;
+  Boolean validateUnits;
+  Boolean resultTypes;
 
-    @BeforeEach
-    public void setUp() {
-        cqlData = getData("/test.cql");
-        annotations = Boolean.TRUE;
-        locators = Boolean.TRUE;
-        disableListDemotion = Boolean.TRUE;
-        disableListPromotion = Boolean.TRUE;
-        disableMethodInvocation = Boolean.TRUE;
-        validateUnits = Boolean.TRUE;
-        resultTypes = Boolean.TRUE;
+  @BeforeEach
+  public void setUp() {
+    cqlData = getData("/fhir.cql");
+    annotations = Boolean.TRUE;
+    locators = Boolean.TRUE;
+    disableListDemotion = Boolean.TRUE;
+    disableListPromotion = Boolean.TRUE;
+    disableMethodInvocation = Boolean.TRUE;
+    validateUnits = Boolean.TRUE;
+    resultTypes = Boolean.TRUE;
 
-        cqlConversionService = new CqlConversionService(null);
+    cqlConversionService = new CqlConversionService(null);
+  }
+
+  @Test
+  void process_Good() {
+    CqlTranslator cqlTranslator = buildCqlTranslator();
+    assertTrue(cqlTranslator.getErrors().isEmpty());
+    assertFalse(cqlTranslator.toJson().contains("CqlToElmError"));
+  }
+
+  @Test
+  void process_SignatureLevelNone() {
+    String jsonDefault = getJson();
+
+    signatureLevel = LibraryBuilder.SignatureLevel.None;
+
+    String jsonSignatureLevelNone = getJson();
+
+    // NO change expected null signatureLevel and LibraryBuilder.SignatureLevel.None behave the same
+    assertEquals(jsonDefault, jsonSignatureLevelNone);
+  }
+
+  @Test
+  void process_SignatureLevelAll() {
+    String jsonDefault = getJson();
+
+    signatureLevel = LibraryBuilder.SignatureLevel.All;
+
+    String jsonSignatureLevelNone = getJson();
+
+    assertEquals(jsonDefault, jsonSignatureLevelNone); // NO change TODO not expected
+  }
+
+  @Test
+  void process_annotations() {
+    String jsonDefault = getJson();
+
+    annotations = Boolean.FALSE;
+
+    String jsonAnnotations = getJson();
+
+    assertNotEquals(jsonDefault, jsonAnnotations); // data changed
+  }
+
+  @Test
+  void process_locators() {
+    String locatorTag = "\"locator\" : ";
+
+    String jsonDefault = getJson();
+    assertTrue(jsonDefault.contains(locatorTag));
+
+    locators = Boolean.FALSE;
+
+    String jsonSignatureLevelNone = getJson();
+    assertFalse(jsonSignatureLevelNone.contains(locatorTag));
+
+    assertNotEquals(jsonDefault, jsonSignatureLevelNone); // data changed
+  }
+
+  @Test
+  void process_validateUnits() {
+    String jsonDefault = getJson();
+
+    validateUnits = Boolean.FALSE;
+
+    String jsonAnnotations = getJson();
+
+    assertEquals(jsonDefault, jsonAnnotations); // NO change TODO not expected
+  }
+
+  @Test
+  void testProcessCqlDataWithErrors() throws JsonProcessingException {
+    cqlData = getData("/cv_populations.cql");
+    RequestData requestData = buildRequestData();
+    CqlConversionPayload cqlConversionPayload =
+      cqlConversionService.processCqlDataWithErrors(requestData);
+    String elmJson = cqlConversionPayload.getJson();
+    ObjectMapper objectMapper = new ObjectMapper();
+    JsonNode rootNode = objectMapper.readTree(elmJson);
+    ArrayNode defines = (ArrayNode) rootNode.get("library").get("statements").get("def");
+
+    // initial population
+    JsonNode ipNode = findJsonNodeForCqlDefinition("Initial Population", defines);
+    assertEquals(ipNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
+    assertEquals(
+      ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+      "{http://hl7.org/fhir}Encounter");
+
+    // Measure Population Exclusions
+    JsonNode mpeNode = findJsonNodeForCqlDefinition("Measure Population Exclusions", defines);
+    assertEquals(mpeNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
+    assertEquals(
+      mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
+      "{http://hl7.org/fhir}Encounter");
+
+    // Boolean define
+    JsonNode booleanNode = findJsonNodeForCqlDefinition("Unused Boolean Definition", defines);
+    assertEquals(booleanNode.get("resultTypeName").asText(), "{urn:hl7-org:elm-types:r1}Boolean");
+
+    // Integer type for function
+    JsonNode moNode = findJsonNodeForCqlDefinition("Measure Observation", defines);
+    assertEquals(moNode.get("resultTypeName").asText(), "{urn:hl7-org:elm-types:r1}Integer");
+  }
+
+  private JsonNode findJsonNodeForCqlDefinition(String cqlDefinition, ArrayNode defines) {
+    Iterator<JsonNode> definitionIterator = defines.iterator();
+    while (definitionIterator.hasNext()) {
+      JsonNode node = definitionIterator.next();
+      if (node.get("name").asText().contains(cqlDefinition)) {
+        return node;
+      }
     }
+    return null;
+  }
 
-    @Test
-    void process_Good() {
-        CqlTranslator cqlTranslator = buildCqlTranslator();
-        assertTrue(cqlTranslator.getErrors().isEmpty());
-        assertFalse(cqlTranslator.toJson().contains("CqlToElmError"));
-    }
+  private String getJson() {
+    CqlTranslator cqlTranslator = buildCqlTranslator();
 
-    @Test
-    void process_SignatureLevelNone() {
-        String jsonDefault = getJson();
+    assertTrue(cqlTranslator.getErrors().isEmpty());
 
-        signatureLevel = LibraryBuilder.SignatureLevel.None;
+    return cqlTranslator.toJson();
+  }
 
-        String jsonSignatureLevelNone = getJson();
+  private CqlTranslator buildCqlTranslator() {
+    RequestData requestData = buildRequestData();
+    return cqlConversionService.processCqlData(requestData);
+  }
 
-        // NO change expected null signatureLevel and LibraryBuilder.SignatureLevel.None behave the same
-        assertEquals(jsonDefault, jsonSignatureLevelNone);
-    }
-
-    @Test
-    void process_SignatureLevelAll() {
-        String jsonDefault = getJson();
-
-        signatureLevel = LibraryBuilder.SignatureLevel.All;
-
-        String jsonSignatureLevelNone = getJson();
-
-        assertEquals(jsonDefault, jsonSignatureLevelNone); // NO change TODO not expected
-    }
-
-    @Test
-    void process_annotations() {
-        String jsonDefault = getJson();
-
-        annotations = Boolean.FALSE;
-
-        String jsonAnnotations = getJson();
-
-        assertNotEquals(jsonDefault, jsonAnnotations); // data changed
-    }
-
-    @Test
-    void process_locators() {
-        String locatorTag = "\"locator\" : ";
-
-        String jsonDefault = getJson();
-        assertTrue(jsonDefault.contains(locatorTag));
-
-        locators = Boolean.FALSE;
-
-        String jsonSignatureLevelNone = getJson();
-        assertFalse(jsonSignatureLevelNone.contains(locatorTag));
-
-        assertNotEquals(jsonDefault, jsonSignatureLevelNone); // data changed
-    }
-
-
-    @Test
-    void process_validateUnits() {
-        String jsonDefault = getJson();
-
-        validateUnits = Boolean.FALSE;
-
-        String jsonAnnotations = getJson();
-
-        assertEquals(jsonDefault, jsonAnnotations); // NO change TODO not expected
-    }
-
-    @Test
-    void testProcessCqlDataWithErrors() throws JsonProcessingException {
-        cqlData = getData("/cv_populations.cql");
-        RequestData requestData = buildRequestData();
-        CqlConversionPayload cqlConversionPayload = cqlConversionService.processCqlDataWithErrors(requestData);
-        String elmJson = cqlConversionPayload.getJson();
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(elmJson);
-        ArrayNode defines = (ArrayNode) rootNode.get("library").get("statements").get("def");
-
-        // initial population
-        JsonNode ipNode = findJsonNodeForCqlDefinition("Initial Population", defines);
-        assertEquals(ipNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
-        assertEquals(ipNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
-          "{http://hl7.org/fhir}Encounter");
-
-        // Measure Population Exclusions
-        JsonNode mpeNode = findJsonNodeForCqlDefinition("Measure Population Exclusions", defines);
-        assertEquals(mpeNode.get("resultTypeSpecifier").get("type").asText(), "ListTypeSpecifier");
-        assertEquals(mpeNode.get("resultTypeSpecifier").get("elementType").get("name").asText(),
-          "{http://hl7.org/fhir}Encounter");
-
-        // Boolean define
-        JsonNode booleanNode = findJsonNodeForCqlDefinition("Unused Boolean Definition", defines);
-        assertEquals(booleanNode.get("resultTypeName").asText(),
-          "{urn:hl7-org:elm-types:r1}Boolean");
-
-        // Integer type for function
-        JsonNode moNode = findJsonNodeForCqlDefinition("Measure Observation", defines);
-        assertEquals(moNode.get("resultTypeName").asText(),
-          "{urn:hl7-org:elm-types:r1}Integer");
-
-    }
-
-    private JsonNode findJsonNodeForCqlDefinition(String cqlDefinition, ArrayNode defines) {
-        Iterator<JsonNode> definitionIterator = defines.iterator();
-        while (definitionIterator.hasNext()) {
-            JsonNode node = definitionIterator.next();
-            if (node.get("name").asText().contains(cqlDefinition)) {
-                return node;
-            }
-        }
-        return null;
-    }
-
-    private String getJson() {
-        CqlTranslator cqlTranslator = buildCqlTranslator();
-
-        assertTrue(cqlTranslator.getErrors().isEmpty());
-
-        return cqlTranslator.toJson();
-    }
-
-    private CqlTranslator buildCqlTranslator() {
-        RequestData requestData = buildRequestData();
-        return cqlConversionService.processCqlData(requestData);
-    }
-
-    private RequestData buildRequestData() {
-        return RequestData.builder()
-                .cqlData(cqlData)
-                .signatures(signatureLevel)
-                .annotations(annotations)
-                .locators(locators)
-                .disableListDemotion(disableListDemotion)
-                .disableListPromotion(disableListPromotion)
-                .disableMethodInvocation(disableMethodInvocation)
-                .validateUnits(validateUnits)
-                .resultTypes(resultTypes)
-                .build();
-    }
+  private RequestData buildRequestData() {
+    return RequestData.builder()
+      .cqlData(cqlData)
+      .signatures(signatureLevel)
+      .annotations(annotations)
+      .locators(locators)
+      .disableListDemotion(disableListDemotion)
+      .disableListPromotion(disableListPromotion)
+      .disableMethodInvocation(disableMethodInvocation)
+      .validateUnits(validateUnits)
+      .resultTypes(resultTypes)
+      .build();
+  }
 }
