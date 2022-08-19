@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
 import java.io.UncheckedIOException;
 
 @RestController
@@ -45,6 +46,7 @@ public class CqlConversionController {
       @RequestParam(value = "disable-method-invocation", defaultValue = "false")
           Boolean disableMethodInvocation,
       @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
+      @RequestParam(value = "result-types", defaultValue = "true") Boolean resultTypes,
       @RequestHeader("Authorization") String accessToken) {
 
     RequestData requestData =
@@ -58,6 +60,7 @@ public class CqlConversionController {
             .disableListPromotion(disableListPromotion)
             .disableMethodInvocation(disableMethodInvocation)
             .validateUnits(validateUnits)
+            .resultTypes(resultTypes)
             .build();
 
     cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);
