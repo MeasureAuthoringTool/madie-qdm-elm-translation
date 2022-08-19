@@ -70,7 +70,7 @@ public class CqlExceptionErrorProcessor {
   private MatCqlConversionException buildMatError(CqlTranslatorException cqlTranslatorException) {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
-
+    log.debug("buildMatError" + cqlTranslatorException.getMessage());
     try {
       String payload = escape(cqlTranslatorException.getMessage());
 
@@ -86,7 +86,8 @@ public class CqlExceptionErrorProcessor {
 
       matCqlConversionException.setMessage(payload);
     } catch (Exception e) {
-      log.debug("Error building MatError", e);
+      log.info("Error building MADiEError message", e.getMessage());
+      log.debug("Error building MADiEError", e);
       matCqlConversionException.setMessage("Exception");
     }
 
