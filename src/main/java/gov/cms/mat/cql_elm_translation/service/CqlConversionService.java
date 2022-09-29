@@ -13,7 +13,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.springframework.stereotype.Service;
 import java.util.List;
 
@@ -36,7 +36,7 @@ public class CqlConversionService {
     // Gets the translator results
     CqlTranslator cqlTranslator = processCqlData(requestData);
 
-    List<CqlTranslatorException> cqlTranslatorExceptions =
+    List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
             requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.getExceptions());
 
@@ -61,18 +61,18 @@ public class CqlConversionService {
         .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
   }
 
-  private List<CqlTranslatorException> processErrors(
-      String cqlData, boolean showWarnings, List<CqlTranslatorException> cqlTranslatorExceptions) {
+  private List<CqlCompilerException> processErrors(
+      String cqlData, boolean showWarnings, List<CqlCompilerException> cqlTranslatorExceptions) {
     logErrors(cqlTranslatorExceptions);
     return new CqlTranslatorExceptionFilter(cqlData, showWarnings, cqlTranslatorExceptions)
         .filter();
   }
 
-  private void logErrors(List<CqlTranslatorException> exceptions) {
+  private void logErrors(List<CqlCompilerException> exceptions) {
     exceptions.forEach(e -> log.debug(formatMessage(e)));
   }
 
-  private String formatMessage(CqlTranslatorException e) {
+  private String formatMessage(CqlCompilerException e) {
     return String.format(
         LOG_MESSAGE_TEMPLATE,
         e.getSeverity() != null ? e.getSeverity().name() : null,

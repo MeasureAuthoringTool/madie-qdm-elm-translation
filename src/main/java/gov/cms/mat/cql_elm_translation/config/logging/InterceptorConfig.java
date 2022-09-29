@@ -9,7 +9,6 @@ import org.springframework.web.servlet.handler.MappedInterceptor;
 
 /** Class creates the interceptors used in header processing */
 @Configuration
-@Slf4j
 public class InterceptorConfig implements WebMvcConfigurer {
 
   /**
