@@ -30,7 +30,7 @@ public class MatMeasureControllerTest implements ResourceFileUtil {
   @InjectMocks private MatMeasureController matMeasureController;
 
   @Test
-  public void TestCqlToElmJsonForMatTransferredMeasureSuccess() {
+  public void testCqlToElmJsonForMatTransferredMeasureSuccess() {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
     CqlConversionPayload payload = CqlConversionPayload.builder().json(result).build();
@@ -47,7 +47,7 @@ public class MatMeasureControllerTest implements ResourceFileUtil {
   }
 
   @Test
-  public void TestCqlToElmJsonForMatTransferredMeasureFail() {
+  public void testCqlToElmJsonForMatTransferredMeasureFail() {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
 
