@@ -36,11 +36,11 @@ public class MatMeasureControllerTest implements ResourceFileUtil {
     CqlConversionPayload payload = CqlConversionPayload.builder().json(result).build();
     when(cqlConversionService.processCqlDataWithErrors(any(RequestData.class))).thenReturn(payload);
 
-    when(request.getHeader("api-key")).thenReturn("testapikey");
+    when(request.getHeader("api-key")).thenReturn("key4api");
     when(request.getHeader("harp-id")).thenReturn("test");
     CqlConversionPayload cqlConversionPayload =
         matMeasureController.cqlToElmJsonForMatTransferredMeasure(
-            cqlData, null, true, true, true, true, true, true, true, true, request, "testapikey");
+            cqlData, null, true, true, true, true, true, true, true, true, request, "key4api");
 
     assertEquals(result, cqlConversionPayload.getJson());
     verify(cqlConversionService).processCqlDataWithErrors(any());
@@ -51,7 +51,7 @@ public class MatMeasureControllerTest implements ResourceFileUtil {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
 
-    when(request.getHeader("api-key")).thenReturn("testapikey");
+    when(request.getHeader("api-key")).thenReturn("key4api");
     when(request.getHeader("harp-id")).thenReturn("test2");
     CqlConversionPayload cqlConversionPayload =
         matMeasureController.cqlToElmJsonForMatTransferredMeasure(
