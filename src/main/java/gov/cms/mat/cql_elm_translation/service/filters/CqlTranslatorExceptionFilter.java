@@ -4,7 +4,7 @@ import gov.cms.mat.cql.elements.LibraryProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.elm.r1.VersionedIdentifier;
 
 import java.util.Collections;
@@ -15,10 +15,10 @@ import java.util.stream.Collectors;
 public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
   @Getter private final String cqlData;
   private final boolean showWarnings;
-  private final List<CqlTranslatorException> cqlTranslatorExceptions;
+  private final List<CqlCompilerException> cqlTranslatorExceptions;
 
   public CqlTranslatorExceptionFilter(
-      String cqlData, boolean showWarnings, List<CqlTranslatorException> cqlTranslatorExceptions) {
+      String cqlData, boolean showWarnings, List<CqlCompilerException> cqlTranslatorExceptions) {
     this.cqlData = cqlData;
     this.showWarnings = showWarnings;
     this.cqlTranslatorExceptions = cqlTranslatorExceptions;
@@ -29,12 +29,12 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
    * Then the cqlTranslatorExceptions are filtered out if they are not pointed to the
    * parent library. ( reason: unknown )
    * */
-  public List<CqlTranslatorException> filter() {
+  public List<CqlCompilerException> filter() {
     if (CollectionUtils.isEmpty(cqlTranslatorExceptions)) {
       log.debug("No CQL Errors found");
       return Collections.emptyList();
     } else {
-      List<CqlTranslatorException> filteredCqlTranslatorExceptions = filterOutWarnings();
+      List<CqlCompilerException> filteredCqlTranslatorExceptions = filterOutWarnings();
 
       if (filteredCqlTranslatorExceptions.isEmpty()) {
         return Collections.emptyList();
@@ -44,7 +44,7 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     }
   }
 
-  private List<CqlTranslatorException> filterOutWarnings() {
+  private List<CqlCompilerException> filterOutWarnings() {
     if (showWarnings) {
       return cqlTranslatorExceptions;
     } else {
@@ -52,10 +52,10 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     }
   }
 
-  private boolean isError(CqlTranslatorException cqlTranslatorException) {
+  private boolean isError(CqlCompilerException cqlTranslatorException) {
     return cqlTranslatorException != null
         && cqlTranslatorException.getSeverity() != null
-        && cqlTranslatorException.getSeverity() == CqlTranslatorException.ErrorSeverity.Error;
+        && cqlTranslatorException.getSeverity() == CqlCompilerException.ErrorSeverity.Error;
   }
 
   /*
@@ -63,8 +63,8 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
    * This filter also removes if there are any errors caught by translator in any of the
    * included libraries
    * */
-  private List<CqlTranslatorException> filterByLibrary(
-      List<CqlTranslatorException> filteredCqlTranslatorExceptions) {
+  private List<CqlCompilerException> filterByLibrary(
+      List<CqlCompilerException> filteredCqlTranslatorExceptions) {
     var libraryProperties = parseLibrary();
 
     return filteredCqlTranslatorExceptions.stream()
@@ -73,7 +73,7 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
   }
 
   private boolean filterOutInclude(
-      CqlTranslatorException cqlTranslatorException, LibraryProperties libraryProperties) {
+      CqlCompilerException cqlTranslatorException, LibraryProperties libraryProperties) {
     if (cqlTranslatorException.getLocator() == null
         || cqlTranslatorException.getLocator().getLibrary() == null) {
       return false;
@@ -85,6 +85,10 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
   }
 
   private boolean isPointingToSameLibrary(LibraryProperties p, VersionedIdentifier v) {
-    return p.getName().equals(v.getId()) && p.getVersion().equals(v.getVersion());
+    log.debug(v.toString());
+    String id = v.getId();
+    String version = v.getVersion();
+
+    return p.getName().equals(id) && p.getVersion().equals(version);
   }
 }

@@ -1,7 +1,9 @@
 package gov.cms.mat.cql_elm_translation.cql_translator;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
+
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -22,44 +24,48 @@ public class TranslationResource {
     QICore;
   }
 
-  private static final MultivaluedMap<String, CqlTranslator.Options> PARAMS_TO_OPTIONS_MAP =
+  private static final MultivaluedMap<String, CqlTranslatorOptions.Options> PARAMS_TO_OPTIONS_MAP =
       new MultivaluedHashMap<>() {
         {
-          putSingle("date-range-optimization", CqlTranslator.Options.EnableDateRangeOptimization);
-          putSingle("annotations", CqlTranslator.Options.EnableAnnotations);
-          putSingle("locators", CqlTranslator.Options.EnableLocators);
-          putSingle("result-types", CqlTranslator.Options.EnableResultTypes);
-          putSingle("detailed-errors", CqlTranslator.Options.EnableDetailedErrors);
-          putSingle("disable-list-traversal", CqlTranslator.Options.DisableListTraversal);
-          putSingle("disable-list-demotion", CqlTranslator.Options.DisableListDemotion);
-          putSingle("disable-list-promotion", CqlTranslator.Options.DisableListPromotion);
-          putSingle("enable-interval-demotion", CqlTranslator.Options.EnableIntervalDemotion);
-          putSingle("enable-interval-promotion", CqlTranslator.Options.EnableIntervalPromotion);
-          putSingle("disable-method-invocation", CqlTranslator.Options.DisableMethodInvocation);
-          putSingle("require-from-keyword", CqlTranslator.Options.RequireFromKeyword);
+          putSingle(
+              "date-range-optimization", CqlTranslatorOptions.Options.EnableDateRangeOptimization);
+          putSingle("annotations", CqlTranslatorOptions.Options.EnableAnnotations);
+          putSingle("locators", CqlTranslatorOptions.Options.EnableLocators);
+          putSingle("result-types", CqlTranslatorOptions.Options.EnableResultTypes);
+          putSingle("detailed-errors", CqlTranslatorOptions.Options.EnableDetailedErrors);
+          putSingle("disable-list-traversal", CqlTranslatorOptions.Options.DisableListTraversal);
+          putSingle("disable-list-demotion", CqlTranslatorOptions.Options.DisableListDemotion);
+          putSingle("disable-list-promotion", CqlTranslatorOptions.Options.DisableListPromotion);
+          putSingle(
+              "enable-interval-demotion", CqlTranslatorOptions.Options.EnableIntervalDemotion);
+          putSingle(
+              "enable-interval-promotion", CqlTranslatorOptions.Options.EnableIntervalPromotion);
+          putSingle(
+              "disable-method-invocation", CqlTranslatorOptions.Options.DisableMethodInvocation);
+          putSingle("require-from-keyword", CqlTranslatorOptions.Options.RequireFromKeyword);
 
           // Todo Do we even use these consolidated options ?
           put(
               "strict",
               Arrays.asList(
-                  CqlTranslator.Options.DisableListTraversal,
-                  CqlTranslator.Options.DisableListDemotion,
-                  CqlTranslator.Options.DisableListPromotion,
-                  CqlTranslator.Options.DisableMethodInvocation));
+                  CqlTranslatorOptions.Options.DisableListTraversal,
+                  CqlTranslatorOptions.Options.DisableListDemotion,
+                  CqlTranslatorOptions.Options.DisableListPromotion,
+                  CqlTranslatorOptions.Options.DisableMethodInvocation));
           put(
               "debug",
               Arrays.asList(
-                  CqlTranslator.Options.EnableAnnotations,
-                  CqlTranslator.Options.EnableLocators,
-                  CqlTranslator.Options.EnableResultTypes));
+                  CqlTranslatorOptions.Options.EnableAnnotations,
+                  CqlTranslatorOptions.Options.EnableLocators,
+                  CqlTranslatorOptions.Options.EnableResultTypes));
           put(
               "mat",
               Arrays.asList(
-                  CqlTranslator.Options.EnableAnnotations,
-                  CqlTranslator.Options.EnableLocators,
-                  CqlTranslator.Options.DisableListDemotion,
-                  CqlTranslator.Options.DisableListPromotion,
-                  CqlTranslator.Options.DisableMethodInvocation));
+                  CqlTranslatorOptions.Options.EnableAnnotations,
+                  CqlTranslatorOptions.Options.EnableLocators,
+                  CqlTranslatorOptions.Options.DisableListDemotion,
+                  CqlTranslatorOptions.Options.DisableListPromotion,
+                  CqlTranslatorOptions.Options.DisableMethodInvocation));
         }
       };
 
@@ -91,7 +97,7 @@ public class TranslationResource {
     try {
       UcumService ucumService = null;
       LibraryBuilder.SignatureLevel signatureLevel = LibraryBuilder.SignatureLevel.None;
-      List<CqlTranslator.Options> optionsList = new ArrayList<>();
+      List<CqlTranslatorOptions.Options> optionsList = new ArrayList<>();
 
       for (String key : params.keySet()) {
         if (PARAMS_TO_OPTIONS_MAP.containsKey(key) && Boolean.parseBoolean(params.getFirst(key))) {
@@ -103,7 +109,8 @@ public class TranslationResource {
         }
       }
 
-      CqlTranslator.Options[] options = optionsList.toArray(new CqlTranslator.Options[0]);
+      CqlTranslatorOptions.Options[] options =
+          optionsList.toArray(new CqlTranslatorOptions.Options[0]);
 
       libraryManager.getLibrarySourceLoader().registerProvider(new MadieLibrarySourceProvider());
 
@@ -112,7 +119,7 @@ public class TranslationResource {
           modelManager,
           libraryManager,
           ucumService,
-          CqlTranslatorException.ErrorSeverity.Error,
+          CqlCompilerException.ErrorSeverity.Error,
           signatureLevel,
           options);
 

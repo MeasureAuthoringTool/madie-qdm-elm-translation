@@ -6,7 +6,7 @@ import gov.cms.mat.fhir.rest.dto.MatCqlConversionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.CqlTranslatorException;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -16,14 +16,14 @@ public class CqlExceptionErrorProcessor {
 
   private static final ObjectMapper mapper = new ObjectMapper();
 
-  private final List<CqlTranslatorException> cqlErrors;
+  private final List<CqlCompilerException> cqlErrors;
   private final String json;
 
   /**
    * Transforms CqlTranslatorException to MatCqlConversionException and prepend with
    * "errorExceptions" object to the translator.json
    */
-  public CqlExceptionErrorProcessor(List<CqlTranslatorException> cqlErrors, String json) {
+  public CqlExceptionErrorProcessor(List<CqlCompilerException> cqlErrors, String json) {
     this.cqlErrors = cqlErrors;
     this.json = json;
   }
@@ -55,7 +55,7 @@ public class CqlExceptionErrorProcessor {
     return cqlErrors.stream().map(this::createDto).collect(Collectors.toList());
   }
 
-  private MatCqlConversionException createDto(CqlTranslatorException cqlException) {
+  private MatCqlConversionException createDto(CqlCompilerException cqlException) {
     MatCqlConversionException matCqlConversionException = buildMatError(cqlException);
 
     if (cqlException.getLocator() == null) {
@@ -67,7 +67,7 @@ public class CqlExceptionErrorProcessor {
     return matCqlConversionException;
   }
 
-  private MatCqlConversionException buildMatError(CqlTranslatorException cqlTranslatorException) {
+  private MatCqlConversionException buildMatError(CqlCompilerException cqlTranslatorException) {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
     log.debug("buildMatError" + cqlTranslatorException.getMessage());

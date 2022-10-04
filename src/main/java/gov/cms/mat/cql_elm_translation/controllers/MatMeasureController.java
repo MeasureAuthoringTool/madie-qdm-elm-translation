@@ -21,7 +21,9 @@ import lombok.extern.slf4j.Slf4j;
 
 @RestController
 @RequestMapping(path = "/mat/translator")
-@Tag(name = "Transfer-Translator", description = "API for translating MAT transferred measure CQL to ELM.")
+@Tag(
+    name = "Transfer-Translator",
+    description = "API for translating MAT transferred measure CQL to ELM.")
 @Slf4j
 @RequiredArgsConstructor
 public class MatMeasureController {
