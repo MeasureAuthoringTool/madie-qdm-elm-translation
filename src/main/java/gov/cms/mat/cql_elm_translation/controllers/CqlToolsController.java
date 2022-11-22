@@ -20,8 +20,7 @@ public class CqlToolsController {
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
-    var cqlDataStream = new ByteArrayInputStream(cqlData.getBytes());
-    try {
+try (var cqlDataStream = new ByteArrayInputStream(cqlData.getBytes())) {
       CqlFormatterVisitor.FormatResult formatResult =
           CqlFormatterVisitor.getFormattedOutput(cqlDataStream);
       if (formatResult.getErrors() != null && !formatResult.getErrors().isEmpty()) {
