@@ -12,10 +12,15 @@ import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcesso
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.springframework.stereotype.Service;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
@@ -33,6 +38,14 @@ public class CqlConversionService {
   }
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
+    // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
+    Pattern pattern = Pattern.compile("^using .*version '[0-9]\\.[0-9]\\.[0-9]'$");
+    Matcher matcher = pattern.matcher(requestData.getCqlData());
+    boolean noModelVersion = false;
+    if (!matcher.find()) {
+      log.debug("cqlTranslatorException: Model and version don't exist");
+      noModelVersion = true;
+    }
     // Gets the translator results
     CqlTranslator cqlTranslator = processCqlData(requestData);
 
@@ -48,7 +61,26 @@ public class CqlConversionService {
 
     String jsonWithErrors =
         new CqlExceptionErrorProcessor(cqlTranslatorExceptions, processedJson).process();
+    if (noModelVersion) {
+      // Does jsonWithErrors contain "Model and version don't exist"
+      // Looking for both the original error in cqlTranslatorException
+      //  and the 'Model and version' error in jsonWithErrors
 
+      DocumentContext jsonContext = JsonPath.parse(jsonWithErrors);
+      try {
+        JSONArray errorFound =
+            jsonContext.read(
+                "$.errorExceptions[?(@.message==\"Model Type and version are required\")]");
+        if (errorFound.size() == 0) {
+          log.error(
+              "cqlTranslatorException: There was a problem finding Model and version, "
+                  + "but the error wasn't correctly reported by cqlTranslator?");
+          log.warn("Error list {}", cqlTranslatorExceptions);
+        }
+      } catch (Exception e) {
+        log.info("Model missing, but likely an empty CQL file");
+      }
+    }
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
   }
 
