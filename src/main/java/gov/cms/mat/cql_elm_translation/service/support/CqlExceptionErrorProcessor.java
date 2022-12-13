@@ -76,9 +76,9 @@ public class CqlExceptionErrorProcessor {
       // UsingProperties.getVersion should be an indicate that the CQL error was a result of Model
       // and version not found in the CQL
       if (StringUtils.contains(payload, "UsingProperties.getVersion")) {
-        log.debug("cqlTranslatorException: Payload" + payload);
+        log.info("cqlTranslatorException: Payload" + payload);
         String rawPayload = clean(payload);
-        log.debug("cqlTranslatorException: RawPayload" + rawPayload);
+        log.info("cqlTranslatorException: RawPayload" + rawPayload);
         if (rawPayload.equals(
             "CannotinvokegovcmsmatcqlelementsUsingProperties"
                 + "getVersionbecausethereturnvalueofjavalangThreadLocalgetisnull")) {
