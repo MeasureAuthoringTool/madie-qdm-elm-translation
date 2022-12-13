@@ -39,7 +39,7 @@ public class CqlConversionService {
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
-    Pattern pattern = Pattern.compile("foo");
+    Pattern pattern = Pattern.compile("^using .*version '[0-9]\\.[0-9]\\.[0-9]'$");
     Matcher matcher = pattern.matcher(requestData.getCqlData());
     boolean noModelVersion = false;
     if (!matcher.find()) {
