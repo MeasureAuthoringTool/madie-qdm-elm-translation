@@ -70,17 +70,18 @@ public class CqlExceptionErrorProcessor {
   private MatCqlConversionException buildMatError(CqlCompilerException cqlTranslatorException) {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
-    log.debug("buildMatError" + cqlTranslatorException.getMessage());
+    log.debug("cqlTranslatorException:" + cqlTranslatorException.getMessage());
     try {
       String payload = escape(cqlTranslatorException.getMessage());
-
+      //UsingProperties.getVersion should be an indicate that the CQL error was a result of Model and version not found in the CQL
       if (StringUtils.contains(payload, "UsingProperties.getVersion")) {
-        log.info("cqlTranslatorException: " + payload);
+        log.debug("cqlTranslatorException: Payload" + payload);
         String rawPayload = clean(payload);
+        log.debug("cqlTranslatorException: RawPayload" + rawPayload);
         if (rawPayload.equals(
             "CannotinvokegovcmsmatcqlelementsUsingProperties"
                 + "getVersionbecausethereturnvalueofjavalangThreadLocalgetisnull")) {
-          payload = "Model Type and version are required";
+          payload = "Model Type and version are required";          
         }
       }
 
