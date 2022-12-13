@@ -73,7 +73,8 @@ public class CqlExceptionErrorProcessor {
     log.debug("cqlTranslatorException:" + cqlTranslatorException.getMessage());
     try {
       String payload = escape(cqlTranslatorException.getMessage());
-      //UsingProperties.getVersion should be an indicate that the CQL error was a result of Model and version not found in the CQL
+      // UsingProperties.getVersion should be an indicate that the CQL error was a result of Model
+      // and version not found in the CQL
       if (StringUtils.contains(payload, "UsingProperties.getVersion")) {
         log.debug("cqlTranslatorException: Payload" + payload);
         String rawPayload = clean(payload);
@@ -81,7 +82,7 @@ public class CqlExceptionErrorProcessor {
         if (rawPayload.equals(
             "CannotinvokegovcmsmatcqlelementsUsingProperties"
                 + "getVersionbecausethereturnvalueofjavalangThreadLocalgetisnull")) {
-          payload = "Model Type and version are required";          
+          payload = "Model Type and version are required";
         }
       }
 
