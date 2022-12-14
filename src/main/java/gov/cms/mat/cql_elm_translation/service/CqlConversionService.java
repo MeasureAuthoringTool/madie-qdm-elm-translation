@@ -39,11 +39,12 @@ public class CqlConversionService {
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
-    Pattern pattern = Pattern.compile("^using .*version '[0-9]\\.[0-9]\\.[0-9]'$");
+    Pattern pattern = Pattern.compile("using .*version '[0-9]\\.[0-9]\\.[0-9]'");
     Matcher matcher = pattern.matcher(requestData.getCqlData());
     boolean noModelVersion = false;
     if (!matcher.find()) {
       log.debug("cqlTranslatorException: Model and version don't exist");
+      log.debug("cqlTranslatorException: \n{}", requestData.getCqlData());
       noModelVersion = true;
     }
     // Gets the translator results
