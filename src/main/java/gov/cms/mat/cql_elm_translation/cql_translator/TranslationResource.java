@@ -84,6 +84,10 @@ public class TranslationResource {
     this.libraryManager = new LibraryManager(modelManager);
   }
 
+  public LibraryManager getLibraryManager() {
+    return libraryManager;
+  }
+
   public static TranslationResource getInstance(boolean model) {
     instance = new TranslationResource(model);
     // returns the singleton object

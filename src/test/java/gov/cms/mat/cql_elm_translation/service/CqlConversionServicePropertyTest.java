@@ -9,6 +9,7 @@ import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.hl7.fhir.r4.utils.LiquidEngine;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +20,8 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
-class CqlConversionServicePropertyTest implements ResourceFileUtil {
+class CqlConversionServicePropertyTest
+    implements ResourceFileUtil, LiquidEngine.ILiquidEngineIcludeResolver {
   CqlConversionService cqlConversionService = new CqlConversionService(null);
 
   String cqlData;
@@ -184,4 +186,17 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
         .resultTypes(resultTypes)
         .build();
   }
+
+  @Override
+  public String fetchInclude(LiquidEngine engine, String name) {
+    return null;
+  }
+
+  //  public void testLiquidMeasureTemplate() {
+  //    String template = getData("/templates/Measure.html");
+  //    LiquidEngine engine = new LiquidEngine(TestingUtilities.context(), null);
+  //    LiquidEngine.LiquidDocument doc = engine.parse(template, "test-script");
+  //    String output = engine.evaluate(doc, measure, null);
+  //    assertEquals("exceptionMessage", output);
+  //  }
 }
