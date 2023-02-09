@@ -25,6 +25,7 @@ import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r5.model.Measure;
 import org.hl7.fhir.r5.test.utils.TestingUtilities;
 import org.hl7.fhir.r5.utils.LiquidEngine;
@@ -151,14 +152,20 @@ public class CqlConversionService {
     //            r4EffectiveDataRequirements, searchParameterResolver, null, modelResolver, null);
     ;
     effectiveDataRequirements.setContent(createAttachment(library.getContent()));
-    String template = getData("/templates/Library.liquid");
+    String template = getData("/templates/Measure.liquid");
     LiquidEngine engine = new LiquidEngine(TestingUtilities.context(), null);
-
+    effectiveDataRequirements.setId("effective-data-requirements");
+    r5Measure.addContained(effectiveDataRequirements);
+    r5Measure.getExtension().add(createExtension());
     LiquidEngine.LiquidDocument doc = engine.parse(template, "test-script");
 
-    String output = engine.evaluate(doc, effectiveDataRequirements, null);
+    String output = engine.evaluate(doc, r5Measure, null);
 
     return null;
+  }
+
+  private Extension createExtension() {
+    return new Extension("http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements");
   }
 
   private List<org.hl7.fhir.r5.model.Attachment> createAttachment(List<Attachment> r4attachments) {
