@@ -7,6 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.elm.r1.VersionedIdentifier;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -39,7 +40,17 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
       if (filteredCqlTranslatorExceptions.isEmpty()) {
         return Collections.emptyList();
       } else {
-        return filterByLibrary(filteredCqlTranslatorExceptions);
+        List<CqlCompilerException> filteredList = filterByLibrary(filteredCqlTranslatorExceptions);
+        List<CqlCompilerException> newList = new ArrayList<CqlCompilerException>();
+        if (CollectionUtils.isNotEmpty(filteredList)) {
+          newList.addAll(filteredList);
+        }
+
+        filteredList = filterBySyntax(filteredCqlTranslatorExceptions);
+        if (CollectionUtils.isNotEmpty(filteredList)) {
+          newList.addAll(filteredList);
+        }
+        return newList;
       }
     }
   }
@@ -90,5 +101,16 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     String version = v.getVersion();
 
     return p.getName().equals(id) && p.getVersion().equals(version);
+  }
+
+  private List<CqlCompilerException> filterBySyntax(
+      List<CqlCompilerException> filteredCqlTranslatorExceptions) {
+    return filteredCqlTranslatorExceptions.stream()
+        .filter(
+            cqlCompilerException ->
+                cqlCompilerException
+                    .toString()
+                    .contains("org.cqframework.cql.cql2elm.CqlSyntaxException"))
+        .toList();
   }
 }
