@@ -21,8 +21,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 @SpringBootTest
 public class CqlTranslatorExceptionFilterTest {
 
-  // @Autowired private CqlTranslatorExceptionFilter filter;
-
   private String cqlData = "";
   private List<CqlCompilerException> cqlTranslatorExceptions = null;
   private CqlCompilerException syntaxException = null;
