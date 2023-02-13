@@ -29,6 +29,8 @@ madie:
       hapi-fhir:
         libraries:
           uri: /fhir/libraries
+        measures:
+            uri: /fhir/measures
 
 springdoc:
   swagger-ui:
