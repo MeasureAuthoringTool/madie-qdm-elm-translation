@@ -72,6 +72,6 @@ public class CqlTranslatorExceptionFilterTest {
 
     CqlCompilerException syntaxException = filteredExceptions.get(0);
     assertEquals(
-        syntaxException.getClass(), org.cqframework.cql.cql2elm.CqlCompilerException.class);
+        syntaxException.getClass(), CqlCompilerException.class);
   }
 }
