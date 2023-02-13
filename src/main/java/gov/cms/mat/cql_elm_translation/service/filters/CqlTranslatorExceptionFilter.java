@@ -34,25 +34,23 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     if (CollectionUtils.isEmpty(cqlTranslatorExceptions)) {
       log.debug("No CQL Errors found");
       return Collections.emptyList();
-    } else {
-      List<CqlCompilerException> filteredCqlTranslatorExceptions = filterOutWarnings();
-
-      if (filteredCqlTranslatorExceptions.isEmpty()) {
-        return Collections.emptyList();
-      } else {
-        List<CqlCompilerException> filteredList = filterByLibrary(filteredCqlTranslatorExceptions);
-        List<CqlCompilerException> newList = new ArrayList<CqlCompilerException>();
-        if (CollectionUtils.isNotEmpty(filteredList)) {
-          newList.addAll(filteredList);
-        }
-
-        filteredList = filterBySyntax(filteredCqlTranslatorExceptions);
-        if (CollectionUtils.isNotEmpty(filteredList)) {
-          newList.addAll(filteredList);
-        }
-        return newList;
-      }
     }
+    List<CqlCompilerException> filteredCqlTranslatorExceptions = filterOutWarnings();
+
+    if (filteredCqlTranslatorExceptions.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<CqlCompilerException> filteredList = filterByLibrary(filteredCqlTranslatorExceptions);
+    List<CqlCompilerException> newList = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(filteredList)) {
+      newList.addAll(filteredList);
+    }
+
+    filteredList = filterBySyntax(filteredCqlTranslatorExceptions);
+    if (CollectionUtils.isNotEmpty(filteredList)) {
+      newList.addAll(filteredList);
+    }
+    return newList;
   }
 
   private List<CqlCompilerException> filterOutWarnings() {
