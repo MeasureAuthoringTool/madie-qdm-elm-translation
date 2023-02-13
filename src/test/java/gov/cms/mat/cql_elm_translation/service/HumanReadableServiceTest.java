@@ -8,6 +8,7 @@ import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
 import org.hl7.fhir.r4.model.Bundle;
+import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Resource;
 import org.junit.jupiter.api.BeforeEach;
@@ -107,6 +108,16 @@ class HumanReadableServiceTest {
   @Test
   void generateHumanReadableThrowsResourceNotFoundExceptionForNoEntry() {
     when(jsonParser.parseResource(any(), anyString())).thenReturn(new Bundle());
+    assertThrows(
+        ResourceNotFoundException.class,
+        () -> humanReadableService.generateHumanReadable(madieMeasure, testAccessToken));
+  }
+
+  @Test
+  void generateHumanReadableThrowsResourceNotFoundExceptionForNoMeasureResource() {
+    Bundle bundle =
+        new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(getBundleEntryComponent(new Library()));
+    when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
     assertThrows(
         ResourceNotFoundException.class,
         () -> humanReadableService.generateHumanReadable(madieMeasure, testAccessToken));

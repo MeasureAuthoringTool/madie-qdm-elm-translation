@@ -7,6 +7,7 @@ import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
 import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
@@ -17,6 +18,8 @@ import org.hl7.fhir.r5.test.utils.TestingUtilities;
 import org.hl7.fhir.r5.utils.LiquidEngine;
 import org.springframework.stereotype.Service;
 
+import java.util.Optional;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -24,16 +27,26 @@ public class HumanReadableService {
   private final FhirContext fhirContext;
   private final MadieFhirServices madieFhirServices;
 
-  public String generateHumanReadable(Measure madieMeasure, String accesToken) {
-    String fhirMeasureBundle = madieFhirServices.getFhirMeasureBundle(madieMeasure, accesToken);
+  public String generateHumanReadable(Measure madieMeasure, String accessToken) {
+    String fhirMeasureBundle = madieFhirServices.getFhirMeasureBundle(madieMeasure, accessToken);
     Bundle bundleResource = createFhirResourceFromJson(fhirMeasureBundle, Bundle.class);
     if (bundleResource != null) {
-      if (bundleResource.getEntry().isEmpty()) {
+      if (CollectionUtils.isEmpty(bundleResource.getEntry())) {
         log.error("Unable to find bundle entry for measure {}", madieMeasure.getId());
         throw new ResourceNotFoundException("Measure", madieMeasure.getId());
       }
       try {
-        Resource measureResource = bundleResource.getEntry().get(0).getResource();
+        Optional<Bundle.BundleEntryComponent> bundleEntryComponent = bundleResource
+            .getEntry()
+            .stream()
+            .filter(entry -> StringUtils.equalsIgnoreCase("Measure", entry.getResource().getResourceType().toString()))
+            .findFirst();
+        if (bundleEntryComponent.isEmpty()) {
+          log.error("Unable to find BundleEntryComponent for measure {}", madieMeasure.getId());
+          throw new ResourceNotFoundException("Measure", madieMeasure.getId());
+        }
+        Resource measureResource = bundleEntryComponent.get().getResource();
+
         // converting measure resource from R4 to R5
         VersionConvertor_40_50 versionConvertor_40_50 =
             new VersionConvertor_40_50(new BaseAdvisor_40_50());
