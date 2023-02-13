@@ -26,13 +26,11 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class HumanReadableServiceTest {
 
-
   @Mock FhirContext fhirContext;
 
   @Mock MadieFhirServices madieFhirServices;
 
   @Mock JsonParser jsonParser;
-
 
   @InjectMocks HumanReadableService humanReadableService;
 
@@ -42,18 +40,21 @@ class HumanReadableServiceTest {
 
   @BeforeEach
   void setUp() {
-    madieMeasure = Measure.builder()
-        .id("madie-test-id")
-        .measureName("test_measure_name")
-        .cqlLibraryName("test_cql_library_name")
-        .version(new Version(1, 0, 0))
-        .measurementPeriodStart(new Date())
-        .measurementPeriodEnd(new Date())
-        .measureMetaData(new MeasureMetaData().toBuilder()
-            .copyright("test_copyright")
-            .disclaimer("test_disclaimer")
-            .build())
-        .build();
+    madieMeasure =
+        Measure.builder()
+            .id("madie-test-id")
+            .measureName("test_measure_name")
+            .cqlLibraryName("test_cql_library_name")
+            .version(new Version(1, 0, 0))
+            .measurementPeriodStart(new Date())
+            .measurementPeriodEnd(new Date())
+            .measureMetaData(
+                new MeasureMetaData()
+                    .toBuilder()
+                    .copyright("test_copyright")
+                    .disclaimer("test_disclaimer")
+                    .build())
+            .build();
 
     org.hl7.fhir.r4.model.Measure measure = new org.hl7.fhir.r4.model.Measure();
     measure
@@ -71,7 +72,8 @@ class HumanReadableServiceTest {
     Bundle bundle =
         new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(bundleEntryComponent);
 
-    when(madieFhirServices.getFhirMeasureBundle(any(), anyString())).thenReturn("bundleResourceJson");
+    when(madieFhirServices.getFhirMeasureBundle(any(), anyString()))
+        .thenReturn("bundleResourceJson");
     when(fhirContext.newJsonParser()).thenReturn(jsonParser);
     when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
   }
@@ -88,7 +90,8 @@ class HumanReadableServiceTest {
 
   @Test
   void generateHumanReadable() {
-    String generatedHumanReadable = humanReadableService.generateHumanReadable(madieMeasure, testAccessToken);
+    String generatedHumanReadable =
+        humanReadableService.generateHumanReadable(madieMeasure, testAccessToken);
     assertNotNull(generatedHumanReadable);
     assertTrue(generatedHumanReadable.contains("test_measure_name"));
   }

@@ -45,7 +45,10 @@ public class HumanReadableService {
         LiquidEngine.LiquidDocument doc = engine.parse(template, "hr-script");
         return engine.evaluate(doc, r5Measure, null);
       } catch (FHIRException fhirException) {
-        log.error("Unable to generate Human readable for measure {} Reason => {}", madieMeasure.getId(), fhirException);
+        log.error(
+            "Unable to generate Human readable for measure {} Reason => {}",
+            madieMeasure.getId(),
+            fhirException);
         throw new HumanReadableGenerationException("Measure", madieMeasure.getId());
       }
     } else {

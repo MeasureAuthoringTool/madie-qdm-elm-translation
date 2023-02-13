@@ -11,4 +11,3 @@ public class HumanReadableGenerationException extends RuntimeException {
     super(String.format(MESSAGE, type, id));
   }
 }
-

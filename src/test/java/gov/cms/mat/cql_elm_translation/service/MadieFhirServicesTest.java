@@ -25,8 +25,7 @@ import static org.mockito.Mockito.when;
 @ExtendWith(MockitoExtension.class)
 class MadieFhirServicesTest {
 
-  @Mock
-  private RestTemplate restTemplate;
+  @Mock private RestTemplate restTemplate;
 
   @InjectMocks MadieFhirServices madieFhirServices;
 
@@ -46,43 +45,56 @@ class MadieFhirServicesTest {
 
   @BeforeEach
   void setUp() throws URISyntaxException {
-    ReflectionTestUtils.setField(madieFhirServices, "madieFhirService", "https://localhost:9090/api");
+    ReflectionTestUtils.setField(
+        madieFhirServices, "madieFhirService", "https://localhost:9090/api");
     ReflectionTestUtils.setField(madieFhirServices, "librariesUri", "/fhir/libraries");
     ReflectionTestUtils.setField(madieFhirServices, "measuresUri", "/fhir/measures");
 
     httpHeaders.add("Authorization", "okta-access-token");
-    libraryUri = new URI("https://localhost:9090/api/fhir/libraries/cql?name=" + cqlLibraryName + "&version=" + cqlLibraryVersion);
+    libraryUri =
+        new URI(
+            "https://localhost:9090/api/fhir/libraries/cql?name="
+                + cqlLibraryName
+                + "&version="
+                + cqlLibraryVersion);
     measureUri = new URI("https://localhost:9090/api/fhir/measures/bundles");
     measure = Measure.builder().id("test_measureId").build();
   }
 
   @Test
   void getHapiFhirCql() {
-    when(restTemplate.exchange(libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
+    when(restTemplate.exchange(
+            libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>("Response Cql String", HttpStatus.OK));
-    String responseBody = madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+    String responseBody =
+        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertEquals(responseBody, "Response Cql String");
   }
 
   @Test
   void getHapiFhirCqlReturnsNull() {
-    when(restTemplate.exchange(libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
+    when(restTemplate.exchange(
+            libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
-    String responseBody = madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+    String responseBody =
+        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
   }
 
   @Test
   void getHapiFhirCqlReturnsNullWhenNotFound() {
-    when(restTemplate.exchange(libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
+    when(restTemplate.exchange(
+            libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
-    String responseBody = madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+    String responseBody =
+        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
   }
 
   @Test
   void getFhirMeasureBundle() {
-    when(restTemplate.exchange(measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
+    when(restTemplate.exchange(
+            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>("Measure Bundle", HttpStatus.OK));
     String response = madieFhirServices.getFhirMeasureBundle(measure, accessToken);
     assertEquals("Measure Bundle", response);
@@ -90,7 +102,8 @@ class MadieFhirServicesTest {
 
   @Test
   void getFhirMeasureBundleThrowsException() {
-    when(restTemplate.exchange(measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
+    when(restTemplate.exchange(
+            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     assertThrows(
         FhirBundleGenerationException.class,

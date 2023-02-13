@@ -11,4 +11,3 @@ public class FhirBundleGenerationException extends RuntimeException {
     super(String.format(MESSAGE, id));
   }
 }
-

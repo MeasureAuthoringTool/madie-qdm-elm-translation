@@ -22,17 +22,14 @@ class HumanReadableControllerMVCTest implements ResourceFileUtil {
 
   private static final String TEST_USER_ID = "john_doe";
 
-  @Autowired
-  private MockMvc mockMvc;
+  @Autowired private MockMvc mockMvc;
 
-  @MockBean
-  HumanReadableService humanReadableService;
+  @MockBean HumanReadableService humanReadableService;
 
   @Test
   public void testHumanReadableController() throws Exception {
 
-    String madieMeasureJson =
-        getData("/example_madie_measure.json");
+    String madieMeasureJson = getData("/example_madie_measure.json");
 
     when(humanReadableService.generateHumanReadable(any(Measure.class), anyString()))
         .thenReturn("Generated Human Readable");
@@ -45,8 +42,6 @@ class HumanReadableControllerMVCTest implements ResourceFileUtil {
                 .content(madieMeasureJson)
                 .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk());
-    verify(humanReadableService, times(1))
-        .generateHumanReadable(any(Measure.class), anyString());
+    verify(humanReadableService, times(1)).generateHumanReadable(any(Measure.class), anyString());
   }
-
 }

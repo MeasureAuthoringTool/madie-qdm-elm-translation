@@ -18,14 +18,18 @@ import java.security.Principal;
 public class HumanReadableController {
   private final HumanReadableService humanReadableService;
 
-  @PutMapping(value ="/human-readable",
+  @PutMapping(
+      value = "/human-readable",
       produces = {MediaType.TEXT_HTML_VALUE},
       consumes = {MediaType.APPLICATION_JSON_VALUE})
   public String generateHumanReadable(
       @RequestBody @Validated(Measure.ValidationSequence.class) Measure measure,
       Principal principal,
       @RequestHeader("Authorization") String accessToken) {
-    log.info("User {} trying to generate Human Readable for measure: {} ", principal.getName(), measure.getId());
+    log.info(
+        "User {} trying to generate Human Readable for measure: {} ",
+        principal.getName(),
+        measure.getId());
     return humanReadableService.generateHumanReadable(measure, accessToken);
   }
 }
