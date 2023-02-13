@@ -45,7 +45,7 @@ public class CqlTranslatorExceptionFilterTest {
   }
 
   @Test
-  public void testFilter_noExceptions() {
+  public void testFilterwithNoExceptions() {
     CqlTranslatorExceptionFilter filter =
         new CqlTranslatorExceptionFilter(cqlData, false, cqlTranslatorExceptions);
     List<CqlCompilerException> filteredExceptions = filter.filter();
@@ -53,7 +53,7 @@ public class CqlTranslatorExceptionFilterTest {
   }
 
   @Test
-  public void testFilter_warnings() {
+  public void testFilterwithWarnings() {
     cqlTranslatorExceptions.add(warning);
     CqlTranslatorExceptionFilter filter =
         new CqlTranslatorExceptionFilter(cqlData, true, cqlTranslatorExceptions);
