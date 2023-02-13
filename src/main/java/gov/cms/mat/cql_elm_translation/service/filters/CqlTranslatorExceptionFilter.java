@@ -41,7 +41,7 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
         return Collections.emptyList();
       } else {
         List<CqlCompilerException> filteredList = filterByLibrary(filteredCqlTranslatorExceptions);
-        List<CqlCompilerException> newList = new ArrayList<CqlCompilerException>();
+        List<CqlCompilerException> newList = new ArrayList<>();
         if (CollectionUtils.isNotEmpty(filteredList)) {
           newList.addAll(filteredList);
         }
