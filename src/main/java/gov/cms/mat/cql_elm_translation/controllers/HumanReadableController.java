@@ -1,18 +1,31 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
+import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.http.MediaType;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
+import java.security.Principal;
 
+@Slf4j
 @RestController
-@RequestMapping(path = "/human-readable")
+@RequiredArgsConstructor
 public class HumanReadableController {
-  @Autowired private HumanReadableService humanReadableService;
+  private final HumanReadableService humanReadableService;
 
-  @GetMapping("/")
-  public String index() {
-    return humanReadableService.generateHumanReadable();
+  @PutMapping(value ="/human-readable",
+      produces = {MediaType.TEXT_HTML_VALUE},
+      consumes = {MediaType.APPLICATION_JSON_VALUE})
+  public String generateHumanReadable(
+      @RequestBody @Validated(Measure.ValidationSequence.class) Measure measure,
+      Principal principal,
+      @RequestHeader("Authorization") String accessToken) {
+    log.info("User {} trying to generate Human Readable for measure: {} ", principal.getName(), measure.getId());
+    return humanReadableService.generateHumanReadable(measure, accessToken);
   }
 }
