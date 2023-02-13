@@ -118,6 +118,36 @@
       <version>${cqframework.version}</version>
     </dependency>
 
+    <!-- for data requirement processing -->
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>elm-fhir</artifactId>
+      <version>${cqframework.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-r4</artifactId>
+      <version>6.2.5</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>okhttp</artifactId>
+          <groupId>com.squareup.okhttp3</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-converter</artifactId>
+      <version>6.2.5</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.google.code.gson</groupId>
+      <artifactId>gson</artifactId>
+      <version>2.10</version>
+    </dependency>
+
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
@@ -197,6 +227,18 @@
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
       <artifactId>json-path</artifactId>
+    </dependency>
+
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-compress</artifactId>
+      <version>1.22</version>
+    </dependency>
+
+    <dependency>
+      <groupId>gov.cms.madie</groupId>
+      <artifactId>madie-java-models</artifactId>
+      <version>0.2.33-SNAPSHOT</version>
     </dependency>
 
     <dependency>

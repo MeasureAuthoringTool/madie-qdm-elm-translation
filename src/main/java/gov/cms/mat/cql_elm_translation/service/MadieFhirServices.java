@@ -1,5 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.models.measure.Measure;
+import gov.cms.mat.cql_elm_translation.exceptions.FhirBundleGenerationException;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -26,6 +28,9 @@ public class MadieFhirServices {
   @Value("${madie.fhir.service.hapi-fhir.libraries.uri}")
   private String librariesUri;
 
+  @Value("${madie.fhir.service.hapi-fhir.measures.uri}")
+  private String measuresUri;
+
   public String getHapiFhirCql(String name, String version, String accessToken) {
     URI uri = buildMadieFhirServiceUri(name, version);
     log.debug("Getting Madie library: {} ", uri);
@@ -48,6 +53,30 @@ public class MadieFhirServices {
       log.error("Cannot find a Cql Library with name: {}, version: {}", name, version);
     }
     return null;
+  }
+
+  public String getFhirMeasureBundle(Measure measure, String accessToken) {
+    URI uri =
+        UriComponentsBuilder.fromHttpUrl(madieFhirService + measuresUri + "/bundles")
+            .build()
+            .encode()
+            .toUri();
+    log.debug("Getting Madie FHIR Measure: {} ", uri);
+
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Authorization", accessToken);
+
+    ResponseEntity<String> responseEntity =
+        restTemplate.exchange(
+            uri, HttpMethod.PUT, new HttpEntity<>(measure, headers), String.class);
+
+    if (responseEntity.getStatusCode().is2xxSuccessful()) {
+      log.debug("Successfully retrieved measure fhir bundle");
+      return responseEntity.getBody();
+    } else {
+      log.error("Unable to generate Fhir bundle for Measure {}", measure.getId());
+      throw new FhirBundleGenerationException(measure.getId());
+    }
   }
 
   private URI buildMadieFhirServiceUri(String name, String version) {
