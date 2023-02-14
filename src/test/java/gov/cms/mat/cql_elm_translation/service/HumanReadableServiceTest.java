@@ -116,7 +116,9 @@ class HumanReadableServiceTest {
   @Test
   void generateHumanReadableThrowsResourceNotFoundExceptionForNoMeasureResource() {
     Bundle bundle =
-        new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(getBundleEntryComponent(new Library()));
+        new Bundle()
+            .setType(Bundle.BundleType.TRANSACTION)
+            .addEntry(getBundleEntryComponent(new Library()));
     when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
     assertThrows(
         ResourceNotFoundException.class,

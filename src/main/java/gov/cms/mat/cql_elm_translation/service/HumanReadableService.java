@@ -36,11 +36,13 @@ public class HumanReadableService {
         throw new ResourceNotFoundException("Measure", madieMeasure.getId());
       }
       try {
-        Optional<Bundle.BundleEntryComponent> bundleEntryComponent = bundleResource
-            .getEntry()
-            .stream()
-            .filter(entry -> StringUtils.equalsIgnoreCase("Measure", entry.getResource().getResourceType().toString()))
-            .findFirst();
+        Optional<Bundle.BundleEntryComponent> bundleEntryComponent =
+            bundleResource.getEntry().stream()
+                .filter(
+                    entry ->
+                        StringUtils.equalsIgnoreCase(
+                            "Measure", entry.getResource().getResourceType().toString()))
+                .findFirst();
         if (bundleEntryComponent.isEmpty()) {
           log.error("Unable to find BundleEntryComponent for measure {}", madieMeasure.getId());
           throw new ResourceNotFoundException("Measure", madieMeasure.getId());

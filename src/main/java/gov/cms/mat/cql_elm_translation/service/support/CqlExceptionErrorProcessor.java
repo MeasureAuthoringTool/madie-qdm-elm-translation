@@ -70,6 +70,12 @@ public class CqlExceptionErrorProcessor {
   private MatCqlConversionException buildMatError(CqlCompilerException cqlTranslatorException) {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
+
+    matCqlConversionException.setType(
+        cqlTranslatorException.toString().contains("org.cqframework.cql.cql2elm.CqlSyntaxException")
+            ? "parsing"
+            : null);
+
     log.debug("cqlTranslatorException:" + cqlTranslatorException.getMessage());
     try {
       String payload = escape(cqlTranslatorException.getMessage());

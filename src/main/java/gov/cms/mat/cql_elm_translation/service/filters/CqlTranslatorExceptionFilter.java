@@ -7,6 +7,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.elm.r1.VersionedIdentifier;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -33,15 +34,23 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     if (CollectionUtils.isEmpty(cqlTranslatorExceptions)) {
       log.debug("No CQL Errors found");
       return Collections.emptyList();
-    } else {
-      List<CqlCompilerException> filteredCqlTranslatorExceptions = filterOutWarnings();
-
-      if (filteredCqlTranslatorExceptions.isEmpty()) {
-        return Collections.emptyList();
-      } else {
-        return filterByLibrary(filteredCqlTranslatorExceptions);
-      }
     }
+    List<CqlCompilerException> filteredCqlTranslatorExceptions = filterOutWarnings();
+
+    if (filteredCqlTranslatorExceptions.isEmpty()) {
+      return Collections.emptyList();
+    }
+    List<CqlCompilerException> filteredList = filterByLibrary(filteredCqlTranslatorExceptions);
+    List<CqlCompilerException> newList = new ArrayList<>();
+    if (CollectionUtils.isNotEmpty(filteredList)) {
+      newList.addAll(filteredList);
+    }
+
+    filteredList = filterBySyntax(filteredCqlTranslatorExceptions);
+    if (CollectionUtils.isNotEmpty(filteredList)) {
+      newList.addAll(filteredList);
+    }
+    return newList;
   }
 
   private List<CqlCompilerException> filterOutWarnings() {
@@ -90,5 +99,16 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     String version = v.getVersion();
 
     return p.getName().equals(id) && p.getVersion().equals(version);
+  }
+
+  private List<CqlCompilerException> filterBySyntax(
+      List<CqlCompilerException> filteredCqlTranslatorExceptions) {
+    return filteredCqlTranslatorExceptions.stream()
+        .filter(
+            cqlCompilerException ->
+                cqlCompilerException
+                    .toString()
+                    .contains("org.cqframework.cql.cql2elm.CqlSyntaxException"))
+        .toList();
   }
 }
