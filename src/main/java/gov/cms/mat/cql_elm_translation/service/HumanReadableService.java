@@ -54,24 +54,23 @@ public class HumanReadableService extends ResourceUtils {
     if (bundleResource != null) {
       if (CollectionUtils.isEmpty(bundleResource.getEntry())) {
         log.error("Unable to find bundle entry for measure {}", madieMeasure.getId());
-        throw new ResourceNotFoundException("Measure", madieMeasure.getId());
+        throw new ResourceNotFoundException("bundle entry", madieMeasure.getId());
       }
       try {
-        Optional<Bundle.BundleEntryComponent> measureBundleEntryComponent =
-            getMeasureEntry(bundleResource);
-        if (measureBundleEntryComponent.isEmpty()) {
-          log.error("Unable to find BundleEntryComponent for measure {}", madieMeasure.getId());
-          throw new ResourceNotFoundException("Measure", madieMeasure.getId());
+        Optional<Bundle.BundleEntryComponent> measureEntry = getMeasureEntry(bundleResource);
+        if (measureEntry.isEmpty()) {
+          log.error("Unable to find measure entry for measure {}", madieMeasure.getId());
+          throw new ResourceNotFoundException("measure entry", madieMeasure.getId());
         }
-        Resource measureResource = measureBundleEntryComponent.get().getResource();
+        Resource measureResource = measureEntry.get().getResource();
 
-        Optional<Bundle.BundleEntryComponent> libraryBundleEntryComponent =
+        Optional<Bundle.BundleEntryComponent> measureLibraryEntry =
             getMeasureLibraryEntry(bundleResource, madieMeasure);
-        if (libraryBundleEntryComponent.isEmpty()) {
-          log.error("Unable to find library for measure {}", madieMeasure.getId());
-          throw new ResourceNotFoundException("Library", madieMeasure.getId());
+        if (measureLibraryEntry.isEmpty()) {
+          log.error("Unable to find library entry for measure {}", madieMeasure.getId());
+          throw new ResourceNotFoundException("library entry", madieMeasure.getId());
         }
-        Library library = (Library) libraryBundleEntryComponent.get().getResource();
+        Library library = (Library) measureLibraryEntry.get().getResource();
 
         // converting measure resource from R4 to R5
         var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
@@ -93,11 +92,11 @@ public class HumanReadableService extends ResourceUtils {
             "Unable to generate Human readable for measure {} Reason => {}",
             madieMeasure.getId(),
             fhirException);
-        throw new HumanReadableGenerationException("Measure", madieMeasure.getId());
+        throw new HumanReadableGenerationException("measure", madieMeasure.getId());
       }
     } else {
       log.error("Unable to find a bundleResource for measure {}", madieMeasure.getId());
-      throw new ResourceNotFoundException("Bundle", madieMeasure.getId());
+      throw new ResourceNotFoundException("bundle", madieMeasure.getId());
     }
   }
 
@@ -157,7 +156,7 @@ public class HumanReadableService extends ResourceUtils {
    * @param accessToken used by MadieLibrarySourceProvider to make calls to madie-fhir-services
    * @return effective data requirement of type R5 library
    */
-  public org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
+  private org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
       org.hl7.fhir.r5.model.Measure r5Measure, Library library, String accessToken) {
     Attachment attachment =
         library.getContent().stream()
@@ -181,6 +180,10 @@ public class HumanReadableService extends ResourceUtils {
     CompiledLibrary translatedLibrary = cqlTranslator.getTranslatedLibrary();
     LibraryManager libraryManager = translationResource.getLibraryManager();
 
+    // providing compiled measureLibrary, as it cannot be fetched using LibrarySourceProvider ( we
+    // are not storing measure libraries in HAPI)
+    libraryManager.cacheLibrary(translatedLibrary);
+
     Set<String> expressionList = getExpressions(r5Measure);
     var dqReqTrans = new DataRequirementsProcessor();
     CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
@@ -196,7 +199,7 @@ public class HumanReadableService extends ResourceUtils {
   private Extension createExtension() {
     var extension = new Extension();
     extension.setUrl(EFFECTIVE_DATA_REQUIREMENT_URL);
-    //    extension.getValueReference().addChild("#effective-data-requirements");
+    extension.getValueReference().setReference("#effective-data-requirements");
     return extension;
   }
 
