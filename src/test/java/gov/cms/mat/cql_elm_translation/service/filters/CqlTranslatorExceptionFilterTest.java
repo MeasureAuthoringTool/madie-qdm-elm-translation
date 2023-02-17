@@ -71,7 +71,6 @@ public class CqlTranslatorExceptionFilterTest {
     assertTrue(filteredExceptions.size() == 1);
 
     CqlCompilerException syntaxException = filteredExceptions.get(0);
-    assertEquals(
-        syntaxException.getClass(), CqlCompilerException.class);
+    assertEquals(syntaxException.getClass(), CqlCompilerException.class);
   }
 }
