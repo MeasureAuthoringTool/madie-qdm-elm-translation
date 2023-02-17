@@ -82,11 +82,13 @@ public class HumanReadableService extends ResourceUtils {
         r5Measure.addContained(effectiveDataRequirements);
         r5Measure.getExtension().add(createExtension());
 
-        String template = ResourceUtils.getData("/templates/Measure.liquid");
+        String measureTemplate = getData("/templates/Measure.liquid");
         // TODO: Need to write our own implementation of TestingUtilities.getWorkerContext
         LiquidEngine engine = new LiquidEngine(TestingUtilities.context(), null);
-        LiquidEngine.LiquidDocument doc = engine.parse(template, "hr-script");
-        return engine.evaluate(doc, r5Measure, null);
+        LiquidEngine.LiquidDocument doc = engine.parse(measureTemplate, "hr-script");
+        String measureHr = engine.evaluate(doc, r5Measure, null);
+        String humanReadable = getData("/templates/HumanReadable.liquid");
+        return humanReadable.replace("human_readable_content_holder", measureHr);
       } catch (FHIRException fhirException) {
         log.error(
             "Unable to generate Human readable for measure {} Reason => {}",
