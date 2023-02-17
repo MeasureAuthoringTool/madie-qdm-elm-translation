@@ -65,21 +65,24 @@ class HumanReadableServiceTest {
                     .build())
             .build();
 
-    measure = new org.hl7.fhir.r4.model.Measure()
-        .setName(madieMeasure.getCqlLibraryName())
-        .setTitle(madieMeasure.getMeasureName())
-        .setExperimental(true)
-        .setUrl("fhirBaseUrl/Measure/" + madieMeasure.getCqlLibraryName())
-        .setVersion(madieMeasure.getVersion().toString())
-        .setEffectivePeriod(
-            getPeriodFromDates(
-                madieMeasure.getMeasurementPeriodStart(), madieMeasure.getMeasurementPeriodEnd()))
-        .setCopyright(madieMeasure.getMeasureMetaData().getCopyright())
-        .setDisclaimer(madieMeasure.getMeasureMetaData().getDisclaimer());
-
+    measure =
+        new org.hl7.fhir.r4.model.Measure()
+            .setName(madieMeasure.getCqlLibraryName())
+            .setTitle(madieMeasure.getMeasureName())
+            .setExperimental(true)
+            .setUrl("fhirBaseUrl/Measure/" + madieMeasure.getCqlLibraryName())
+            .setVersion(madieMeasure.getVersion().toString())
+            .setEffectivePeriod(
+                getPeriodFromDates(
+                    madieMeasure.getMeasurementPeriodStart(),
+                    madieMeasure.getMeasurementPeriodEnd()))
+            .setCopyright(madieMeasure.getMeasureMetaData().getCopyright())
+            .setDisclaimer(madieMeasure.getMeasureMetaData().getDisclaimer());
 
     String cqlData = ResourceUtils.getData("/cv_populations.cql");
-    library = new Library().addContent(new Attachment().setData(cqlData.getBytes()).setContentType("text/cql"));
+    library =
+        new Library()
+            .addContent(new Attachment().setData(cqlData.getBytes()).setContentType("text/cql"));
     library.setId("Library/" + madieMeasure.getCqlLibraryName());
 
     when(madieFhirServices.getFhirMeasureBundle(any(), anyString()))
@@ -101,10 +104,11 @@ class HumanReadableServiceTest {
   void generateHumanReadable() {
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
-    Bundle bundle = new Bundle()
-        .setType(Bundle.BundleType.TRANSACTION)
-        .addEntry(measureBundleEntryComponent)
-        .addEntry(libraryBundleEntryComponent);
+    Bundle bundle =
+        new Bundle()
+            .setType(Bundle.BundleType.TRANSACTION)
+            .addEntry(measureBundleEntryComponent)
+            .addEntry(libraryBundleEntryComponent);
 
     doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
     when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
@@ -147,9 +151,8 @@ class HumanReadableServiceTest {
   @Test
   void generateHumanReadableThrowsResourceNotFoundExceptionForNoMeasureLibraryResource() {
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
-    Bundle bundle = new Bundle()
-        .setType(Bundle.BundleType.TRANSACTION)
-        .addEntry(measureBundleEntryComponent);
+    Bundle bundle =
+        new Bundle().setType(Bundle.BundleType.TRANSACTION).addEntry(measureBundleEntryComponent);
     when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
     assertThrows(
         ResourceNotFoundException.class,
@@ -163,10 +166,11 @@ class HumanReadableServiceTest {
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
-    Bundle bundle = new Bundle()
-        .setType(Bundle.BundleType.TRANSACTION)
-        .addEntry(measureBundleEntryComponent)
-        .addEntry(libraryBundleEntryComponent);
+    Bundle bundle =
+        new Bundle()
+            .setType(Bundle.BundleType.TRANSACTION)
+            .addEntry(measureBundleEntryComponent)
+            .addEntry(libraryBundleEntryComponent);
 
     when(jsonParser.parseResource(any(), anyString())).thenReturn(bundle);
 
