@@ -74,6 +74,10 @@ public class TranslationResource {
 
   static TranslationResource instance = null;
 
+  public LibraryManager getLibraryManager() {
+    return libraryManager;
+  }
+
   private TranslationResource(boolean isFhir) {
     modelManager = new ModelManager();
 
