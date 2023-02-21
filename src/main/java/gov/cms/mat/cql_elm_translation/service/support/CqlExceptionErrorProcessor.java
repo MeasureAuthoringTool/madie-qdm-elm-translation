@@ -9,6 +9,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -48,7 +49,8 @@ public class CqlExceptionErrorProcessor {
     List<MatCqlConversionException> matErrors = buildMatErrors();
     String jsonToInsert = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matErrors);
 
-    return json.replaceFirst("\n", "\n  \"errorExceptions\":" + jsonToInsert + ",\n");
+    return json.replaceFirst(
+        "\n", Matcher.quoteReplacement("\n  \"errorExceptions\":" + jsonToInsert + ",\n"));
   }
 
   private List<MatCqlConversionException> buildMatErrors() {
