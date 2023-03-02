@@ -1,7 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.models.measure.Measure;
-import gov.cms.mat.cql_elm_translation.exceptions.FhirBundleGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -89,24 +88,5 @@ class MadieFhirServicesTest {
     String responseBody =
         madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
-  }
-
-  @Test
-  void getFhirMeasureBundle() {
-    when(restTemplate.exchange(
-            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
-        .thenReturn(new ResponseEntity<>("Measure Bundle", HttpStatus.OK));
-    String response = madieFhirServices.getFhirMeasureBundle(measure, accessToken);
-    assertEquals("Measure Bundle", response);
-  }
-
-  @Test
-  void getFhirMeasureBundleThrowsException() {
-    when(restTemplate.exchange(
-            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
-        .thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
-    assertThrows(
-        FhirBundleGenerationException.class,
-        () -> madieFhirServices.getFhirMeasureBundle(measure, accessToken));
   }
 }

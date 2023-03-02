@@ -1,16 +1,17 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import ca.uhn.fhir.context.FhirContext;
-import gov.cms.madie.models.measure.Measure;
+import ca.uhn.fhir.parser.IParser;
+// import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 
 import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.HumanReadableGenerationException;
+// import gov.cms.mat.cql_elm_translation.exceptions.HumanReadableGenerationException;
 import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
-import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
+// import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
+// import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
@@ -19,14 +20,14 @@ import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
-import org.hl7.fhir.exceptions.FHIRException;
+// import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-import org.hl7.fhir.r5.model.Extension;
+// import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r5.test.utils.TestingUtilities;
-import org.hl7.fhir.r5.utils.LiquidEngine;
+// import org.hl7.fhir.r5.test.utils.TestingUtilities;
+// import org.hl7.fhir.r5.utils.LiquidEngine;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -39,74 +40,21 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HumanReadableService extends ResourceUtils {
+public class HumanReadableService {
   private final FhirContext fhirContext;
-  private final MadieFhirServices madieFhirServices;
+  private final FhirContext fhirContextForR5;
 
   private final CqlConversionService cqlConversionService;
 
-  private static final String EFFECTIVE_DATA_REQUIREMENT_URL =
-      "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-effectiveDataRequirements";
-
-  public String generateHumanReadable(Measure madieMeasure, String accessToken) {
-    String fhirMeasureBundle = madieFhirServices.getFhirMeasureBundle(madieMeasure, accessToken);
-    Bundle bundleResource = createFhirResourceFromJson(fhirMeasureBundle, Bundle.class);
-    if (bundleResource != null) {
-      if (CollectionUtils.isEmpty(bundleResource.getEntry())) {
-        log.error("Unable to find bundle entry for measure {}", madieMeasure.getId());
-        throw new ResourceNotFoundException("bundle entry", madieMeasure.getId());
-      }
-      try {
-        Optional<Bundle.BundleEntryComponent> measureEntry = getMeasureEntry(bundleResource);
-        if (measureEntry.isEmpty()) {
-          log.error("Unable to find measure entry for measure {}", madieMeasure.getId());
-          throw new ResourceNotFoundException("measure entry", madieMeasure.getId());
-        }
-        Resource measureResource = measureEntry.get().getResource();
-
-        Optional<Bundle.BundleEntryComponent> measureLibraryEntry =
-            getMeasureLibraryEntry(bundleResource, madieMeasure);
-        if (measureLibraryEntry.isEmpty()) {
-          log.error("Unable to find library entry for measure {}", madieMeasure.getId());
-          throw new ResourceNotFoundException("library entry", madieMeasure.getId());
-        }
-        Library library = (Library) measureLibraryEntry.get().getResource();
-
-        // converting measure resource from R4 to R5
-        var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-        org.hl7.fhir.r5.model.Measure r5Measure =
-            (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(measureResource);
-
-        org.hl7.fhir.r5.model.Library effectiveDataRequirements =
-            getEffectiveDataRequirements(r5Measure, library, accessToken);
-        r5Measure.addContained(effectiveDataRequirements);
-        r5Measure.getExtension().add(createExtension());
-
-        String measureTemplate = getData("/templates/Measure.liquid");
-        // TODO: Need to write our own implementation of TestingUtilities.getWorkerContext
-        LiquidEngine engine = new LiquidEngine(TestingUtilities.context(), null);
-        LiquidEngine.LiquidDocument doc = engine.parse(measureTemplate, "hr-script");
-        String measureHr = engine.evaluate(doc, r5Measure, null);
-        String humanReadable = getData("/templates/HumanReadable.liquid");
-        return humanReadable.replace("human_readable_content_holder", measureHr);
-      } catch (FHIRException fhirException) {
-        log.error(
-            "Unable to generate Human readable for measure {} Reason => {}",
-            madieMeasure.getId(),
-            fhirException);
-        throw new HumanReadableGenerationException("measure", madieMeasure.getId());
-      }
-    } else {
-      log.error("Unable to find a bundleResource for measure {}", madieMeasure.getId());
-      throw new ResourceNotFoundException("bundle", madieMeasure.getId());
-    }
-  }
-
-  private <T extends Resource> T createFhirResourceFromJson(String json, Class<T> clazz) {
+  public <T extends Resource> T createFhirResourceFromJson(String json, Class<T> clazz) {
     if (StringUtils.isEmpty(json)) {
       return null;
     }
-    return fhirContext.newJsonParser().parseResource(clazz, json);
+    return getR4Parser().parseResource(clazz, json);
+  }
+
+  protected IParser getR4Parser() {
+    return fhirContext.newJsonParser();
   }
 
   private RequestData createDefaultRequestData() {
@@ -126,7 +74,7 @@ public class HumanReadableService extends ResourceUtils {
    * @param bundleResource Bundle resource
    * @return BundleEntry which is of type Measure
    */
-  private Optional<Bundle.BundleEntryComponent> getMeasureEntry(Bundle bundleResource) {
+  public Optional<Bundle.BundleEntryComponent> getMeasureEntry(Bundle bundleResource) {
     return bundleResource.getEntry().stream()
         .filter(
             entry ->
@@ -136,29 +84,12 @@ public class HumanReadableService extends ResourceUtils {
   }
 
   /**
-   * @param bundleResource Bundle resource
-   * @param madieMeasure madie measure
-   * @return BundleEntry which is a Measure library
-   */
-  private Optional<Bundle.BundleEntryComponent> getMeasureLibraryEntry(
-      Bundle bundleResource, Measure madieMeasure) {
-    return bundleResource.getEntry().stream()
-        .filter(
-            entry ->
-                StringUtils.equalsIgnoreCase(
-                        "Library", entry.getResource().getResourceType().toString())
-                    && StringUtils.equalsIgnoreCase(
-                        "Library/" + madieMeasure.getCqlLibraryName(), entry.getResource().getId()))
-        .findFirst();
-  }
-
-  /**
    * @param r5Measure retrieved from measure bundle
    * @param library measure library
    * @param accessToken used by MadieLibrarySourceProvider to make calls to madie-fhir-services
    * @return effective data requirement of type R5 library
    */
-  private org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
+  public org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
       org.hl7.fhir.r5.model.Measure r5Measure, Library library, String accessToken) {
     Attachment attachment =
         library.getContent().stream()
@@ -198,13 +129,6 @@ public class HumanReadableService extends ResourceUtils {
     return effectiveDataRequirements;
   }
 
-  private Extension createExtension() {
-    var extension = new Extension();
-    extension.setUrl(EFFECTIVE_DATA_REQUIREMENT_URL);
-    extension.getValueReference().setReference("#effective-data-requirements");
-    return extension;
-  }
-
   private List<org.hl7.fhir.r5.model.Attachment> createAttachment(List<Attachment> r4attachments) {
     return r4attachments.stream()
         .map(
@@ -234,5 +158,31 @@ public class HumanReadableService extends ResourceUtils {
                       stratifier -> expressionSet.add(stratifier.getCriteria().getExpression()));
             });
     return expressionSet;
+  }
+
+  public Optional<Bundle.BundleEntryComponent> getMeasureLibraryEntry(
+      Bundle bundleResource, String libraryName) {
+
+    return bundleResource.getEntry().stream()
+        .filter(
+            entry ->
+                StringUtils.equalsIgnoreCase(
+                        "Library", entry.getResource().getResourceType().toString())
+                    && StringUtils.equalsIgnoreCase(
+                        "Library/" + libraryName, entry.getResource().getId()))
+        .findFirst();
+  }
+
+  public org.hl7.fhir.r5.model.Measure getR5MeasureFromR4MeasureResource(Resource measureResource) {
+    var versionConvertor_40_50 = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+    return (org.hl7.fhir.r5.model.Measure) versionConvertor_40_50.convertResource(measureResource);
+  }
+
+  public String getEffectiveDataRequirementsStr(org.hl7.fhir.r5.model.Library r5Library) {
+    return getR5Parser().setPrettyPrint(true).encodeResourceToString(r5Library);
+  }
+
+  protected IParser getR5Parser() {
+    return fhirContextForR5.newJsonParser();
   }
 }
