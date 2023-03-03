@@ -2,32 +2,23 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-// import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-
 import gov.cms.mat.cql_elm_translation.data.RequestData;
-// import gov.cms.mat.cql_elm_translation.exceptions.HumanReadableGenerationException;
 import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
-// import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-// import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
 import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
-// import org.hl7.fhir.exceptions.FHIRException;
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
-// import org.hl7.fhir.r5.model.Extension;
 import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
-// import org.hl7.fhir.r5.test.utils.TestingUtilities;
-// import org.hl7.fhir.r5.utils.LiquidEngine;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
@@ -40,7 +31,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class HumanReadableService {
+public class EffectiveDataRequirementService {
   private final FhirContext fhirContext;
   private final FhirContext fhirContextForR5;
 

@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
+import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 
 import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
 import org.hl7.fhir.r4.model.Resource;
@@ -28,14 +28,14 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@WebMvcTest({HumanReadableController.class})
-class HumanReadableControllerMVCTest {
+@WebMvcTest({EffectiveDataRequirementController.class})
+class EffectiveDataRequirementControllerMVCTest {
 
   private static final String TEST_USER_ID = "john_doe";
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean HumanReadableService humanReadableService;
+  @MockBean EffectiveDataRequirementService effectiveDataRequirementService;
 
   @MockBean private FhirContext fhirContextForR5;
 
@@ -63,7 +63,8 @@ class HumanReadableControllerMVCTest {
 
   @Test
   public void testGetEffectiveDataRequirementsThrowsExceptionWhenBundleIsNull() throws Exception {
-    when(humanReadableService.createFhirResourceFromJson(anyString(), any())).thenReturn(null);
+    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
+        .thenReturn(null);
     mockMvc
         .perform(
             MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
@@ -75,13 +76,15 @@ class HumanReadableControllerMVCTest {
                 .param("measureId", "CMS104")
                 .contentType(MediaType.TEXT_PLAIN_VALUE))
         .andExpect(status().is4xxClientError());
-    verify(humanReadableService, times(1)).createFhirResourceFromJson(anyString(), any());
+    verify(effectiveDataRequirementService, times(1))
+        .createFhirResourceFromJson(anyString(), any());
   }
 
   @Test
   public void testGetEffectiveDataRequirementsThrowsExceptionWhenBundleEntryIsNull()
       throws Exception {
-    when(humanReadableService.createFhirResourceFromJson(anyString(), any())).thenReturn(bundle);
+    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
+        .thenReturn(bundle);
     when(bundle.getEntry()).thenReturn(new ArrayList<>());
     mockMvc
         .perform(
@@ -94,15 +97,17 @@ class HumanReadableControllerMVCTest {
                 .param("measureId", "CMS104")
                 .contentType(MediaType.TEXT_PLAIN_VALUE))
         .andExpect(status().is4xxClientError());
-    verify(humanReadableService, times(1)).createFhirResourceFromJson(anyString(), any());
+    verify(effectiveDataRequirementService, times(1))
+        .createFhirResourceFromJson(anyString(), any());
   }
 
   @Test
   public void testGetEffectiveDataRequirementsThrowsExceptionWhenMeasureEntryIsNull()
       throws Exception {
-    when(humanReadableService.createFhirResourceFromJson(anyString(), any())).thenReturn(bundle);
+    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
+        .thenReturn(bundle);
     when(bundle.getEntry()).thenReturn(entries);
-    when(humanReadableService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
+    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
         .thenReturn(Optional.empty());
     mockMvc
         .perform(
@@ -115,19 +120,22 @@ class HumanReadableControllerMVCTest {
                 .param("measureId", "CMS104")
                 .contentType(MediaType.TEXT_PLAIN_VALUE))
         .andExpect(status().is4xxClientError());
-    verify(humanReadableService, times(1)).createFhirResourceFromJson(anyString(), any());
-    verify(humanReadableService, times(1)).getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
+    verify(effectiveDataRequirementService, times(1))
+        .createFhirResourceFromJson(anyString(), any());
+    verify(effectiveDataRequirementService, times(1))
+        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
   }
 
   @Test
   public void testGetEffectiveDataRequirementsThrowsExceptionWhenLibraryEntryIsNull()
       throws Exception {
-    when(humanReadableService.createFhirResourceFromJson(anyString(), any())).thenReturn(bundle);
+    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
+        .thenReturn(bundle);
     when(bundle.getEntry()).thenReturn(entries);
-    when(humanReadableService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
+    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
         .thenReturn(Optional.of(measureEntryComponent));
     when(measureEntryComponent.getResource()).thenReturn(measureResource);
-    when(humanReadableService.getMeasureLibraryEntry(
+    when(effectiveDataRequirementService.getMeasureLibraryEntry(
             any(org.hl7.fhir.r4.model.Bundle.class), anyString()))
         .thenReturn(Optional.empty());
 
@@ -142,32 +150,35 @@ class HumanReadableControllerMVCTest {
                 .param("measureId", "CMS104")
                 .contentType(MediaType.TEXT_PLAIN_VALUE))
         .andExpect(status().is4xxClientError());
-    verify(humanReadableService, times(1)).createFhirResourceFromJson(anyString(), any());
-    verify(humanReadableService, times(1)).getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
-    verify(humanReadableService, times(1))
+    verify(effectiveDataRequirementService, times(1))
+        .createFhirResourceFromJson(anyString(), any());
+    verify(effectiveDataRequirementService, times(1))
+        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
+    verify(effectiveDataRequirementService, times(1))
         .getMeasureLibraryEntry(any(org.hl7.fhir.r4.model.Bundle.class), anyString());
   }
 
   @Test
   public void testGetEffectiveDataRequirementsSuccess() throws Exception {
 
-    when(humanReadableService.createFhirResourceFromJson(anyString(), any())).thenReturn(bundle);
+    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
+        .thenReturn(bundle);
     when(bundle.getEntry()).thenReturn(entries);
-    when(humanReadableService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
+    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
         .thenReturn(Optional.of(measureEntryComponent));
     when(measureEntryComponent.getResource()).thenReturn(measureResource);
-    when(humanReadableService.getMeasureLibraryEntry(
+    when(effectiveDataRequirementService.getMeasureLibraryEntry(
             any(org.hl7.fhir.r4.model.Bundle.class), anyString()))
         .thenReturn(Optional.of(libraryEntryComponent));
     when(libraryEntryComponent.getResource()).thenReturn(library);
-    when(humanReadableService.getR5MeasureFromR4MeasureResource(any(Resource.class)))
+    when(effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(any(Resource.class)))
         .thenReturn(r5Measure);
-    when(humanReadableService.getEffectiveDataRequirements(
+    when(effectiveDataRequirementService.getEffectiveDataRequirements(
             any(org.hl7.fhir.r5.model.Measure.class),
             any(org.hl7.fhir.r4.model.Library.class),
             anyString()))
         .thenReturn(r5Libray);
-    when(humanReadableService.getEffectiveDataRequirementsStr(
+    when(effectiveDataRequirementService.getEffectiveDataRequirementsStr(
             any(org.hl7.fhir.r5.model.Library.class)))
         .thenReturn("test");
     mockMvc
@@ -181,10 +192,11 @@ class HumanReadableControllerMVCTest {
                 .param("measureId", "testMeasureId")
                 .contentType(MediaType.TEXT_PLAIN_VALUE))
         .andExpect(status().isOk());
-    verify(humanReadableService, times(1)).getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
-    verify(humanReadableService, times(1))
+    verify(effectiveDataRequirementService, times(1))
+        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
+    verify(effectiveDataRequirementService, times(1))
         .getMeasureLibraryEntry(any(org.hl7.fhir.r4.model.Bundle.class), anyString());
-    verify(humanReadableService, times(1))
+    verify(effectiveDataRequirementService, times(1))
         .getEffectiveDataRequirements(
             any(org.hl7.fhir.r5.model.Measure.class),
             any(org.hl7.fhir.r4.model.Library.class),

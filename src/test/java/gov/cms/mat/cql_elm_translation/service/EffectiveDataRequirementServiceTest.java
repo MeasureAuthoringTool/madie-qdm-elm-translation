@@ -32,7 +32,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class HumanReadableServiceTest {
+class EffectiveDataRequirementServiceTest {
 
   @Mock FhirContext fhirContext;
 
@@ -48,7 +48,7 @@ class HumanReadableServiceTest {
 
   @Mock CqlConversionService cqlConversionService;
 
-  @InjectMocks HumanReadableService humanReadableService;
+  @InjectMocks EffectiveDataRequirementService effectiveDataRequirementService;
 
   private Measure madieMeasure;
 
@@ -137,7 +137,7 @@ class HumanReadableServiceTest {
 
   @Test
   public void testCreateFhirResourceFromJsonReturnsNull() {
-    Bundle result = humanReadableService.createFhirResourceFromJson(null, null);
+    Bundle result = effectiveDataRequirementService.createFhirResourceFromJson(null, null);
     assertNull(result);
   }
 
@@ -152,11 +152,12 @@ class HumanReadableServiceTest {
             .addEntry(measureBundleEntryComponent)
             .addEntry(libraryBundleEntryComponent);
 
-    when(humanReadableService.getR4Parser()).thenReturn(r4Parser);
+    when(effectiveDataRequirementService.getR4Parser()).thenReturn(r4Parser);
     when(r4Parser.parseResource(any(), anyString())).thenReturn(bundle);
 
     Bundle result =
-        humanReadableService.createFhirResourceFromJson("bundleResourceJson", Bundle.class);
+        effectiveDataRequirementService.createFhirResourceFromJson(
+            "bundleResourceJson", Bundle.class);
     assertNotNull(result);
   }
 
@@ -169,7 +170,8 @@ class HumanReadableServiceTest {
             .setType(Bundle.BundleType.TRANSACTION)
             .addEntry(measureBundleEntryComponent)
             .addEntry(libraryBundleEntryComponent);
-    Optional<Bundle.BundleEntryComponent> result = humanReadableService.getMeasureEntry(bundle);
+    Optional<Bundle.BundleEntryComponent> result =
+        effectiveDataRequirementService.getMeasureEntry(bundle);
 
     assertTrue(result.isPresent());
   }
@@ -184,7 +186,7 @@ class HumanReadableServiceTest {
             .addEntry(measureBundleEntryComponent)
             .addEntry(libraryBundleEntryComponent);
     Optional<Bundle.BundleEntryComponent> result =
-        humanReadableService.getMeasureLibraryEntry(bundle, "anotherLibrary");
+        effectiveDataRequirementService.getMeasureLibraryEntry(bundle, "anotherLibrary");
 
     assertTrue(result.isEmpty());
   }
@@ -199,7 +201,7 @@ class HumanReadableServiceTest {
             .addEntry(measureBundleEntryComponent)
             .addEntry(libraryBundleEntryComponent);
     Optional<Bundle.BundleEntryComponent> result =
-        humanReadableService.getMeasureLibraryEntry(bundle, CQL_LIBRARY_NAME);
+        effectiveDataRequirementService.getMeasureLibraryEntry(bundle, CQL_LIBRARY_NAME);
     Library library = (Library) result.get().getResource();
 
     assertTrue(result.isPresent());
@@ -217,11 +219,11 @@ class HumanReadableServiceTest {
             .addEntry(libraryBundleEntryComponent);
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
-        humanReadableService.getMeasureEntry(bundle);
+        effectiveDataRequirementService.getMeasureEntry(bundle);
     Resource measureResource = measureEntry.get().getResource();
 
     org.hl7.fhir.r5.model.Measure r5Measure =
-        humanReadableService.getR5MeasureFromR4MeasureResource(measureResource);
+        effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
     assertNotNull(r5Measure);
     assertEquals(r5Measure.getName(), CQL_LIBRARY_NAME);
   }
@@ -241,15 +243,16 @@ class HumanReadableServiceTest {
             .addEntry(libraryBundleEntryComponent);
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
-        humanReadableService.getMeasureEntry(bundle);
+        effectiveDataRequirementService.getMeasureEntry(bundle);
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
-        humanReadableService.getR5MeasureFromR4MeasureResource(measureResource);
+        effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
 
     assertThrows(
         ResourceNotFoundException.class,
         () ->
-            humanReadableService.getEffectiveDataRequirements(r5Measure, library, testAccessToken));
+            effectiveDataRequirementService.getEffectiveDataRequirements(
+                r5Measure, library, testAccessToken));
   }
 
   @Test
@@ -266,13 +269,14 @@ class HumanReadableServiceTest {
             .addEntry(libraryBundleEntryComponent);
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
-        humanReadableService.getMeasureEntry(bundle);
+        effectiveDataRequirementService.getMeasureEntry(bundle);
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
-        humanReadableService.getR5MeasureFromR4MeasureResource(measureResource);
+        effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
 
     org.hl7.fhir.r5.model.Library r5Library =
-        humanReadableService.getEffectiveDataRequirements(r5Measure, library, testAccessToken);
+        effectiveDataRequirementService.getEffectiveDataRequirements(
+            r5Measure, library, testAccessToken);
     assertEquals(r5Library.getId(), "effective-data-requirements");
   }
 
@@ -290,19 +294,21 @@ class HumanReadableServiceTest {
             .addEntry(libraryBundleEntryComponent);
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
-        humanReadableService.getMeasureEntry(bundle);
+        effectiveDataRequirementService.getMeasureEntry(bundle);
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
-        humanReadableService.getR5MeasureFromR4MeasureResource(measureResource);
+        effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
 
     org.hl7.fhir.r5.model.Library r5Library =
-        humanReadableService.getEffectiveDataRequirements(r5Measure, library, testAccessToken);
+        effectiveDataRequirementService.getEffectiveDataRequirements(
+            r5Measure, library, testAccessToken);
     assertEquals(r5Library.getId(), "effective-data-requirements");
 
-    when(humanReadableService.getR4Parser()).thenReturn(r5Parser);
+    when(effectiveDataRequirementService.getR4Parser()).thenReturn(r5Parser);
     when(r5Parser.setPrettyPrint(true)).thenReturn(jsonParserPrettier);
     when(jsonParserPrettier.encodeResourceToString(any())).thenReturn("test");
-    String r5LibraryStr = humanReadableService.getEffectiveDataRequirementsStr(r5Library);
+    String r5LibraryStr =
+        effectiveDataRequirementService.getEffectiveDataRequirementsStr(r5Library);
     assertEquals(r5LibraryStr, "test");
   }
 }

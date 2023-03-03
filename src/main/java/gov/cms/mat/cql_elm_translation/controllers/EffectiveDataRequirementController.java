@@ -1,7 +1,7 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
+import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -24,8 +24,8 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequiredArgsConstructor
-public class HumanReadableController {
-  private final HumanReadableService humanReadableService;
+public class EffectiveDataRequirementController {
+  private final EffectiveDataRequirementService effectiveDataRequirementService;
 
   @PutMapping(
       value = "/human-readable/effective-data-requirements",
@@ -39,7 +39,7 @@ public class HumanReadableController {
       @RequestParam(required = true, name = "measureId") String measureId) {
 
     Bundle bundleResource =
-        humanReadableService.createFhirResourceFromJson(bundleStr, Bundle.class);
+        effectiveDataRequirementService.createFhirResourceFromJson(bundleStr, Bundle.class);
 
     log.info(
         "User {} trying to get effective data requirements for bundle: {} ",
@@ -53,7 +53,7 @@ public class HumanReadableController {
     }
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
-        humanReadableService.getMeasureEntry(bundleResource);
+        effectiveDataRequirementService.getMeasureEntry(bundleResource);
     if (measureEntry.isEmpty()) {
       log.error("Unable to find measure entry for bundle {}", bundleResource.getId());
       throw new ResourceNotFoundException("measure entry ", measureId);
@@ -61,7 +61,7 @@ public class HumanReadableController {
     Resource measureResource = measureEntry.get().getResource();
 
     Optional<Bundle.BundleEntryComponent> measureLibraryEntry =
-        humanReadableService.getMeasureLibraryEntry(bundleResource, libraryName);
+        effectiveDataRequirementService.getMeasureLibraryEntry(bundleResource, libraryName);
     if (measureLibraryEntry.isEmpty()) {
       log.error("Unable to find library entry for bundle {}", bundleResource.getId());
       throw new ResourceNotFoundException("library entry ", measureId);
@@ -69,12 +69,14 @@ public class HumanReadableController {
     Library library = (Library) measureLibraryEntry.get().getResource();
 
     org.hl7.fhir.r5.model.Measure r5Measure =
-        humanReadableService.getR5MeasureFromR4MeasureResource(measureResource);
+        effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
 
     org.hl7.fhir.r5.model.Library r5Library =
-        humanReadableService.getEffectiveDataRequirements(r5Measure, library, accessToken);
+        effectiveDataRequirementService.getEffectiveDataRequirements(
+            r5Measure, library, accessToken);
 
-    String r5LibraryStr = humanReadableService.getEffectiveDataRequirementsStr(r5Library);
+    String r5LibraryStr =
+        effectiveDataRequirementService.getEffectiveDataRequirementsStr(r5Library);
 
     return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(r5LibraryStr);
   }
