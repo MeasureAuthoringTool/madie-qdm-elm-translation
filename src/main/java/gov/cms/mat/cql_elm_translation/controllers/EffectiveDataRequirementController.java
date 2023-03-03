@@ -28,7 +28,7 @@ public class EffectiveDataRequirementController {
   private final EffectiveDataRequirementService effectiveDataRequirementService;
 
   @PutMapping(
-      value = "/human-readable/effective-data-requirements",
+      value = "/effective-data-requirements",
       produces = {MediaType.APPLICATION_JSON_VALUE},
       consumes = {MediaType.TEXT_PLAIN_VALUE})
   public ResponseEntity<String> getEffectiveDataRequirements(

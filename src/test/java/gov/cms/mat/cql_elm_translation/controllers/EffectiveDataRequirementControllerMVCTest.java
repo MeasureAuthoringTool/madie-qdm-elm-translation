@@ -67,7 +67,7 @@ class EffectiveDataRequirementControllerMVCTest {
         .thenReturn(null);
     mockMvc
         .perform(
-            MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
+            MockMvcRequestBuilders.put("/effective-data-requirements")
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
@@ -88,7 +88,7 @@ class EffectiveDataRequirementControllerMVCTest {
     when(bundle.getEntry()).thenReturn(new ArrayList<>());
     mockMvc
         .perform(
-            MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
+            MockMvcRequestBuilders.put("/effective-data-requirements")
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
@@ -111,7 +111,7 @@ class EffectiveDataRequirementControllerMVCTest {
         .thenReturn(Optional.empty());
     mockMvc
         .perform(
-            MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
+            MockMvcRequestBuilders.put("/effective-data-requirements")
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
@@ -141,7 +141,7 @@ class EffectiveDataRequirementControllerMVCTest {
 
     mockMvc
         .perform(
-            MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
+            MockMvcRequestBuilders.put("/effective-data-requirements")
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
@@ -183,7 +183,7 @@ class EffectiveDataRequirementControllerMVCTest {
         .thenReturn("test");
     mockMvc
         .perform(
-            MockMvcRequestBuilders.put("/human-readable/effective-data-requirements")
+            MockMvcRequestBuilders.put("/effective-data-requirements")
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
