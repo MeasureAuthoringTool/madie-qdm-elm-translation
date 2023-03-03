@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import gov.cms.madie.models.measure.Measure;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;

@@ -44,10 +44,10 @@ class EffectiveDataRequirementControllerMVCTest {
   @Mock org.hl7.fhir.r5.model.Library r5Libray;
 
   @Mock org.hl7.fhir.r4.model.Bundle bundle;
-  @Mock org.hl7.fhir.r4.model.Bundle.BundleEntryComponent entryComponent;
-  @Mock org.hl7.fhir.r4.model.Bundle.BundleEntryComponent measureEntryComponent;
+  @Mock BundleEntryComponent entryComponent;
+  @Mock BundleEntryComponent measureEntryComponent;
   @Mock Resource measureResource;
-  @Mock org.hl7.fhir.r4.model.Bundle.BundleEntryComponent libraryEntryComponent;
+  @Mock BundleEntryComponent libraryEntryComponent;
   @Mock org.hl7.fhir.r4.model.Library library;
   @Mock org.hl7.fhir.r5.model.Measure r5Measure;
   private List<BundleEntryComponent> entries = new ArrayList<>();
