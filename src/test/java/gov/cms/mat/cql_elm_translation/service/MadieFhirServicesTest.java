@@ -32,15 +32,11 @@ class MadieFhirServicesTest {
 
   private URI libraryUri;
 
-  private URI measureUri;
-
   private final String cqlLibraryName = "cqlLibraryName";
 
   private final String cqlLibraryVersion = "1.0.000";
 
   private final String accessToken = "okta-access-token";
-
-  private Measure measure;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
@@ -56,8 +52,6 @@ class MadieFhirServicesTest {
                 + cqlLibraryName
                 + "&version="
                 + cqlLibraryVersion);
-    measureUri = new URI("https://localhost:9090/api/fhir/measures/bundles");
-    measure = Measure.builder().id("test_measureId").build();
   }
 
   @Test
