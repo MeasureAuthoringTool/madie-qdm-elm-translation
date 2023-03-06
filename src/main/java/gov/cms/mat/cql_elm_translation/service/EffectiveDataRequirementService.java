@@ -23,10 +23,8 @@ import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayInputStream;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -115,19 +113,9 @@ public class EffectiveDataRequirementService {
     org.hl7.fhir.r5.model.Library effectiveDataRequirements =
         dqReqTrans.gatherDataRequirements(
             libraryManager, translatedLibrary, options, expressionList, true);
-    effectiveDataRequirements.setContent(createAttachment(library.getContent()));
+
     effectiveDataRequirements.setId("effective-data-requirements");
     return effectiveDataRequirements;
-  }
-
-  private List<org.hl7.fhir.r5.model.Attachment> createAttachment(List<Attachment> r4attachments) {
-    return r4attachments.stream()
-        .map(
-            attachment ->
-                new org.hl7.fhir.r5.model.Attachment()
-                    .setContentType(attachment.getContentType())
-                    .setData(attachment.getData()))
-        .collect(Collectors.toList());
   }
 
   private Set<String> getExpressions(org.hl7.fhir.r5.model.Measure r5Measure) {
