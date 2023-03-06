@@ -3,9 +3,6 @@ package gov.cms.mat.cql_elm_translation.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
 import ca.uhn.fhir.parser.JsonParser;
-import gov.cms.madie.models.common.Version;
-import gov.cms.madie.models.measure.Measure;
-import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
 import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 import org.hl7.fhir.r4.model.Attachment;
@@ -50,8 +47,6 @@ class EffectiveDataRequirementServiceTest {
 
   @InjectMocks EffectiveDataRequirementService effectiveDataRequirementService;
 
-  private Measure madieMeasure;
-
   private org.hl7.fhir.r4.model.Measure measure;
 
   private Library library;
@@ -75,21 +70,6 @@ class EffectiveDataRequirementServiceTest {
 
   @BeforeEach
   void setUp() {
-    madieMeasure =
-        Measure.builder()
-            .id("madie-test-id")
-            .measureName("test_measure_name")
-            .cqlLibraryName(CQL_LIBRARY_NAME)
-            .version(new Version(1, 0, 0))
-            .measurementPeriodStart(new Date())
-            .measurementPeriodEnd(new Date())
-            .measureMetaData(
-                new MeasureMetaData()
-                    .toBuilder()
-                    .copyright("test_copyright")
-                    .disclaimer("test_disclaimer")
-                    .build())
-            .build();
 
     expression.setExpression("Initial Population");
     population.setCriteria(expression);
@@ -104,17 +84,14 @@ class EffectiveDataRequirementServiceTest {
 
     measure =
         new org.hl7.fhir.r4.model.Measure()
-            .setName(madieMeasure.getCqlLibraryName())
-            .setTitle(madieMeasure.getMeasureName())
+            .setName(CQL_LIBRARY_NAME)
+            .setTitle("test_measure_name")
             .setExperimental(true)
-            .setUrl("fhirBaseUrl/Measure/" + madieMeasure.getCqlLibraryName())
-            .setVersion(madieMeasure.getVersion().toString())
-            .setEffectivePeriod(
-                getPeriodFromDates(
-                    madieMeasure.getMeasurementPeriodStart(),
-                    madieMeasure.getMeasurementPeriodEnd()))
-            .setCopyright(madieMeasure.getMeasureMetaData().getCopyright())
-            .setDisclaimer(madieMeasure.getMeasureMetaData().getDisclaimer())
+            .setUrl("fhirBaseUrl/Measure/" + CQL_LIBRARY_NAME)
+            .setVersion("1.0.000")
+            .setEffectivePeriod(getPeriodFromDates(new Date(), new Date()))
+            .setCopyright("test_copyright")
+            .setDisclaimer("test_disclaimer")
             .setGroup(groups)
             .setSupplementalData(supplementalDataList);
 
@@ -122,7 +99,7 @@ class EffectiveDataRequirementServiceTest {
     library =
         new Library()
             .addContent(new Attachment().setData(cqlData.getBytes()).setContentType("text/cql"));
-    library.setId("Library/" + madieMeasure.getCqlLibraryName());
+    library.setId("Library/" + CQL_LIBRARY_NAME);
   }
 
   public Bundle.BundleEntryComponent getBundleEntryComponent(Resource resource) {
@@ -232,7 +209,7 @@ class EffectiveDataRequirementServiceTest {
   public void
       testGetEffectiveDataRequirementsThrowsResourceNotFoundExceptionWhenCqlAttachmentHasInvalidContentType() {
     library.getContent().replaceAll(attachment -> attachment.setContentType("invalid"));
-    library.setId("Library/" + madieMeasure.getCqlLibraryName());
+    library.setId("Library/" + CQL_LIBRARY_NAME);
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
@@ -258,7 +235,7 @@ class EffectiveDataRequirementServiceTest {
   @Test
   public void testGetEffectiveDataRequirementsSuccess() {
     library.getContent().replaceAll(attachment -> attachment.setContentType("text/cql"));
-    library.setId("Library/" + madieMeasure.getCqlLibraryName());
+    library.setId("Library/" + CQL_LIBRARY_NAME);
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
@@ -283,7 +260,7 @@ class EffectiveDataRequirementServiceTest {
   @Test
   public void testGetEffectiveDataRequirementsStr() {
     library.getContent().replaceAll(attachment -> attachment.setContentType("text/cql"));
-    library.setId("Library/" + madieMeasure.getCqlLibraryName());
+    library.setId("Library/" + CQL_LIBRARY_NAME);
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
