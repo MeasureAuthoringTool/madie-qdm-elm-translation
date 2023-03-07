@@ -1,7 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import gov.cms.madie.models.measure.Measure;
-import gov.cms.mat.cql_elm_translation.exceptions.FhirBundleGenerationException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,15 +31,11 @@ class MadieFhirServicesTest {
 
   private URI libraryUri;
 
-  private URI measureUri;
-
   private final String cqlLibraryName = "cqlLibraryName";
 
   private final String cqlLibraryVersion = "1.0.000";
 
   private final String accessToken = "okta-access-token";
-
-  private Measure measure;
 
   @BeforeEach
   void setUp() throws URISyntaxException {
@@ -57,8 +51,6 @@ class MadieFhirServicesTest {
                 + cqlLibraryName
                 + "&version="
                 + cqlLibraryVersion);
-    measureUri = new URI("https://localhost:9090/api/fhir/measures/bundles");
-    measure = Measure.builder().id("test_measureId").build();
   }
 
   @Test
@@ -89,24 +81,5 @@ class MadieFhirServicesTest {
     String responseBody =
         madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
-  }
-
-  @Test
-  void getFhirMeasureBundle() {
-    when(restTemplate.exchange(
-            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
-        .thenReturn(new ResponseEntity<>("Measure Bundle", HttpStatus.OK));
-    String response = madieFhirServices.getFhirMeasureBundle(measure, accessToken);
-    assertEquals("Measure Bundle", response);
-  }
-
-  @Test
-  void getFhirMeasureBundleThrowsException() {
-    when(restTemplate.exchange(
-            measureUri, HttpMethod.PUT, new HttpEntity<>(measure, httpHeaders), String.class))
-        .thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
-    assertThrows(
-        FhirBundleGenerationException.class,
-        () -> madieFhirServices.getFhirMeasureBundle(measure, accessToken));
   }
 }
