@@ -23,14 +23,23 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
   private static final ThreadLocal<UsingProperties> threadLocalValue = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalValueAccessToken = new ThreadLocal<>();
   private static CqlLibraryService cqlLibraryService;
-  private static final Map<String, String[]> supportedLibrariesMap;
+  private static final Map<String, String[]> supportedLibrariesMap = Map.of(
+    "FHIR", List.of("FHIR").toArray(STRING_ARR),
+    "QICORE", List.of("FHIR", "QICore").toArray(STRING_ARR),
+    "QDM", List.of("QDM").toArray(STRING_ARR)
+  );
 
-  static {
-    supportedLibrariesMap = Map.of(
-        "FHIR", List.of("FHIR").toArray(STRING_ARR),
-        "QICORE", List.of("FHIR", "QICore").toArray(STRING_ARR),
-        "QDM", List.of("QDM").toArray(STRING_ARR)
-    );
+  public static String getAccessToken() {
+    return threadLocalValueAccessToken.get();
+  }
+
+  public static UsingProperties getUsingProperties() {
+    return UsingProperties.builder()
+        .libraryType(threadLocalValue.get().getLibraryType())
+        .version(threadLocalValue.get().getVersion())
+        .line(threadLocalValue.get().getLine())
+        .comment(threadLocalValue.get().getComment())
+        .build();
   }
 
   public static void setFhirServicesService(CqlLibraryService cqlLibraryService) {
