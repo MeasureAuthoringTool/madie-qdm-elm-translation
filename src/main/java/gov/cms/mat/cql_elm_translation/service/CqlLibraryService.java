@@ -16,21 +16,18 @@ import java.net.URI;
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class MadieFhirServices {
+public class CqlLibraryService {
 
   private final RestTemplate restTemplate;
 
-  @Value("${madie.fhir.service.baseUrl}")
-  private String madieFhirService;
+  @Value("${madie.library.service.baseUrl}")
+  private String madieLibraryService;
 
-  @Value("${madie.fhir.service.hapi-fhir.libraries.uri}")
-  private String librariesUri;
+  @Value("${madie.library.service.cql.uri}")
+  private String librariesCqlUri;
 
-  @Value("${madie.fhir.service.hapi-fhir.measures.uri}")
-  private String measuresUri;
-
-  public String getHapiFhirCql(String name, String version, String accessToken) {
-    URI uri = buildMadieFhirServiceUri(name, version);
+  public String getLibraryCql(String name, String version, String accessToken) {
+    URI uri = buildMadieLibraryServiceUri(name, version);
     log.debug("Getting Madie library: {} ", uri);
 
     HttpHeaders headers = new HttpHeaders();
@@ -49,12 +46,14 @@ public class MadieFhirServices {
       }
     } else if (responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
       log.error("Cannot find a Cql Library with name: {}, version: {}", name, version);
+    } else if (responseEntity.getStatusCode().equals(HttpStatus.CONFLICT)) {
+      log.error("Multiple libraries found with name: {}, version: {}, but only one was expected", name, version);
     }
     return null;
   }
 
-  private URI buildMadieFhirServiceUri(String name, String version) {
-    return UriComponentsBuilder.fromHttpUrl(madieFhirService + librariesUri + "/cql")
+  private URI buildMadieLibraryServiceUri(String name, String version) {
+    return UriComponentsBuilder.fromHttpUrl(madieLibraryService + librariesCqlUri)
         .queryParam("name", name)
         .queryParam("version", version)
         .build()

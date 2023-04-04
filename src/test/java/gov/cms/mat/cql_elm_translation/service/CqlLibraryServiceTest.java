@@ -21,11 +21,12 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
-class MadieFhirServicesTest {
+class CqlLibraryServiceTest {
 
   @Mock private RestTemplate restTemplate;
 
-  @InjectMocks MadieFhirServices madieFhirServices;
+  @InjectMocks
+  CqlLibraryService cqlLibraryService;
 
   private final HttpHeaders httpHeaders = new HttpHeaders();
 
@@ -40,46 +41,55 @@ class MadieFhirServicesTest {
   @BeforeEach
   void setUp() throws URISyntaxException {
     ReflectionTestUtils.setField(
-        madieFhirServices, "madieFhirService", "https://localhost:9090/api");
-    ReflectionTestUtils.setField(madieFhirServices, "librariesUri", "/fhir/libraries");
-    ReflectionTestUtils.setField(madieFhirServices, "measuresUri", "/fhir/measures");
+        cqlLibraryService, "madieLibraryService", "https://localhost:9090/api");
+    ReflectionTestUtils.setField(cqlLibraryService, "librariesCqlUri", "/cql-libraries/cql");
 
     httpHeaders.add("Authorization", "okta-access-token");
     libraryUri =
         new URI(
-            "https://localhost:9090/api/fhir/libraries/cql?name="
+            "https://localhost:9090/api/cql-libraries/cql?name="
                 + cqlLibraryName
                 + "&version="
                 + cqlLibraryVersion);
   }
 
   @Test
-  void getHapiFhirCql() {
+  void getLibraryCql() {
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>("Response Cql String", HttpStatus.OK));
     String responseBody =
-        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+        cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertEquals(responseBody, "Response Cql String");
   }
 
   @Test
-  void getHapiFhirCqlReturnsNull() {
+  void getLibraryCqlReturnsNull() {
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>(null, HttpStatus.OK));
     String responseBody =
-        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+        cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
   }
 
   @Test
-  void getHapiFhirCqlReturnsNullWhenNotFound() {
+  void getLibraryCqlReturnsNullWhenNotFound() {
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
         .thenReturn(new ResponseEntity<>(null, HttpStatus.NOT_FOUND));
     String responseBody =
-        madieFhirServices.getHapiFhirCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+        cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
+    assertNull(responseBody);
+  }
+
+  @Test
+  void getLibraryCqlReturnsNullWhenConflict() {
+    when(restTemplate.exchange(
+            libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
+        .thenReturn(new ResponseEntity<>(null, HttpStatus.CONFLICT));
+    String responseBody =
+        cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
   }
 }

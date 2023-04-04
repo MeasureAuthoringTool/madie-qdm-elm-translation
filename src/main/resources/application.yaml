@@ -23,14 +23,11 @@ info:
     name: Cql Elm Translation Services
 
 madie:
-  fhir:
+  library:
     service:
-      baseUrl: ${FHIR_SERVICES_URL:http://localhost:8085/api}
-      hapi-fhir:
-        libraries:
-          uri: /fhir/libraries
-        measures:
-            uri: /fhir/measures
+      baseUrl: ${CQL_LIBRARY_SERVICE_URL:http://localhost:8082/api}
+      cql:
+        uri: /cql-libraries/cql
 
 springdoc:
   swagger-ui:
