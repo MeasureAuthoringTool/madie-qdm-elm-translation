@@ -42,7 +42,7 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
         .build();
   }
 
-  public static void setFhirServicesService(CqlLibraryService cqlLibraryService) {
+  public static void setCqlLibraryService(CqlLibraryService cqlLibraryService) {
     MadieLibrarySourceProvider.cqlLibraryService = cqlLibraryService;
   }
 

@@ -33,7 +33,7 @@ public class CqlConversionService {
   /* MadieLibrarySourceProvider places version and service in thread local */
   public void setUpLibrarySourceProvider(String cql, String accessToken) {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setFhirServicesService(cqlLibraryService);
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken(accessToken);
   }
 
