@@ -28,18 +28,18 @@ import java.util.regex.Pattern;
 public class CqlConversionService {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
-  private final MadieFhirServices madieFhirServices;
+  private final CqlLibraryService cqlLibraryService;
 
   /* MadieLibrarySourceProvider places version and service in thread local */
   public void setUpLibrarySourceProvider(String cql, String accessToken) {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setFhirServicesService(madieFhirServices);
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken(accessToken);
   }
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
-    Pattern pattern = Pattern.compile("using .*version '[0-9]\\.[0-9]\\.[0-9]'");
+    Pattern pattern = Pattern.compile("using .*version '[0-9]\\.[0-9](\\.[0-9])?'");
     Matcher matcher = pattern.matcher(requestData.getCqlData());
     boolean noModelVersion = false;
     if (!matcher.find()) {

@@ -1,5 +1,9 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.notNullValue;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
@@ -13,7 +17,11 @@ import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
+
+import gov.cms.mat.cql.elements.UsingProperties;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +38,25 @@ class CqlConversionServiceTest {
   @Autowired private CqlConversionService service;
 
   @Mock RequestData requestData;
+
+  private final String LIBRARY_CQL =
+      "library QICoreCommon version '1.3.000'\n" +
+      "using QICore version '4.1.1'";
+
+  @AfterEach
+  void tearDown() {
+    service.setUpLibrarySourceProvider("", "");
+  }
+
+  @Test
+  void testSetUpLibrarySourceProvider() {
+    service.setUpLibrarySourceProvider(LIBRARY_CQL, "ACCESS_TOKEN");
+    assertThat(MadieLibrarySourceProvider.getAccessToken(), is(equalTo("ACCESS_TOKEN")));
+    UsingProperties usingProperties = MadieLibrarySourceProvider.getUsingProperties();
+    assertThat(usingProperties, is(notNullValue()));
+    assertThat(usingProperties.getLibraryType(), is(equalTo("QICore")));
+    assertThat(usingProperties.getVersion(), is(equalTo("4.1.1")));
+  }
 
   @Test
   void testProcessCqlDataWithErrors() {
@@ -140,7 +167,6 @@ class CqlConversionServiceTest {
   void testProcessCqlDataWithErrorsMissingModel() {
     String cqlData = StringUtils.EMPTY;
     File inputXmlFile = new File(this.getClass().getResource("/missing-model.cql").getFile());
-
     try {
       cqlData = new String(Files.readAllBytes(inputXmlFile.toPath()));
     } catch (IOException e) {
