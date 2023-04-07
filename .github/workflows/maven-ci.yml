@@ -15,10 +15,10 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Set up JDK 17
-        uses: actions/setup-java@v2
+        uses: actions/setup-java@v3
         with:
-          java-version: '17'
           distribution: 'corretto'
+          java-version: '17'
 
 #      Github Authentication is required to download artifacts from github packages
 #      A secret is created for this repo, so that github actions can fetch it, the secret is named after GH_PAT_FOR_ACTIONS_TOKEN
