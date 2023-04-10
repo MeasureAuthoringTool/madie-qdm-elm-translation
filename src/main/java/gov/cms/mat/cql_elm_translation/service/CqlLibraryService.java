@@ -47,7 +47,10 @@ public class CqlLibraryService {
     } else if (responseEntity.getStatusCode().equals(HttpStatus.NOT_FOUND)) {
       log.error("Cannot find a Cql Library with name: {}, version: {}", name, version);
     } else if (responseEntity.getStatusCode().equals(HttpStatus.CONFLICT)) {
-      log.error("Multiple libraries found with name: {}, version: {}, but only one was expected", name, version);
+      log.error(
+          "Multiple libraries found with name: {}, version: {}, but only one was expected",
+          name,
+          version);
     }
     return null;
   }

@@ -35,8 +35,7 @@ class EffectiveDataRequirementServiceTest {
 
   @Mock FhirContext fhirContextForR5;
 
-  @Mock
-  CqlLibraryService cqlLibraryService;
+  @Mock CqlLibraryService cqlLibraryService;
 
   @Mock JsonParser r4Parser;
 
