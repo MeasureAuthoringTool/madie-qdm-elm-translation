@@ -23,11 +23,11 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
   private static final ThreadLocal<UsingProperties> threadLocalValue = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalValueAccessToken = new ThreadLocal<>();
   private static CqlLibraryService cqlLibraryService;
-  private static final Map<String, String[]> supportedLibrariesMap = Map.of(
-    "FHIR", List.of("FHIR").toArray(STRING_ARR),
-    "QICORE", List.of("FHIR", "QICore").toArray(STRING_ARR),
-    "QDM", List.of("QDM").toArray(STRING_ARR)
-  );
+  private static final Map<String, String[]> supportedLibrariesMap =
+      Map.of(
+          "FHIR", List.of("FHIR").toArray(STRING_ARR),
+          "QICORE", List.of("FHIR", "QICore").toArray(STRING_ARR),
+          "QDM", List.of("QDM").toArray(STRING_ARR));
 
   public static String getAccessToken() {
     return threadLocalValueAccessToken.get();
@@ -71,7 +71,8 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
   }
 
   private InputStream processLibrary(VersionedIdentifier libraryIdentifier, String key) {
-    String[] supportedLibraries = supportedLibrariesMap.get(threadLocalValue.get().getLibraryType().toUpperCase());
+    String[] supportedLibraries =
+        supportedLibrariesMap.get(threadLocalValue.get().getLibraryType().toUpperCase());
     if (Arrays.stream(supportedLibraries)
         .anyMatch(threadLocalValue.get().getLibraryType()::contains)) {
       return getInputStream(libraryIdentifier, key);

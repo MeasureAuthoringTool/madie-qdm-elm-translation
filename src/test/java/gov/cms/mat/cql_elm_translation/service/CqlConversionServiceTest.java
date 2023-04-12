@@ -40,8 +40,7 @@ class CqlConversionServiceTest {
   @Mock RequestData requestData;
 
   private final String LIBRARY_CQL =
-      "library QICoreCommon version '1.3.000'\n" +
-      "using QICore version '4.1.1'";
+      "library QICoreCommon version '1.3.000'\n" + "using QICore version '4.1.1'";
 
   @AfterEach
   void tearDown() {
