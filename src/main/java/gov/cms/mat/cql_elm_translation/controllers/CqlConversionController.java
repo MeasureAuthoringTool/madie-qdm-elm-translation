@@ -8,7 +8,6 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
-import gov.cms.mat.cql_elm_translation.service.MatXmlConversionService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -30,7 +29,6 @@ import java.io.UncheckedIOException;
 public class CqlConversionController {
 
   private final CqlConversionService cqlConversionService;
-  private final MatXmlConversionService matXmlConversionService;
 
   @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
   public CqlConversionPayload cqlToElmJson(
@@ -73,47 +71,6 @@ public class CqlConversionController {
     String cleanedJson = remover.clean();
     cqlConversionPayload.setJson(cleanedJson);
     return cqlConversionPayload;
-  }
-
-  @PutMapping(path = "/xml", consumes = "text/plain", produces = "application/elm+json")
-  public String xmlToElmJson(
-      @RequestBody String xml,
-      @RequestParam(defaultValue = "false") Boolean showWarnings,
-      @RequestParam(defaultValue = "true") Boolean isDraft,
-      @RequestParam(required = false) LibraryBuilder.SignatureLevel signatures,
-      @RequestParam(defaultValue = "true") Boolean annotations,
-      @RequestParam(defaultValue = "true") Boolean locators,
-      @RequestParam(value = "disable-list-demotion", defaultValue = "true")
-          Boolean disableListDemotion,
-      @RequestParam(value = "disable-list-promotion", defaultValue = "true")
-          Boolean disableListPromotion,
-      @RequestParam(value = "disable-method-invocation", defaultValue = "true")
-          Boolean disableMethodInvocation,
-      @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
-      @RequestHeader(value = "Authorization") String accessToken) {
-
-    // Todo This end point is to capture cqlModel from MAT's Measure XML, so we can remove this
-    // feature for MADiE
-    String cqlData = matXmlConversionService.processCqlXml(xml);
-
-    cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);
-
-    RequestData requestData =
-        RequestData.builder()
-            .cqlData(cqlData)
-            .showWarnings(showWarnings)
-            .signatures(signatures)
-            .annotations(annotations)
-            .locators(locators)
-            .disableListDemotion(disableListDemotion)
-            .disableListPromotion(disableListPromotion)
-            .disableMethodInvocation(disableMethodInvocation)
-            .validateUnits(validateUnits)
-            .build();
-
-    CqlConversionPayload payload = cqlConversionService.processCqlDataWithErrors(requestData);
-    TranslatorOptionsRemover remover = new TranslatorOptionsRemover(payload.getJson());
-    return remover.clean();
   }
 
   /**
