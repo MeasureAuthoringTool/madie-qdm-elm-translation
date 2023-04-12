@@ -10,7 +10,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.fhir.ucum.UcumEssenceService;
 import org.fhir.ucum.UcumException;
 import org.fhir.ucum.UcumService;
-import org.springframework.stereotype.Service;
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
@@ -21,7 +20,7 @@ import java.util.List;
 public class TranslationResource {
   public enum ModelType {
     FHIR,
-    QICore;
+    QICore
   }
 
   private static final MultivaluedMap<String, CqlTranslatorOptions.Options> PARAMS_TO_OPTIONS_MAP =

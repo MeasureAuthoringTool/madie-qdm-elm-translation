@@ -35,8 +35,8 @@ public class EffectiveDataRequirementController {
       Principal principal,
       @RequestBody String bundleStr,
       @RequestHeader("Authorization") String accessToken,
-      @RequestParam(required = true, name = "libraryName") String libraryName,
-      @RequestParam(required = true, name = "measureId") String measureId) {
+      @RequestParam(name = "libraryName") String libraryName,
+      @RequestParam(name = "measureId") String measureId) {
 
     Bundle bundleResource =
         effectiveDataRequirementService.createFhirResourceFromJson(bundleStr, Bundle.class);
