@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.springframework.beans.factory.annotation.Value;

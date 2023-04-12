@@ -8,10 +8,10 @@ import org.apache.commons.io.IOUtils;
 import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.lang.Nullable;
-import org.springframework.web.servlet.handler.HandlerInterceptorAdapter;
+import org.springframework.web.servlet.HandlerInterceptor;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -24,7 +24,7 @@ import static gov.cms.mat.config.logging.MdcHeaderString.MDC_START_KEY;
 
 /** Class that get the header data from the request and set in the MDC context */
 @Slf4j
-public class RequestHeaderInterceptor extends HandlerInterceptorAdapter {
+public class RequestHeaderInterceptor implements HandlerInterceptor {
   private static final String HEADER_TEMPLATE = "%s:\"%s\"";
 
   @Override
