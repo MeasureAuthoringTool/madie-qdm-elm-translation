@@ -25,8 +25,7 @@ class CqlLibraryServiceTest {
 
   @Mock private RestTemplate restTemplate;
 
-  @InjectMocks
-  CqlLibraryService cqlLibraryService;
+  @InjectMocks CqlLibraryService cqlLibraryService;
 
   private final HttpHeaders httpHeaders = new HttpHeaders();
 

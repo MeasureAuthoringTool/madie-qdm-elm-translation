@@ -4,8 +4,6 @@ import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
-import gov.cms.mat.cql_elm_translation.service.MatXmlConversionService;
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -23,8 +21,6 @@ class CqlConversionControllerTest implements ResourceFileUtil {
   private static final String translatorOptionsTag = "\"translatorOptions\"";
 
   @Mock private CqlConversionService cqlConversionService;
-  @Mock private MatXmlConversionService matXmlConversionService;
-  @Mock private CqlTranslator cqlTranslator;
 
   @InjectMocks private CqlConversionController cqlConversionController;
 
@@ -43,31 +39,6 @@ class CqlConversionControllerTest implements ResourceFileUtil {
     assertEquals(result, cqlConversionPayload.getJson());
     Mockito.verify(cqlConversionService).processCqlDataWithErrors(any());
   }
-
-  //    @Test
-  //    void xmlToElmJson() {
-  //        String cqlData = "cqlData";
-  //        String xml = "</xml>";
-  //        String result = "json-data";
-  //
-  //        when(matXmlConversionService.processCqlXml(xml)).thenReturn(cqlData);
-  //        when(cqlConversionService.processCqlDataWithErrors(any())).thenReturn(result);
-  //
-  //        String json = cqlConversionController.xmlToElmJson(xml,
-  //                LibraryBuilder.SignatureLevel.All,
-  //                true,
-  //                true,
-  //                true,
-  //                true,
-  //                true,
-  //                true);
-  //
-  //        assertEquals(result, json);
-  //
-  //        verify(matXmlConversionService).processCqlXml(xml);
-  //        verify(cqlConversionService).processCqlDataWithErrors(any());
-  //        //verify(cqlConversionService).processQdmVersion(cqlData);
-  //    }
 
   @Test
   void translatorOptionsRemoverNoErrors() {
