@@ -127,7 +127,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>6.2.5</version>
+      <version>6.4.0</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -139,7 +139,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>6.2.5</version>
+      <version>6.4.0</version>
     </dependency>
 
     <dependency>
@@ -163,7 +163,7 @@
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.6.13</version>
+      <version>1.7.0</version>
     </dependency>
 
     <dependency>
@@ -282,7 +282,7 @@
                     </goals>
                   </pluginExecutionFilter>
                   <action>
-                    <ignore></ignore>
+                    <ignore/>
                   </action>
                 </pluginExecution>
               </pluginExecutions>
