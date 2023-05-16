@@ -93,7 +93,6 @@ public class CQLFilter {
         List<String> parentExpressions,
         CqlTranslator translator
     ) {
-
         this(
             parentLibraryString,
             childrenLibraries,

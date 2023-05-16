@@ -37,7 +37,6 @@ public class CqlParserListener extends cqlBaseListener {
   private String currentContext = "Patient";
   private boolean hasSyntaxErrors;
   private List<CQLError> syntaxErrors;
-  private CQLModel previousModel;
 
   private static class SyntaxErrorListener extends BaseErrorListener {
     private List<CQLError> errors = new ArrayList<>();
@@ -55,8 +54,7 @@ public class CqlParserListener extends cqlBaseListener {
     }
   }
 
-  public CqlParserListener(String cql, CQLModel previousModel) throws IOException {
-    this.previousModel = previousModel;
+  public CqlParserListener(String cql) throws IOException {
     initializeNewModel();
     syntaxErrors = new ArrayList<>();
     cqlModel.setContext(currentContext);
@@ -116,14 +114,9 @@ public class CqlParserListener extends cqlBaseListener {
     String comment = getExpressionComment(ctx).trim();
     String logic = getParameterLogic(ctx, getFullText(ctx.identifier())).trim();
 
-    Optional<CQLParameter> existingParameter = previousModel.getCqlParameters().stream().filter(d -> d.getParameterName().equals(identifier)).findFirst();
     CQLParameter parameter = new CQLParameter();
-    if (existingParameter.isPresent()) {
-      parameter = existingParameter.get();
-    } else {
-      parameter.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
-      parameter.setName(identifier);
-    }
+    parameter.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
+    parameter.setName(identifier);
 
     parameter.setCommentString(comment);
     parameter.setLogic(logic);
@@ -149,14 +142,10 @@ public class CqlParserListener extends cqlBaseListener {
     String logic = getDefinitionAndFunctionLogic(ctx).trim();
     String comment = getExpressionComment(ctx).trim();
 
-    Optional<CQLDefinition> existingDefinition = previousModel.getDefinitionList().stream().filter(d -> d.getDefinitionName().equals(identifier)).findFirst();
     CQLDefinition definition = new CQLDefinition();
-    if (existingDefinition.isPresent()) {
-      definition = existingDefinition.get();
-    } else {
-      definition.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
-      definition.setName(identifier);
-    }
+    definition.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
+    definition.setName(identifier);
+
 
     definition.setContext(currentContext);
     definition.setCommentString(comment);
@@ -201,14 +190,9 @@ public class CqlParserListener extends cqlBaseListener {
       }
     }
 
-    Optional<CQLFunctions> existingFunction = previousModel.getCqlFunctions().stream().filter(d -> d.getFunctionName().equals(identifier)).findFirst();
     CQLFunctions function = new CQLFunctions();
-    if (existingFunction.isPresent()) {
-      function = existingFunction.get();
-    } else {
-      function.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
-      function.setName(identifier);
-    }
+    function.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
+    function.setName(identifier);
 
     function.setCommentString(comment);
     function.setLogic(CQLUtilityClass.replaceFirstWhitespaceInLineForExpression(logic));
