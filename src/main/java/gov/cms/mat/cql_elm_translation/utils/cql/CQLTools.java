@@ -11,8 +11,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.Cql2ElmListener;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -27,7 +30,7 @@ import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.ParameterDef;
 
-public class CQLFilter {
+public class CQLTools {
 
     private String parentLibraryString;
     private Map<String, String> childrenLibraries;
@@ -85,9 +88,10 @@ public class CQLFilter {
     Set<String> usedDefinitions = new HashSet<>();
     Set<String> usedFunctions = new HashSet<>();
     Set<String> usedCodeSystems = new HashSet<>();
+    DataCriteria dataCriteria = new DataCriteria();
 
 
-    public CQLFilter(
+    public CQLTools(
         String parentLibraryString,
         Map<String, String> childrenLibraries,
         List<String> parentExpressions,
@@ -100,7 +104,7 @@ public class CQLFilter {
             translator,
             translator.getTranslatedLibraries());
     }
-    public CQLFilter(
+    public CQLTools(
             String parentLibraryString,
             Map<String, String> childrenLibraries,
             List<String> parentExpressions,
@@ -123,7 +127,7 @@ public class CQLFilter {
      *
      * @throws IOException
      */
-    public void filter() throws IOException {
+    public void generate() throws IOException {
         InputStream stream = new ByteArrayInputStream(this.parentLibraryString.getBytes(StandardCharsets.UTF_8));
         cqlLexer lexer = new cqlLexer(CharStreams.fromStream(stream));
         CommonTokenStream tokens = new CommonTokenStream(lexer);
@@ -147,10 +151,32 @@ public class CQLFilter {
         Set<String> functionsSet = new HashSet<>(listener.getFunctions());
         Map<String, Map<String, Set<String>>> valuesetMap = new HashMap<>(listener.getValueSetDataTypeMap());
         Map<String, Map<String, Set<String>>> codeMap = new HashMap<>(listener.getCodeDataTypeMap());
+        Map<String, String> valueSetOids = new HashMap<>(listener.getValueSetOids());
 
         collectUsedExpressions(graph, librariesSet, valuesetsSet, codesSet, codesystemsSet, parametersSet, definitionsSet, functionsSet);
         collectValueSetCodeDataType(valuesetMap, codeMap);
         collectReturnTypeMap();
+        collectDataCriteria(valueSetOids);
+    }
+    private void collectDataCriteria(Map<String, String> valueSetOids) {
+        valuesetDataTypeMap.keySet().forEach(vs ->
+            dataCriteria.getDataCriteriaWithValueSets().put(
+                CQLValueSet.builder()
+                    .name(vs)
+                    .oid(valueSetOids.get(vs))
+                    .build(),
+                valuesetDataTypeMap.get(vs)));
+
+        codeDataTypeMap.keySet().forEach(code ->
+            dataCriteria.getDataCriteriaWithCodes().put(
+                CQLCode.builder()
+                    .codeName(code)
+                    //TODO lookup code & code system details
+                    .codeOID("shrug")
+                    .codeSystemName("shrug")
+                    .codeSystemOID("shrug")
+                    .build(),
+                codeDataTypeMap.get(code)));
     }
 
     private void collectUsedExpressions(CQLGraph graph, Set<String> librariesSet, Set<String> valuesetsSet, Set<String> codesSet,
@@ -159,7 +185,7 @@ public class CQLFilter {
         List<String> libraries = new ArrayList<>(librariesSet);
         List<String> valuesets = new ArrayList<>(valuesetsSet);
         List<String> codes = new ArrayList<>(codesSet);
-        List<String> codesytems = new ArrayList<>(codesystemsSet);
+        List<String> codesystems = new ArrayList<>(codesystemsSet);
         List<String> parameters = new ArrayList<>(parametersSet);
         List<String> definitions = new ArrayList<>(definitionsSet);
         List<String> functions = new ArrayList<>(functionsSet);
@@ -168,7 +194,7 @@ public class CQLFilter {
             collectUsedLibraries(graph, libraries, parentExpression);
             collectUsedValuesets(graph, valuesets, parentExpression);
             collectUsedCodes(graph, codes, parentExpression);
-            collectUsedCodeSystems(graph, codesytems, parentExpression);
+            collectUsedCodeSystems(graph, codesystems, parentExpression);
             collectUsedParameters(graph, parameters, parentExpression);
             collectUsedDefinitions(graph, definitions, parentExpression);
             collectUsedFunctions(graph, functions, parentExpression);
@@ -314,7 +340,6 @@ public class CQLFilter {
             }
         }
 
-
         if (null != this.library.getLibrary().getIncludes()) {
             for (IncludeDef include : this.library.getLibrary().getIncludes().getDef()) {
 //                CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath() + "-" + include.getVersion());
@@ -455,6 +480,10 @@ public class CQLFilter {
 
     public Map<String, Map<String, Set<String>>> getExpressionNameToCodeDataTypeMap() {
         return expressionNameToCodeDataTypeMap;
+    }
+
+    public DataCriteria getDataCriteria() {
+        return dataCriteria;
     }
 
     @Override
