@@ -1,11 +1,18 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import java.util.Objects;
 
 /**
  * The Class CQLCode.
  */
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CQLCode implements CQLExpression {
 
     /**
