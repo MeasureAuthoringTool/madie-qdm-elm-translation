@@ -76,7 +76,7 @@ public class Cql2ElmListener extends cqlBaseListener {
     private Set<String> parameters = new HashSet<>();
     private Set<String> definitions = new HashSet<>();
     private Set<String> functions = new HashSet<>();
-
+    private HashMap<String, String> valueSetOids = new HashMap<>();
     private Map<String, Map<String, Set<String>>> valueSetDataTypeMap = new HashMap<>();
     private Map<String, Map<String, Set<String>>> codeDataTypeMap = new HashMap<>();
 
@@ -117,10 +117,10 @@ public class Cql2ElmListener extends cqlBaseListener {
     public void enterQualifiedFunction(QualifiedFunctionContext ctx) {
         if (ctx.identifierOrFunctionIdentifier() != null
                 && ctx.identifierOrFunctionIdentifier().identifier() != null) {
-            String identifer = parseString(ctx.identifierOrFunctionIdentifier().identifier().getText());
+            String identifier = parseString(ctx.identifierOrFunctionIdentifier().identifier().getText());
 
-            if (shouldResolve(identifer)) {
-                resolve(identifer, getCurrentLibraryContext());
+            if (shouldResolve(identifier)) {
+                resolve(identifier, getCurrentLibraryContext());
             }
         }
 
@@ -140,7 +140,6 @@ public class Cql2ElmListener extends cqlBaseListener {
                     resolve(qualifier, getCurrentLibraryContext());
                 }
             }
-
             resolve(identifier, getCurrentLibraryContext());
         }
     }
@@ -237,7 +236,6 @@ public class Cql2ElmListener extends cqlBaseListener {
             identifier = parseString(ctx.terminology().getText());
         }
 
-
         String formattedIdentifier = formatIdentifier(identifier);
 
         // we need to resolve based on the identifier since it will be looking in the proper library but we need
@@ -258,6 +256,7 @@ public class Cql2ElmListener extends cqlBaseListener {
             }
 
             current.get(formattedIdentifier).add(dataType);
+            valueSetOids.putIfAbsent(formattedIdentifier, ((ValueSetDef) element).getId().substring("urn:oid:".length()));
         } else if (element instanceof CodeDef) {
             Map<String, Set<String>> current = codeDataTypeMap.get(currentContext);
             if (current == null) {
@@ -476,6 +475,7 @@ public class Cql2ElmListener extends cqlBaseListener {
         functions.addAll(listener.getFunctions());
         valueSetDataTypeMap.putAll(listener.getValueSetDataTypeMap());
         codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
+        valueSetOids.putAll(listener.getValueSetOids());
     }
 
     public Set<String> getLibraries() {
@@ -512,6 +512,10 @@ public class Cql2ElmListener extends cqlBaseListener {
 
     public Map<String, Map<String, Set<String>>> getCodeDataTypeMap() {
         return codeDataTypeMap;
+    }
+
+    public Map<String, String> getValueSetOids() {
+        return valueSetOids;
     }
 
     public CQLGraph getGraph() {
