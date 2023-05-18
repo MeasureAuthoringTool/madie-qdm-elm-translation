@@ -1,73 +1,90 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLFilter;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.data.DataCriteria;
+import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.CqlParserListener;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 @Slf4j
 @Service
 @RequiredArgsConstructor
 public class DataCriteriaService {
 
-  public Map<String, Set<String>> parseDataCriteriaFromCql(String cql, Map<String,String> includedLibraries, CqlTranslator cqlTranslator) {
+  private final CqlConversionService cqlConversionService;
 
-    CQLFilter cqlFilter = new CQLFilter(
+  public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
+    //Run Translator to compile libraries
+    MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
+    cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
+    CqlTranslator cqlTranslator = runTranslator(cql);
+
+    CQLTools cqlTools = new CQLTools(
         cql,
-        includedLibraries,
-        getExpressionsFromCql(cql),
+        getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
+        getParentExpressions(cql),
         cqlTranslator
     );
 
     try {
-      cqlFilter.filter();
+      cqlTools.generate();
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-
-    return buildDataCriteria(cqlFilter.getExpressionNameToValuesetDataTypeMap(),
-        cqlFilter.getExpressionNameToCodeDataTypeMap());
+    return cqlTools.getDataCriteria();
   }
 
-  private Map<String, Set<String>> buildDataCriteria(Map<String, Map<String, Set<String>>> valueSetBackedDataCriteriaByExpression,
-                                                            Map<String, Map<String, Set<String>>> codeBackedDataCriteriaByExpression) {
-    Map<String, Set<String>> dataCriteria = new HashMap<>();
-    condense(valueSetBackedDataCriteriaByExpression, dataCriteria);
-    condense(codeBackedDataCriteriaByExpression, dataCriteria);
-    return dataCriteria;
-  }
-
-   private void condense(Map<String, Map<String, Set<String>>> expressionMap,
-                         Map<String, Set<String>> target) {
-     // key -> Definition/Function (aka Expressions)
-     // Value -> Map
-     //    Key -> Expression
-     //    Value -> Map
-     //      Key -> ValueSet/Code
-     //      Value -> Set
-     //        Key -> ValueSet/Code
-     //        Value -> QDM Data Type
-    expressionMap.values().forEach(ex -> {
-      for (String terminology : ex.keySet()) {
-        if (target.get(terminology) != null) {
-          target.get(terminology).addAll(ex.get(terminology));
-        } else {
-          target.put(terminology, ex.get(terminology));
-        }
+  private Map<String, String> getIncludedLibrariesCql(MadieLibrarySourceProvider librarySourceProvider,
+                                                      CqlTranslator cqlTranslator) {
+    Map<String, String> includedLibrariesCql = new HashMap<>();
+    for (CompiledLibrary l : cqlTranslator.getTranslatedLibraries().values()) {
+      try {
+        includedLibrariesCql.putIfAbsent(
+            l.getIdentifier().getId() +"-"+l.getIdentifier().getVersion(),
+            new String(
+                librarySourceProvider
+                    .getLibrarySource(l.getLibrary().getIdentifier())
+                    .readAllBytes(),
+                StandardCharsets.UTF_8));
+      } catch (IOException e) {
+        throw new RuntimeException(e);
       }
-    });
-   }
+    }
+    return includedLibrariesCql;
+  }
 
-  private List<String> getExpressionsFromCql(String cql) {
+  private CqlTranslator runTranslator(String cql) {
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData(cql)
+            .showWarnings(false)
+            .signatures(LibraryBuilder.SignatureLevel.All)
+            .annotations(true)
+            .locators(true)
+            .disableListDemotion(true)
+            .disableListPromotion(true)
+            .disableMethodInvocation(false)
+            .validateUnits(true)
+            .resultTypes(true)
+            .build();
+
+    return cqlConversionService.processCqlData(requestData);
+  }
+
+  private List<String> getParentExpressions(String cql) {
     CQLModel cqlModel;
     try {
       CqlParserListener listener = new CqlParserListener(cql);
