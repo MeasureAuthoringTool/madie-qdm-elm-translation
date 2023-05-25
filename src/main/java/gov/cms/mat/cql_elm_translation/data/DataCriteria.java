@@ -15,11 +15,10 @@ import java.util.Set;
 @Builder
 @AllArgsConstructor
 @NoArgsConstructor
-//TODO Move to madie java models
+// TODO Move to madie java models
 public class DataCriteria {
-  @Builder.Default
-  private Map<CQLCode, Set<String>> dataCriteriaWithCodes = new HashMap<>();
+  @Builder.Default private Map<CQLCode, Set<String>> dataCriteriaWithCodes = new HashMap<>();
+
   @Builder.Default
   private Map<CQLValueSet, Set<String>> dataCriteriaWithValueSets = new HashMap<>();
 }
-

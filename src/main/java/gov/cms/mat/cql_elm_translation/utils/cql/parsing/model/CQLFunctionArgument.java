@@ -1,7 +1,5 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
-
-
 public class CQLFunctionArgument implements Cloneable {
   private String id;
   private String argumentName;
@@ -14,50 +12,63 @@ public class CQLFunctionArgument implements Cloneable {
   public boolean isValid() {
     return isValid;
   }
+
   public void setValid(boolean isValid) {
     this.isValid = isValid;
   }
+
   public String getArgumentName() {
     return argumentName.trim();
   }
+
   public void setArgumentName(String argumentName) {
     this.argumentName = argumentName.trim();
   }
+
   public String getArgumentType() {
     return argumentType;
   }
+
   public void setArgumentType(String argumentType) {
     this.argumentType = argumentType;
   }
+
   public String getId() {
     return id;
   }
+
   public void setId(String id) {
     this.id = id;
   }
+
   public String getAttributeName() {
     return attributeName;
   }
+
   public void setAttributeName(String attributeName) {
     this.attributeName = attributeName;
   }
+
   public String getOtherType() {
     return otherType;
   }
+
   public void setOtherType(String otherType) {
     this.otherType = otherType;
   }
+
   public String getQdmDataType() {
     return qdmDataType;
   }
+
   public void setQdmDataType(String qdmDataType) {
     this.qdmDataType = qdmDataType;
   }
 
   public String getReturnType() {
-    if(this.qdmDataType != null) {
+    if (this.qdmDataType != null) {
       return this.qdmDataType;
-    } else if(this.otherType != null) {
+    } else if (this.otherType != null) {
       return this.otherType;
     } else {
       return this.argumentType;
@@ -74,5 +85,4 @@ public class CQLFunctionArgument implements Cloneable {
     argumentClone.setOtherType(this.getOtherType());
     return argumentClone;
   }
-
 }

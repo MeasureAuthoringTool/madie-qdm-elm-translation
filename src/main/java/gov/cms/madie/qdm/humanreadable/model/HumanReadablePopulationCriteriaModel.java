@@ -15,6 +15,5 @@ public class HumanReadablePopulationCriteriaModel {
   private String id;
   private int sequence;
   private List<HumanReadablePopulationModel> populations;
-  @Builder.Default
-  private String scoreUnit = "";
+  @Builder.Default private String scoreUnit = "";
 }

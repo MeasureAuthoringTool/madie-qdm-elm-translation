@@ -29,6 +29,7 @@ public class HumanReadableService {
 
   /**
    * Transforms MADiE Measure to the QDM HumanReadable data model, then generates the HR HTML.
+   *
    * @param measure MADiE Measure
    * @return String QDM Human Readable HTML
    * @throws TemplateException bad end
@@ -50,6 +51,7 @@ public class HumanReadableService {
 
   /**
    * Full HR Generation.
+   *
    * @param model
    * @return
    * @throws IOException
@@ -59,40 +61,51 @@ public class HumanReadableService {
     Map<String, Object> paramsMap = new HashMap<>();
     paramsMap.put("model", model);
     setMeasurementPeriodForQdm(model.getMeasureInformation());
-    return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl"), paramsMap);
+    return FreeMarkerTemplateUtils.processTemplateIntoString(
+        freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl"), paramsMap);
   }
 
-  public String generateSinglePopulation(HumanReadablePopulationModel population) throws IOException, TemplateException {
+  public String generateSinglePopulation(HumanReadablePopulationModel population)
+      throws IOException, TemplateException {
     Map<String, Object> paramsMap = new HashMap<>();
     paramsMap.put("population", population);
-    return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("humanreadable/population_human_readable.ftl"), paramsMap);
+    return FreeMarkerTemplateUtils.processTemplateIntoString(
+        freemarkerConfiguration.getTemplate("humanreadable/population_human_readable.ftl"),
+        paramsMap);
   }
 
   /**
    * Truncated HR originally displayed on MAT's Measure Details page.
+   *
    * @param measureInformationModel
    * @param measureModel
    * @return
    * @throws IOException
    * @throws TemplateException
    */
-  public String generate(HumanReadableMeasureInformationModel measureInformationModel, String measureModel) throws IOException, TemplateException {
+  public String generate(
+      HumanReadableMeasureInformationModel measureInformationModel, String measureModel)
+      throws IOException, TemplateException {
     HumanReadable model = new HumanReadable();
     model.setMeasureInformation(measureInformationModel);
     Map<String, Object> paramsMap = new HashMap<>();
     paramsMap.put("model", model);
-    return FreeMarkerTemplateUtils.processTemplateIntoString(freemarkerConfiguration.getTemplate("humanreadable/human_readable_measuredetails.ftl"), paramsMap);
+    return FreeMarkerTemplateUtils.processTemplateIntoString(
+        freemarkerConfiguration.getTemplate("humanreadable/human_readable_measuredetails.ftl"),
+        paramsMap);
   }
 
   private void setMeasurementPeriodForQdm(HumanReadableMeasureInformationModel model) {
     boolean isCalendarYear = model.isCalendarYear();
     String measurementPeriodStartDate = model.getMeasurementPeriodStartDate();
     String measurementPeriodEndDate = model.getMeasurementPeriodEndDate();
-    model.setMeasurementPeriod(HumanReadableDateUtil.getFormattedMeasurementPeriod(isCalendarYear, measurementPeriodStartDate, measurementPeriodEndDate));
+    model.setMeasurementPeriod(
+        HumanReadableDateUtil.getFormattedMeasurementPeriod(
+            isCalendarYear, measurementPeriodStartDate, measurementPeriodEndDate));
   }
 
   private HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
-    //TODO Needs safety checks
+    // TODO Needs safety checks
     return HumanReadableMeasureInformationModel.builder()
         .qdmVersion(5.6) // TODO Replace hardcode
         .ecqmTitle(measure.getEcqmTitle())
@@ -106,7 +119,8 @@ public class HumanReadableService {
             DateFormat.getDateInstance().format(measure.getMeasurementPeriodStart()))
         .measurementPeriodEndDate(
             DateFormat.getDateInstance().format(measure.getMeasurementPeriodEnd()))
-        .measureScoring(measure.getGroups().get(0).getScoring()) //All groups expected to have same scoring
+        .measureScoring(
+            measure.getGroups().get(0).getScoring()) // All groups expected to have same scoring
         .description(measure.getMeasureMetaData().getDescription())
         .copyright(measure.getMeasureMetaData().getCopyright())
         .disclaimer(measure.getMeasureMetaData().getDisclaimer())
@@ -117,23 +131,27 @@ public class HumanReadableService {
 
   private List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
     return measure.getGroups().stream()
-        .map(group -> HumanReadablePopulationCriteriaModel.builder()
-            .id(group.getId())
-            .name(group.getGroupDescription())
-            .populations(buildPopulations(group))
-            .build())
+        .map(
+            group ->
+                HumanReadablePopulationCriteriaModel.builder()
+                    .id(group.getId())
+                    .name(group.getGroupDescription())
+                    .populations(buildPopulations(group))
+                    .build())
         .collect(Collectors.toList());
   }
 
   private List<HumanReadablePopulationModel> buildPopulations(Group group) {
     return group.getPopulations().stream()
-        .map(population -> HumanReadablePopulationModel.builder()
-            .name(population.getName().name())
-            .id(population.getId())
-            .display(population.getName().getDisplay())
-            .logic(population.getDefinition())
-            .expressionName(population.getDefinition())
-            .build())
+        .map(
+            population ->
+                HumanReadablePopulationModel.builder()
+                    .name(population.getName().name())
+                    .id(population.getId())
+                    .display(population.getName().getDisplay())
+                    .logic(population.getDefinition())
+                    .expressionName(population.getDefinition())
+                    .build())
         .collect(Collectors.toList());
   }
 
@@ -144,5 +162,4 @@ public class HumanReadableService {
   private List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
     return List.of(new HumanReadableValuesetModel());
   }
-
 }

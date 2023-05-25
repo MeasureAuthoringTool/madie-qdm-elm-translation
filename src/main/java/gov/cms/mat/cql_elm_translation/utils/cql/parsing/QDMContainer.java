@@ -15,9 +15,7 @@ public class QDMContainer {
   private Map<String, List<String>> datatypeToAttributesMap = new HashMap<>();
   private Map<String, List<String>> qdmAttributeToTypeMap = new HashMap<>();
 
-  public QDMContainer() {
-
-  }
+  public QDMContainer() {}
 
   public QDMContainer(final Map<String, List<String>> datatypeToAttributesMap) {
     this.datatypeToAttributesMap = datatypeToAttributesMap;
@@ -27,7 +25,7 @@ public class QDMContainer {
     return datatypeToAttributesMap;
   }
 
-  public void setDatatypeToAttributesMap(final Map<String, List<String>> datatypeToAttributesMap ) {
+  public void setDatatypeToAttributesMap(final Map<String, List<String>> datatypeToAttributesMap) {
     this.datatypeToAttributesMap = datatypeToAttributesMap;
   }
 
@@ -41,6 +39,7 @@ public class QDMContainer {
 
   /**
    * Gets the attributes for a given datatype
+   *
    * @param datatype the datatype to find by, e.g. Encounter, Performed
    * @return the list of attributes for that datatype
    */
@@ -48,9 +47,7 @@ public class QDMContainer {
     return datatypeToAttributesMap.get(datatype);
   }
 
-  /**
-   * Gets a list of all distinct attributes
-   */
+  /** Gets a list of all distinct attributes */
   public List<String> getAttributes() {
     final Set<String> attributes = new HashSet<>();
     datatypeToAttributesMap.forEach((k, v) -> attributes.addAll(v));
@@ -63,6 +60,7 @@ public class QDMContainer {
 
   /**
    * Gets a list of all distinct qdm datatypes
+   *
    * @return
    */
   public List<String> getDatatypes() {
@@ -73,12 +71,24 @@ public class QDMContainer {
     return qdmAttributeToTypeMap.get(attribute);
   }
 
-  private List<String> getSubAttributesList(){
+  private List<String> getSubAttributesList() {
     qdmAttributeToTypeMap.put("locationPeriod", Arrays.asList("interval<System.DateTime>"));
     qdmAttributeToTypeMap.put("denominator", Arrays.asList(SYSTEM_QUANTITY));
     qdmAttributeToTypeMap.put("numerator", Arrays.asList(SYSTEM_QUANTITY));
     qdmAttributeToTypeMap.put("low", Arrays.asList(SYSTEM_QUANTITY));
     qdmAttributeToTypeMap.put("high", Arrays.asList(SYSTEM_QUANTITY));
-    return Arrays.asList("denominator", "high", "locationPeriod", "low", "namingSystem", "numerator", "unit", "value", "presentOnAdmissionIndicator", "specialty", "role", "qualification");
+    return Arrays.asList(
+        "denominator",
+        "high",
+        "locationPeriod",
+        "low",
+        "namingSystem",
+        "numerator",
+        "unit",
+        "value",
+        "presentOnAdmissionIndicator",
+        "specialty",
+        "role",
+        "qualification");
   }
 }

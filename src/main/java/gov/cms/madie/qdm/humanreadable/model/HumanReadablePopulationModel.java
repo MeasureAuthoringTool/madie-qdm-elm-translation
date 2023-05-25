@@ -19,4 +19,5 @@ public class HumanReadablePopulationModel {
   private boolean inGroup;
   private String associatedPopulationName;
   private String display;
-  private String type; }
+  private String type;
+}

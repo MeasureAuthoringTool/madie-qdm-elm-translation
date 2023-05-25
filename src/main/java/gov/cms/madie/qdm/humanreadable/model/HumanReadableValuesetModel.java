@@ -50,7 +50,7 @@ public class HumanReadableValuesetModel implements HumanReadableTerminologyModel
 
   private void createTerminologyDisplay() {
     String output = "";
-    if(StringUtils.isNotBlank(version) && !version.equalsIgnoreCase("1.0")) {
+    if (StringUtils.isNotBlank(version) && !version.equalsIgnoreCase("1.0")) {
       output = "valueset \"" + name + "\" (" + oid + ", version " + version + ")";
     } else {
       output = "valueset \"" + name + "\" (" + oid + ")";
@@ -69,7 +69,7 @@ public class HumanReadableValuesetModel implements HumanReadableTerminologyModel
   }
 
   private void createtDataCriteriaDisplay() {
-    if( StringUtils.isBlank(name) && StringUtils.isBlank(oid)){
+    if (StringUtils.isBlank(name) && StringUtils.isBlank(oid)) {
       this.dataCriteriaDisplay = '"' + datatype + '"';
     } else {
       if ("attribute".equals(datatype)) {
@@ -79,7 +79,9 @@ public class HumanReadableValuesetModel implements HumanReadableTerminologyModel
       String output = String.format("\"%s: %s\" using \"%s (%s)\"", datatype, name, name, oid);
 
       if (StringUtils.isNotBlank(version) && !version.equals("1.0") && !version.equals("1")) {
-        output = String.format("\"%s: %s\" using \"%s (%s, version %s)\"", datatype, name, name, oid, version);
+        output =
+            String.format(
+                "\"%s: %s\" using \"%s (%s, version %s)\"", datatype, name, name, oid, version);
       }
 
       this.dataCriteriaDisplay = output;
@@ -113,13 +115,16 @@ public class HumanReadableValuesetModel implements HumanReadableTerminologyModel
   @Override
   public boolean equals(Object obj) {
     HumanReadableValuesetModel model = (HumanReadableValuesetModel) obj;
-    return name.equals(model.name) && oid.equals(model.oid) && version.equals(model.version) && isDatatypeEqual(datatype, model.datatype);
+    return name.equals(model.name)
+        && oid.equals(model.oid)
+        && version.equals(model.version)
+        && isDatatypeEqual(datatype, model.datatype);
   }
 
   private boolean isDatatypeEqual(String d1, String d2) {
     // if datatype 1 is not null, then check the equality to datatype 2.
     // if datatype 1 is null, then check to see if datatype 2 is null.
-    if(d1 != null) {
+    if (d1 != null) {
       return d1.equals(d2);
     } else {
       return d2 == null;

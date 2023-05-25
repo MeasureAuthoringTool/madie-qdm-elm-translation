@@ -13,5 +13,4 @@ public interface CQLExpression {
   public String getLogic();
 
   public void setLogic(String logic);
-
 }

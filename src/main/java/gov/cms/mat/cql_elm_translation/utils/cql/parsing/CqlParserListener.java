@@ -22,15 +22,24 @@ import org.cqframework.cql.gen.cqlParser.FunctionDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.OperandDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.ParameterDefinitionContext;
 
-/**
- * MAT's ReverseEngineeringListener
- */
+/** MAT's ReverseEngineeringListener */
 public class CqlParserListener extends cqlBaseListener {
 
   private static final String DEFINE = "define";
   private static final String CONTEXT = "context";
   private static final String PARAMETER = "parameter";
-  private static final List<String> CQL_DATA_TYPES = List.of("Boolean", "Date", "DateTime", "Decimal", "Integer", "QDM Datatype", "Ratio", "String", "Time", "Others");
+  private static final List<String> CQL_DATA_TYPES =
+      List.of(
+          "Boolean",
+          "Date",
+          "DateTime",
+          "Decimal",
+          "Integer",
+          "QDM Datatype",
+          "Ratio",
+          "String",
+          "Time",
+          "Others");
   private cqlParser parser;
   private CommonTokenStream tokens;
   private CQLModel cqlModel;
@@ -42,8 +51,13 @@ public class CqlParserListener extends cqlBaseListener {
     private List<CQLError> errors = new ArrayList<>();
 
     @Override
-    public void syntaxError(Recognizer<?, ?> recognizer, Object offendingSymbol, int line, int charPositionInLine,
-                            String msg, RecognitionException e) {
+    public void syntaxError(
+        Recognizer<?, ?> recognizer,
+        Object offendingSymbol,
+        int line,
+        int charPositionInLine,
+        String msg,
+        RecognitionException e) {
       CQLError error = new CQLError();
       error.setErrorMessage(msg);
       error.setErrorInLine(line - 1);
@@ -77,16 +91,16 @@ public class CqlParserListener extends cqlBaseListener {
 
   private void initializeNewModel() {
     cqlModel = new CQLModel();
-//    cqlModel.setLibraryName(previousModel.getLibraryName());
-//    cqlModel.setVersionUsed(previousModel.getVersionUsed());
-//    cqlModel.setLibraryComment(previousModel.getLibraryComment());
-//    cqlModel.setUsingModel(previousModel.getUsingModel());
-//    cqlModel.setUsingModelVersion(previousModel.getUsingModelVersion());
-//
-//    cqlModel.setCqlIncludeLibraries(previousModel.getCqlIncludeLibraries());
-//    cqlModel.setCodeSystemList(previousModel.getCodeSystemList());
-//    cqlModel.setCodeList(previousModel.getCodeList());
-//    cqlModel.setValueSetList(previousModel.getValueSetList());
+    //    cqlModel.setLibraryName(previousModel.getLibraryName());
+    //    cqlModel.setVersionUsed(previousModel.getVersionUsed());
+    //    cqlModel.setLibraryComment(previousModel.getLibraryComment());
+    //    cqlModel.setUsingModel(previousModel.getUsingModel());
+    //    cqlModel.setUsingModelVersion(previousModel.getUsingModelVersion());
+    //
+    //    cqlModel.setCqlIncludeLibraries(previousModel.getCqlIncludeLibraries());
+    //    cqlModel.setCodeSystemList(previousModel.getCodeSystemList());
+    //    cqlModel.setCodeList(previousModel.getCodeList());
+    //    cqlModel.setValueSetList(previousModel.getValueSetList());
   }
 
   @Override
@@ -132,9 +146,14 @@ public class CqlParserListener extends cqlBaseListener {
       builder.append(t.getText());
     }
 
-    return builder.toString().replaceFirst(PARAMETER, "").replace("public", "").replace("private", "").replace(identifier, "").trim();
+    return builder
+        .toString()
+        .replaceFirst(PARAMETER, "")
+        .replace("public", "")
+        .replace("private", "")
+        .replace(identifier, "")
+        .trim();
   }
-
 
   @Override
   public void enterExpressionDefinition(ExpressionDefinitionContext ctx) {
@@ -146,7 +165,6 @@ public class CqlParserListener extends cqlBaseListener {
     definition.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
     definition.setName(identifier);
 
-
     definition.setContext(currentContext);
     definition.setCommentString(comment);
     definition.setLogic(CQLUtilityClass.replaceFirstWhitespaceInLineForExpression(logic));
@@ -156,7 +174,8 @@ public class CqlParserListener extends cqlBaseListener {
 
   @Override
   public void enterFunctionDefinition(FunctionDefinitionContext ctx) {
-    String identifier = CQLParserUtil.parseString(getFullText(ctx.identifierOrFunctionIdentifier()));
+    String identifier =
+        CQLParserUtil.parseString(getFullText(ctx.identifierOrFunctionIdentifier()));
     String logic = getDefinitionAndFunctionLogic(ctx).trim();
     String comment = getExpressionComment(ctx).trim();
 
@@ -203,9 +222,14 @@ public class CqlParserListener extends cqlBaseListener {
   }
 
   private String getFullText(ParserRuleContext context) {
-    if (context.start == null || context.stop == null || context.start.getStartIndex() < 0 || context.stop.getStopIndex() < 0)
-      return context.getText();
-    return context.start.getInputStream().getText(Interval.of(context.start.getStartIndex(), context.stop.getStopIndex()));
+    if (context.start == null
+        || context.stop == null
+        || context.start.getStartIndex() < 0
+        || context.stop.getStopIndex() < 0) return context.getText();
+    return context
+        .start
+        .getInputStream()
+        .getText(Interval.of(context.start.getStartIndex(), context.stop.getStopIndex()));
   }
 
   private String getExpressionComment(ParserRuleContext ctx) {
@@ -249,8 +273,8 @@ public class CqlParserListener extends cqlBaseListener {
   }
 
   /**
-   * A definition or function body should be considered done when it reaches the next define statement
-   * or it reaches a comment for the next expression.
+   * A definition or function body should be considered done when it reaches the next define
+   * statement or it reaches a comment for the next expression.
    *
    * @param ctx the context to find the end of the body of
    * @return the index of the last token in the body
@@ -262,7 +286,10 @@ public class CqlParserListener extends cqlBaseListener {
     // find the next define statement
     boolean startAdding = false;
     for (Token t : ts) {
-      if ((t.getText().equals(DEFINE) || t.getText().contentEquals(PARAMETER) || t.getText().equals(CONTEXT)) && startAdding) {
+      if ((t.getText().equals(DEFINE)
+              || t.getText().contentEquals(PARAMETER)
+              || t.getText().equals(CONTEXT))
+          && startAdding) {
         index = t.getTokenIndex();
         break;
       }
@@ -272,7 +299,6 @@ public class CqlParserListener extends cqlBaseListener {
         startAdding = true;
       }
     }
-
 
     if (tokens.get(index).getText().equals(CONTEXT)) {
       return index - 1;

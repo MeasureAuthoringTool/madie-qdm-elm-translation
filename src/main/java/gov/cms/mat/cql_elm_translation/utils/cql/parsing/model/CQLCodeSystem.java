@@ -1,119 +1,116 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
-
-
 // TODO: Auto-generated Javadoc
-/**
- * The Class CQLCodeSystem.
- */
-public class CQLCodeSystem  {
+/** The Class CQLCodeSystem. */
+public class CQLCodeSystem {
 
-	/** The id. */
-	private String id;
-	
-	/** The code system. */
-	private String codeSystem;
-	
-	/** The code system name. */
-	private String codeSystemName;
-	
-	/** The code system version. */
-	private String codeSystemVersion;
-	
-	/** The value set OID. */
-	private String valueSetOID;
+  /** The id. */
+  private String id;
 
-	/**
-	 * stores off the version uri. example:
-	 * codesystem "SNOMEDCT:2017-09": 'http://snomed.info/sct/731000124108' version 'http://snomed.info/sct/731000124108/version/201709'
-	 */
-	 private String versionUri;
+  /** The code system. */
+  private String codeSystem;
 
-	/**
-	 * Gets the id.
-	 *
-	 * @return the id
-	 */
-	public String getId() {
-		return id;
-	}
+  /** The code system name. */
+  private String codeSystemName;
 
-	/**
-	 * Sets the id.
-	 *
-	 * @param id the new id
-	 */
-	public void setId(String id) {
-		this.id = id;
-	}
+  /** The code system version. */
+  private String codeSystemVersion;
 
-	/**
-	 * Gets the code system.
-	 *
-	 * @return the code system
-	 */
-	public String getCodeSystem() {
-		return codeSystem;
-	}
+  /** The value set OID. */
+  private String valueSetOID;
 
-	/**
-	 * Sets the code system.
-	 *
-	 * @param codeSystem the new code system
-	 */
-	public void setCodeSystem(String codeSystem) {
-		this.codeSystem = codeSystem;
-	}
+  /**
+   * stores off the version uri. example: codesystem "SNOMEDCT:2017-09":
+   * 'http://snomed.info/sct/731000124108' version
+   * 'http://snomed.info/sct/731000124108/version/201709'
+   */
+  private String versionUri;
 
-	/**
-	 * Gets the code system name.
-	 *
-	 * @return the code system name
-	 */
-	public String getCodeSystemName() {
-		return codeSystemName;
-	}
+  /**
+   * Gets the id.
+   *
+   * @return the id
+   */
+  public String getId() {
+    return id;
+  }
 
-	/**
-	 * Sets the code system name.
-	 *
-	 * @param codeSystemName the new code system name
-	 */
-	public void setCodeSystemName(String codeSystemName) {
-		this.codeSystemName = codeSystemName;
-	}
+  /**
+   * Sets the id.
+   *
+   * @param id the new id
+   */
+  public void setId(String id) {
+    this.id = id;
+  }
 
-	/**
-	 * Gets the code system version.
-	 *
-	 * @return the code system version
-	 */
-	public String getCodeSystemVersion() {
-		return codeSystemVersion;
-	}
+  /**
+   * Gets the code system.
+   *
+   * @return the code system
+   */
+  public String getCodeSystem() {
+    return codeSystem;
+  }
 
-	/**
-	 * Sets the code system version.
-	 *
-	 * @param codeSystemVersion the new code system version
-	 */
-	public void setCodeSystemVersion(String codeSystemVersion) {
-		this.codeSystemVersion = codeSystemVersion;
-	}
+  /**
+   * Sets the code system.
+   *
+   * @param codeSystem the new code system
+   */
+  public void setCodeSystem(String codeSystem) {
+    this.codeSystem = codeSystem;
+  }
 
-	public String getVersionUri() {
-		return versionUri;
-	}
+  /**
+   * Gets the code system name.
+   *
+   * @return the code system name
+   */
+  public String getCodeSystemName() {
+    return codeSystemName;
+  }
 
-	public void setVersionUri(String versionUri) {
-		this.versionUri = versionUri;
-	}
+  /**
+   * Sets the code system name.
+   *
+   * @param codeSystemName the new code system name
+   */
+  public void setCodeSystemName(String codeSystemName) {
+    this.codeSystemName = codeSystemName;
+  }
 
-	public String getValueSetOID() {
-		return valueSetOID;
-	}
+  /**
+   * Gets the code system version.
+   *
+   * @return the code system version
+   */
+  public String getCodeSystemVersion() {
+    return codeSystemVersion;
+  }
 
-	public void setValueSetOID(String valueSetOID) {
-		this.valueSetOID = valueSetOID;
-	}
+  /**
+   * Sets the code system version.
+   *
+   * @param codeSystemVersion the new code system version
+   */
+  public void setCodeSystemVersion(String codeSystemVersion) {
+    this.codeSystemVersion = codeSystemVersion;
+  }
+
+  public String getVersionUri() {
+    return versionUri;
+  }
+
+  public void setVersionUri(String versionUri) {
+    this.versionUri = versionUri;
+  }
+
+  public String getValueSetOID() {
+    return valueSetOID;
+  }
+
+  public void setValueSetOID(String valueSetOID) {
+    this.valueSetOID = valueSetOID;
+  }
 }

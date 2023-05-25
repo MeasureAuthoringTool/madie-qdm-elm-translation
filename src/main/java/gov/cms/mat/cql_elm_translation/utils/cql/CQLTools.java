@@ -32,498 +32,544 @@ import org.hl7.elm.r1.ParameterDef;
 
 public class CQLTools {
 
-    private String parentLibraryString;
-    private Map<String, String> childrenLibraries;
-    private CompiledLibrary library;
-    private CqlTranslator translator;
+  private String parentLibraryString;
+  private Map<String, String> childrenLibraries;
+  private CompiledLibrary library;
+  private CqlTranslator translator;
 
-    /**
-     * Maps a valueset identifier to the datatypes it is using.
-     */
-    private Map<String, Set<String>> valuesetDataTypeMap = new HashMap<>();
+  /** Maps a valueset identifier to the datatypes it is using. */
+  private Map<String, Set<String>> valuesetDataTypeMap = new HashMap<>();
 
-    /**
-     * Maps a code identifier to the datatypes it is using
-     */
-    private Map<String, Set<String>> codeDataTypeMap = new HashMap<>();
+  /** Maps a code identifier to the datatypes it is using */
+  private Map<String, Set<String>> codeDataTypeMap = new HashMap<>();
 
-    /**
-     * Maps an expression, to it's internal valueset - datatype map
-     */
-    private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap = new HashMap<>();
+  /** Maps an expression, to it's internal valueset - datatype map */
+  private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
+      new HashMap<>();
 
-    /**
-     * Maps an expression, to it's internal code - datatype map
-     */
-    private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
+  /** Maps an expression, to it's internal code - datatype map */
+  private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
+  /** Maps an expression name to its return type (only function and definitions) */
+  private Map<String, String> nameToReturnTypeMap = new HashMap<>();
 
-    /**
-     * Maps an expression name to its return type (only function and definitions)
-     */
-    private Map<String, String> nameToReturnTypeMap = new HashMap<>();
+  /**
+   * The list of parent expressions. Often times, these are populations from MAT. Anything that can
+   * be reached from this node in the graph should be considered used.
+   */
+  private List<String> parentExpressions = new ArrayList<>();
 
-    /**
-     * The list of parent expressions. Often times, these are populations from MAT. Anything that can be reached from
-     * this node in the graph should be considered used.
-     */
-    private List<String> parentExpressions = new ArrayList<>();
+  private Map<String, String> qdmTypeInfoMap = new HashMap<>();
 
-    private Map<String, String> qdmTypeInfoMap = new HashMap<>();
+  private Map<String, CompiledLibrary> CompiledLibraryMap;
 
-    private Map<String, CompiledLibrary> CompiledLibraryMap;
+  /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
+  private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
 
-    /**
-     * Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>.
-     */
-    private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
+  private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
-    private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
+  // used expression sets
+  Set<String> usedLibraries = new HashSet<>();
+  Set<String> usedCodes = new HashSet<>();
+  Set<String> usedValuesets = new HashSet<>();
+  Set<String> usedParameters = new HashSet<>();
+  Set<String> usedDefinitions = new HashSet<>();
+  Set<String> usedFunctions = new HashSet<>();
+  Set<String> usedCodeSystems = new HashSet<>();
+  DataCriteria dataCriteria = new DataCriteria();
 
-    // used expression sets
-    Set<String> usedLibraries = new HashSet<>();
-    Set<String> usedCodes = new HashSet<>();
-    Set<String> usedValuesets = new HashSet<>();
-    Set<String> usedParameters = new HashSet<>();
-    Set<String> usedDefinitions = new HashSet<>();
-    Set<String> usedFunctions = new HashSet<>();
-    Set<String> usedCodeSystems = new HashSet<>();
-    DataCriteria dataCriteria = new DataCriteria();
+  public CQLTools(
+      String parentLibraryString,
+      Map<String, String> childrenLibraries,
+      List<String> parentExpressions,
+      CqlTranslator translator) {
+    this(
+        parentLibraryString,
+        childrenLibraries,
+        parentExpressions,
+        translator,
+        translator.getTranslatedLibraries());
+  }
 
+  public CQLTools(
+      String parentLibraryString,
+      Map<String, String> childrenLibraries,
+      List<String> parentExpressions,
+      CqlTranslator translator,
+      Map<String, CompiledLibrary> translatedLibraries) {
 
-    public CQLTools(
-        String parentLibraryString,
-        Map<String, String> childrenLibraries,
-        List<String> parentExpressions,
-        CqlTranslator translator
-    ) {
-        this(
-            parentLibraryString,
-            childrenLibraries,
-            parentExpressions,
-            translator,
-            translator.getTranslatedLibraries());
+    this.parentLibraryString = parentLibraryString;
+    this.translator = translator;
+    this.library = translator.getTranslatedLibrary();
+    this.childrenLibraries = childrenLibraries;
+    this.CompiledLibraryMap = translatedLibraries;
+    this.parentExpressions = parentExpressions;
+  }
+
+  /**
+   * The CQL Filter Entry Point.
+   *
+   * <p>This function will find all of the used CQL expressions, create a valueset - datatype map
+   * and code - datatype map, and find return types for each expression.
+   *
+   * @throws IOException
+   */
+  public void generate() throws IOException {
+    InputStream stream =
+        new ByteArrayInputStream(this.parentLibraryString.getBytes(StandardCharsets.UTF_8));
+    cqlLexer lexer = new cqlLexer(CharStreams.fromStream(stream));
+    CommonTokenStream tokens = new CommonTokenStream(lexer);
+    cqlParser parser = new cqlParser(tokens);
+
+    CQLGraph graph = new CQLGraph();
+    Cql2ElmListener listener =
+        new Cql2ElmListener(graph, library, CompiledLibraryMap, childrenLibraries);
+    ParseTree tree = parser.library();
+    CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor();
+    preprocessor.setTokenStream(tokens);
+    preprocessor.visit(tree);
+    ParseTreeWalker walker = new ParseTreeWalker();
+    walker.walk(listener, tree);
+
+    Set<String> librariesSet = new HashSet<>(listener.getLibraries());
+    Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
+    Set<String> codesSet = new HashSet<>(listener.getCodes());
+    Set<String> codesystemsSet = new HashSet<>(listener.getCodesystems());
+    Set<String> parametersSet = new HashSet<>(listener.getParameters());
+    Set<String> definitionsSet = new HashSet<>(listener.getDefinitions());
+    Set<String> functionsSet = new HashSet<>(listener.getFunctions());
+    Map<String, Map<String, Set<String>>> valuesetMap =
+        new HashMap<>(listener.getValueSetDataTypeMap());
+    Map<String, Map<String, Set<String>>> codeMap = new HashMap<>(listener.getCodeDataTypeMap());
+    Map<String, String> valueSetOids = new HashMap<>(listener.getValueSetOids());
+
+    collectUsedExpressions(
+        graph,
+        librariesSet,
+        valuesetsSet,
+        codesSet,
+        codesystemsSet,
+        parametersSet,
+        definitionsSet,
+        functionsSet);
+    collectValueSetCodeDataType(valuesetMap, codeMap);
+    collectReturnTypeMap();
+    collectDataCriteria(valueSetOids);
+  }
+
+  private void collectDataCriteria(Map<String, String> valueSetOids) {
+    valuesetDataTypeMap
+        .keySet()
+        .forEach(
+            vs ->
+                dataCriteria
+                    .getDataCriteriaWithValueSets()
+                    .put(
+                        CQLValueSet.builder().name(vs).oid(valueSetOids.get(vs)).build(),
+                        valuesetDataTypeMap.get(vs)));
+
+    codeDataTypeMap
+        .keySet()
+        .forEach(
+            code ->
+                dataCriteria
+                    .getDataCriteriaWithCodes()
+                    .put(
+                        CQLCode.builder()
+                            .codeName(code)
+                            // TODO lookup code & code system details
+                            .codeOID("shrug")
+                            .codeSystemName("shrug")
+                            .codeSystemOID("shrug")
+                            .build(),
+                        codeDataTypeMap.get(code)));
+  }
+
+  private void collectUsedExpressions(
+      CQLGraph graph,
+      Set<String> librariesSet,
+      Set<String> valuesetsSet,
+      Set<String> codesSet,
+      Set<String> codesystemsSet,
+      Set<String> parametersSet,
+      Set<String> definitionsSet,
+      Set<String> functionsSet) {
+    List<String> libraries = new ArrayList<>(librariesSet);
+    List<String> valuesets = new ArrayList<>(valuesetsSet);
+    List<String> codes = new ArrayList<>(codesSet);
+    List<String> codesystems = new ArrayList<>(codesystemsSet);
+    List<String> parameters = new ArrayList<>(parametersSet);
+    List<String> definitions = new ArrayList<>(definitionsSet);
+    List<String> functions = new ArrayList<>(functionsSet);
+
+    for (String parentExpression : parentExpressions) {
+      collectUsedLibraries(graph, libraries, parentExpression);
+      collectUsedValuesets(graph, valuesets, parentExpression);
+      collectUsedCodes(graph, codes, parentExpression);
+      collectUsedCodeSystems(graph, codesystems, parentExpression);
+      collectUsedParameters(graph, parameters, parentExpression);
+      collectUsedDefinitions(graph, definitions, parentExpression);
+      collectUsedFunctions(graph, functions, parentExpression);
     }
-    public CQLTools(
-            String parentLibraryString,
-            Map<String, String> childrenLibraries,
-            List<String> parentExpressions,
-            CqlTranslator translator,
-            Map<String, CompiledLibrary> translatedLibraries) {
+  }
 
-        this.parentLibraryString = parentLibraryString;
-        this.translator = translator;
-        this.library = translator.getTranslatedLibrary();
-        this.childrenLibraries = childrenLibraries;
-        this.CompiledLibraryMap = translatedLibraries;
-        this.parentExpressions = parentExpressions;
+  /**
+   * For every function reference from the listener, checks if the parent expression and the
+   * function make a path. If it does make a path, that means the function is used and should
+   * therefore be added to the used functions list.
+   *
+   * @param graph the graph
+   * @param functions the function references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedFunctions(
+      CQLGraph graph, List<String> functions, String parentExpression) {
+    for (String function : functions) {
+      if (graph.isPath(parentExpression, function)) {
+        usedFunctions.add(function);
+      }
     }
+  }
 
-    /**
-     * The CQL Filter Entry Point.
-     * <p>
-     * This function will find all of the used CQL expressions, create a valueset - datatype map and code - datatype map,
-     * and find return types for each expression.
-     *
-     * @throws IOException
-     */
-    public void generate() throws IOException {
-        InputStream stream = new ByteArrayInputStream(this.parentLibraryString.getBytes(StandardCharsets.UTF_8));
-        cqlLexer lexer = new cqlLexer(CharStreams.fromStream(stream));
-        CommonTokenStream tokens = new CommonTokenStream(lexer);
-        cqlParser parser = new cqlParser(tokens);
-
-        CQLGraph graph = new CQLGraph();
-        Cql2ElmListener listener = new Cql2ElmListener(graph, library, CompiledLibraryMap, childrenLibraries);
-        ParseTree tree = parser.library();
-        CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor();
-        preprocessor.setTokenStream(tokens);
-        preprocessor.visit(tree);
-        ParseTreeWalker walker = new ParseTreeWalker();
-        walker.walk(listener, tree);
-
-        Set<String> librariesSet = new HashSet<>(listener.getLibraries());
-        Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
-        Set<String> codesSet = new HashSet<>(listener.getCodes());
-        Set<String> codesystemsSet = new HashSet<>(listener.getCodesystems());
-        Set<String> parametersSet = new HashSet<>(listener.getParameters());
-        Set<String> definitionsSet = new HashSet<>(listener.getDefinitions());
-        Set<String> functionsSet = new HashSet<>(listener.getFunctions());
-        Map<String, Map<String, Set<String>>> valuesetMap = new HashMap<>(listener.getValueSetDataTypeMap());
-        Map<String, Map<String, Set<String>>> codeMap = new HashMap<>(listener.getCodeDataTypeMap());
-        Map<String, String> valueSetOids = new HashMap<>(listener.getValueSetOids());
-
-        collectUsedExpressions(graph, librariesSet, valuesetsSet, codesSet, codesystemsSet, parametersSet, definitionsSet, functionsSet);
-        collectValueSetCodeDataType(valuesetMap, codeMap);
-        collectReturnTypeMap();
-        collectDataCriteria(valueSetOids);
+  /**
+   * For every definition reference from the listener, checks if the parent expression and the
+   * definition make a path. If it does make a path, that means the definition is used and should
+   * therefore be added to the used definitions list.
+   *
+   * @param graph the graph
+   * @param definitions the definition references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedDefinitions(
+      CQLGraph graph, List<String> definitions, String parentExpression) {
+    for (String definition : definitions) {
+      if (graph.isPath(parentExpression, definition)
+          && !definition.equalsIgnoreCase("Patient")
+          && !definition.equalsIgnoreCase("Population")) {
+        usedDefinitions.add(definition);
+      }
     }
-    private void collectDataCriteria(Map<String, String> valueSetOids) {
-        valuesetDataTypeMap.keySet().forEach(vs ->
-            dataCriteria.getDataCriteriaWithValueSets().put(
-                CQLValueSet.builder()
-                    .name(vs)
-                    .oid(valueSetOids.get(vs))
-                    .build(),
-                valuesetDataTypeMap.get(vs)));
+  }
 
-        codeDataTypeMap.keySet().forEach(code ->
-            dataCriteria.getDataCriteriaWithCodes().put(
-                CQLCode.builder()
-                    .codeName(code)
-                    //TODO lookup code & code system details
-                    .codeOID("shrug")
-                    .codeSystemName("shrug")
-                    .codeSystemOID("shrug")
-                    .build(),
-                codeDataTypeMap.get(code)));
+  /**
+   * For every parameter reference from the listener, checks if the parent expression and the
+   * parameter make a path. If it does make a path, that means the parameter is used and should
+   * therefore be added to the used parameters list.
+   *
+   * @param graph the graph
+   * @param parameters the parameter references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedParameters(
+      CQLGraph graph, List<String> parameters, String parentExpression) {
+    for (String parameter : parameters) {
+      if (graph.isPath(parentExpression, parameter)) {
+        usedParameters.add(parameter);
+      }
     }
+  }
 
-    private void collectUsedExpressions(CQLGraph graph, Set<String> librariesSet, Set<String> valuesetsSet, Set<String> codesSet,
-                                        Set<String> codesystemsSet, Set<String> parametersSet, Set<String> definitionsSet,
-                                        Set<String> functionsSet) {
-        List<String> libraries = new ArrayList<>(librariesSet);
-        List<String> valuesets = new ArrayList<>(valuesetsSet);
-        List<String> codes = new ArrayList<>(codesSet);
-        List<String> codesystems = new ArrayList<>(codesystemsSet);
-        List<String> parameters = new ArrayList<>(parametersSet);
-        List<String> definitions = new ArrayList<>(definitionsSet);
-        List<String> functions = new ArrayList<>(functionsSet);
-
-        for (String parentExpression : parentExpressions) {
-            collectUsedLibraries(graph, libraries, parentExpression);
-            collectUsedValuesets(graph, valuesets, parentExpression);
-            collectUsedCodes(graph, codes, parentExpression);
-            collectUsedCodeSystems(graph, codesystems, parentExpression);
-            collectUsedParameters(graph, parameters, parentExpression);
-            collectUsedDefinitions(graph, definitions, parentExpression);
-            collectUsedFunctions(graph, functions, parentExpression);
-        }
+  /**
+   * For every code reference from the listener, checks if the parent expression and the code make a
+   * path. If it does make a path, that means the code is used and should therefore be added to the
+   * used codes list.
+   *
+   * @param graph the graph
+   * @param codes the code references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedCodes(CQLGraph graph, List<String> codes, String parentExpression) {
+    for (String code : codes) {
+      if (graph.isPath(parentExpression, code)) {
+        usedCodes.add(code);
+      }
     }
+  }
 
-    /**
-     * For every function reference from the listener, checks if the parent expression and the function make a path.
-     * If it does make a path, that means the function is used and should therefore be added to the used functions list.
-     *
-     * @param graph            the graph
-     * @param functions        the function references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedFunctions(CQLGraph graph, List<String> functions, String parentExpression) {
-        for (String function : functions) {
-            if (graph.isPath(parentExpression, function)) {
-                usedFunctions.add(function);
-            }
-        }
+  /**
+   * For every codesystem reference from the listener, checks if the parent expression and the
+   * codesystem make a path. If it does make a path, that means the codesystem is used and should
+   * therefore be added to the used codesystems list.
+   *
+   * @param graph the graph
+   * @param codesystems the code references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedCodeSystems(
+      CQLGraph graph, List<String> codesystems, String parentExpression) {
+    for (String codesystem : codesystems) {
+      if (graph.isPath(parentExpression, codesystem)) {
+        usedCodeSystems.add(codesystem);
+      }
     }
+  }
 
-    /**
-     * For every definition reference from the listener, checks if the parent expression and the definition make a path.
-     * If it does make a path, that means the definition is used and should therefore be added to the used definitions list.
-     *
-     * @param graph            the graph
-     * @param definitions      the definition references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedDefinitions(CQLGraph graph, List<String> definitions, String parentExpression) {
-        for (String definition : definitions) {
-            if (graph.isPath(parentExpression, definition) && !definition.equalsIgnoreCase("Patient") && !definition.equalsIgnoreCase("Population")) {
-                usedDefinitions.add(definition);
-            }
-        }
+  /**
+   * For every valueset reference from the listener, checks if the parent expression and the
+   * valueset make a path. If it does make a path, that means the valueset is used and should
+   * therefore be added to the used valuesets list.
+   *
+   * @param graph the graph
+   * @param valuesets the valueset references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedValuesets(
+      CQLGraph graph, List<String> valuesets, String parentExpression) {
+    for (String valueset : valuesets) {
+      if (graph.isPath(parentExpression, valueset)) {
+        usedValuesets.add(valueset);
+      }
     }
+  }
 
-    /**
-     * For every parameter reference from the listener, checks if the parent expression and the parameter make a path.
-     * If it does make a path, that means the parameter is used and should therefore be added to the used parameters list.
-     *
-     * @param graph            the graph
-     * @param parameters       the parameter references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedParameters(CQLGraph graph, List<String> parameters, String parentExpression) {
-        for (String parameter : parameters) {
-            if (graph.isPath(parentExpression, parameter)) {
-                usedParameters.add(parameter);
-            }
-        }
+  /**
+   * For every library reference from the listener, checks if the parent expression and the library
+   * make a path. If it does make a path, that means the library is used and should therefore be
+   * added to the used libraries list.
+   *
+   * @param graph the graph
+   * @param libraries the library references from the listener
+   * @param parentExpression the parent expression to check
+   */
+  private void collectUsedLibraries(
+      CQLGraph graph, List<String> libraries, String parentExpression) {
+    for (String library : libraries) {
+      if (graph.isPath(parentExpression, library)) {
+        usedLibraries.add(library);
+      }
     }
+  }
 
-    /**
-     * For every code reference from the listener, checks if the parent expression and the code make a path.
-     * If it does make a path, that means the code is used and should therefore be added to the used codes list.
-     *
-     * @param graph            the graph
-     * @param codes            the code references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedCodes(CQLGraph graph, List<String> codes, String parentExpression) {
-        for (String code : codes) {
-            if (graph.isPath(parentExpression, code)) {
-                usedCodes.add(code);
-            }
-        }
-    }
+  /** Collects and creates a mapping of expression names to return types. */
+  private void collectReturnTypeMap() {
+    // the following makes an assumption that a library can not have any duplicate libraries
+    // declared in it.
 
-    /**
-     * For every codesystem reference from the listener, checks if the parent expression and the codesystem make a path.
-     * If it does make a path, that means the codesystem is used and should therefore be added to the used codesystems list.
-     *
-     * @param graph            the graph
-     * @param codesystems      the code references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedCodeSystems(CQLGraph graph, List<String> codesystems, String parentExpression) {
-        for (String codesystem : codesystems) {
-            if (graph.isPath(parentExpression, codesystem)) {
-                usedCodeSystems.add(codesystem);
-            }
-        }
-    }
+    // statements contain all function and definitions.
+    Library.Statements statements = this.library.getLibrary().getStatements();
+    Library.Parameters parameters = this.library.getLibrary().getParameters();
+    String libraryName = this.library.getIdentifier().getId();
+    String libraryVersion = this.library.getIdentifier().getVersion();
+    this.allNamesToReturnTypeMap.put(libraryName + "-" + libraryVersion, new HashMap<>());
 
-    /**
-     * For every valueset reference from the listener, checks if the parent expression and the valueset make a path.
-     * If it does make a path, that means the valueset is used and should therefore be added to the used valuesets list.
-     *
-     * @param graph            the graph
-     * @param valuesets        the valueset references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedValuesets(CQLGraph graph, List<String> valuesets, String parentExpression) {
-        for (String valueset : valuesets) {
-            if (graph.isPath(parentExpression, valueset)) {
-                usedValuesets.add(valueset);
-            }
-        }
-    }
-
-    /**
-     * For every library reference from the listener, checks if the parent expression and the library make a path.
-     * If it does make a path, that means the library is used and should therefore be added to the used libraries list.
-     *
-     * @param graph            the graph
-     * @param libraries        the library references from the listener
-     * @param parentExpression the parent expression to check
-     */
-    private void collectUsedLibraries(CQLGraph graph, List<String> libraries, String parentExpression) {
-        for (String library : libraries) {
-            if (graph.isPath(parentExpression, library)) {
-                usedLibraries.add(library);
-            }
-        }
-    }
-
-    /**
-     * Collects and creates a mapping of expression names to return types.
-     */
-    private void collectReturnTypeMap() {
-        // the following makes an assumption that a library can not have any duplicate libraries declared in it.
-
-        // statements contain all function and definitions.
-        Library.Statements statements = this.library.getLibrary().getStatements();
-        Library.Parameters parameters = this.library.getLibrary().getParameters();
-        String libraryName = this.library.getIdentifier().getId();
-        String libraryVersion = this.library.getIdentifier().getVersion();
-        this.allNamesToReturnTypeMap.put(libraryName + "-" + libraryVersion, new HashMap<>());
-
-        for (ExpressionDef expression : statements.getDef()) {
-            this.allNamesToReturnTypeMap.get(libraryName + "-" + libraryVersion).put(expression.getName(), expression.getResultType().toString());
-            this.nameToReturnTypeMap.put(expression.getName(), expression.getResultType().toString());
-            this.expressionToReturnTypeMap.put(expression.getName(), expression.getResultType().toString());
-        }
-
-        if (parameters != null) {
-            for (ParameterDef parameter : parameters.getDef()) {
-                this.allNamesToReturnTypeMap.get(libraryName + "-" + libraryVersion).put(parameter.getName(), parameter.getResultType().toString());
-                this.nameToReturnTypeMap.put(parameter.getName(), parameter.getResultType().toString());
-                this.expressionToReturnTypeMap.put(parameter.getName(), parameter.getResultType().toString());
-            }
-        }
-
-        if (null != this.library.getLibrary().getIncludes()) {
-            for (IncludeDef include : this.library.getLibrary().getIncludes().getDef()) {
-//                CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath() + "-" + include.getVersion());
-                CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath());
-
-                Library.Statements statementsFromIncludedLibrary = lib.getLibrary().getStatements();
-                Library.Parameters parametersFromIncludedLibrary = lib.getLibrary().getParameters();
-                String includedLibraryName = lib.getIdentifier().getId();
-                String includedLibraryVersion = lib.getIdentifier().getVersion();
-                this.allNamesToReturnTypeMap.put(includedLibraryName + "-" + includedLibraryVersion, new HashMap<>());
-
-                for (ExpressionDef expression : statementsFromIncludedLibrary.getDef()) {
-                    this.allNamesToReturnTypeMap.get(includedLibraryName + "-" + includedLibraryVersion).put(expression.getName(), expression.getResultType().toString());
-                    this.expressionToReturnTypeMap.put(include.getLocalIdentifier() + "." + expression.getName(), expression.getResultType().toString());
-                }
-
-                if (parametersFromIncludedLibrary != null) {
-                    for (ParameterDef parameter : parametersFromIncludedLibrary.getDef()) {
-                        this.allNamesToReturnTypeMap.get(includedLibraryName + "-" + includedLibraryVersion).put(parameter.getName(), parameter.getResultType().toString());
-                        this.expressionToReturnTypeMap.put(include.getLocalIdentifier() + "." + parameter.getName(), parameter.getResultType().toString());
-                    }
-                }
-            }
-        }
+    for (ExpressionDef expression : statements.getDef()) {
+      this.allNamesToReturnTypeMap
+          .get(libraryName + "-" + libraryVersion)
+          .put(expression.getName(), expression.getResultType().toString());
+      this.nameToReturnTypeMap.put(expression.getName(), expression.getResultType().toString());
+      this.expressionToReturnTypeMap.put(
+          expression.getName(), expression.getResultType().toString());
     }
 
-    /**
-     * Collects the valueset - datatype map and code - datatype map.
-     * <p>
-     * It loos through each translator object from the parser, and then for each translator it loops through the retrieves.
-     * It then puts the valueset/code and it's corresponding data type into the correct map.
-     */
-    private void collectValueSetCodeDataType(Map<String, Map<String, Set<String>>> valuesetMap,
-                                             Map<String, Map<String, Set<String>>> codeMap) {
-        this.expressionNameToValuesetDataTypeMap = valuesetMap;
-        this.expressionNameToCodeDataTypeMap = codeMap;
-        this.valuesetDataTypeMap = flattenMap(valuesetMap);
-        this.codeDataTypeMap = flattenMap(codeMap);
+    if (parameters != null) {
+      for (ParameterDef parameter : parameters.getDef()) {
+        this.allNamesToReturnTypeMap
+            .get(libraryName + "-" + libraryVersion)
+            .put(parameter.getName(), parameter.getResultType().toString());
+        this.nameToReturnTypeMap.put(parameter.getName(), parameter.getResultType().toString());
+        this.expressionToReturnTypeMap.put(
+            parameter.getName(), parameter.getResultType().toString());
+      }
     }
 
-    /**
-     * The valueset/code - datatype map will come to us in a format of <ExpressionName, <Valueset/Code Name, [DataType]>>.
-     * We want to also have a flattened map which will be in the format of <Valueset/Code Name, [DataType]>
-     *
-     * @return a map in the above format
-     */
-    private Map<String, Set<String>> flattenMap(Map<String, Map<String, Set<String>>> mapToFlatten) {
-        Map<String, Set<String>> flattenedMap = new HashMap<>();
+    if (null != this.library.getLibrary().getIncludes()) {
+      for (IncludeDef include : this.library.getLibrary().getIncludes().getDef()) {
+        //                CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath() + "-"
+        // + include.getVersion());
+        CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath());
 
-        Set<String> keys = mapToFlatten.keySet();
-        for (String key : keys) {
-            Map<String, Set<String>> innerMap = mapToFlatten.get(key);
+        Library.Statements statementsFromIncludedLibrary = lib.getLibrary().getStatements();
+        Library.Parameters parametersFromIncludedLibrary = lib.getLibrary().getParameters();
+        String includedLibraryName = lib.getIdentifier().getId();
+        String includedLibraryVersion = lib.getIdentifier().getVersion();
+        this.allNamesToReturnTypeMap.put(
+            includedLibraryName + "-" + includedLibraryVersion, new HashMap<>());
 
-            Set<String> innerKeys = innerMap.keySet();
-            for (String innerKey : innerKeys) {
-                flattenedMap.computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)));
-            }
+        for (ExpressionDef expression : statementsFromIncludedLibrary.getDef()) {
+          this.allNamesToReturnTypeMap
+              .get(includedLibraryName + "-" + includedLibraryVersion)
+              .put(expression.getName(), expression.getResultType().toString());
+          this.expressionToReturnTypeMap.put(
+              include.getLocalIdentifier() + "." + expression.getName(),
+              expression.getResultType().toString());
         }
 
-        return flattenedMap;
-    }
-
-    public Map<String, List<String>> getValuesetDataTypeMap() {
-        Map<String, List<String>> valuesetDataTypeMapWithList = new HashMap<>();
-
-        List<String> keySet = new ArrayList<>(valuesetDataTypeMap.keySet());
-
-        for (String key : keySet) {
-            List<String> dataTypes = new ArrayList<>(valuesetDataTypeMap.get(key));
-            valuesetDataTypeMapWithList.put(key, dataTypes);
+        if (parametersFromIncludedLibrary != null) {
+          for (ParameterDef parameter : parametersFromIncludedLibrary.getDef()) {
+            this.allNamesToReturnTypeMap
+                .get(includedLibraryName + "-" + includedLibraryVersion)
+                .put(parameter.getName(), parameter.getResultType().toString());
+            this.expressionToReturnTypeMap.put(
+                include.getLocalIdentifier() + "." + parameter.getName(),
+                parameter.getResultType().toString());
+          }
         }
+      }
+    }
+  }
 
-        return valuesetDataTypeMapWithList;
+  /**
+   * Collects the valueset - datatype map and code - datatype map.
+   *
+   * <p>It loos through each translator object from the parser, and then for each translator it
+   * loops through the retrieves. It then puts the valueset/code and it's corresponding data type
+   * into the correct map.
+   */
+  private void collectValueSetCodeDataType(
+      Map<String, Map<String, Set<String>>> valuesetMap,
+      Map<String, Map<String, Set<String>>> codeMap) {
+    this.expressionNameToValuesetDataTypeMap = valuesetMap;
+    this.expressionNameToCodeDataTypeMap = codeMap;
+    this.valuesetDataTypeMap = flattenMap(valuesetMap);
+    this.codeDataTypeMap = flattenMap(codeMap);
+  }
+
+  /**
+   * The valueset/code - datatype map will come to us in a format of <ExpressionName, <Valueset/Code
+   * Name, [DataType]>>. We want to also have a flattened map which will be in the format of
+   * <Valueset/Code Name, [DataType]>
+   *
+   * @return a map in the above format
+   */
+  private Map<String, Set<String>> flattenMap(Map<String, Map<String, Set<String>>> mapToFlatten) {
+    Map<String, Set<String>> flattenedMap = new HashMap<>();
+
+    Set<String> keys = mapToFlatten.keySet();
+    for (String key : keys) {
+      Map<String, Set<String>> innerMap = mapToFlatten.get(key);
+
+      Set<String> innerKeys = innerMap.keySet();
+      for (String innerKey : innerKeys) {
+        flattenedMap.computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)));
+      }
     }
 
-    public Map<String, List<String>> getCodeDataTypeMap() {
-        Map<String, List<String>> codeDataTypeMapWithList = new HashMap<>();
+    return flattenedMap;
+  }
 
-        List<String> keySet = new ArrayList<>(codeDataTypeMap.keySet());
+  public Map<String, List<String>> getValuesetDataTypeMap() {
+    Map<String, List<String>> valuesetDataTypeMapWithList = new HashMap<>();
 
-        for (String key : keySet) {
-            List<String> dataTypes = new ArrayList<>(codeDataTypeMap.get(key));
-            codeDataTypeMapWithList.put(key, dataTypes);
-        }
+    List<String> keySet = new ArrayList<>(valuesetDataTypeMap.keySet());
 
-        return codeDataTypeMapWithList;
+    for (String key : keySet) {
+      List<String> dataTypes = new ArrayList<>(valuesetDataTypeMap.get(key));
+      valuesetDataTypeMapWithList.put(key, dataTypes);
     }
 
-    public Map<String, String> getNameToReturnTypeMap() {
-        return nameToReturnTypeMap;
+    return valuesetDataTypeMapWithList;
+  }
+
+  public Map<String, List<String>> getCodeDataTypeMap() {
+    Map<String, List<String>> codeDataTypeMapWithList = new HashMap<>();
+
+    List<String> keySet = new ArrayList<>(codeDataTypeMap.keySet());
+
+    for (String key : keySet) {
+      List<String> dataTypes = new ArrayList<>(codeDataTypeMap.get(key));
+      codeDataTypeMapWithList.put(key, dataTypes);
     }
 
-    public void setNameToReturnTypeMap(Map<String, String> nameToReturnTypeMap) {
-        this.nameToReturnTypeMap = nameToReturnTypeMap;
+    return codeDataTypeMapWithList;
+  }
+
+  public Map<String, String> getNameToReturnTypeMap() {
+    return nameToReturnTypeMap;
+  }
+
+  public void setNameToReturnTypeMap(Map<String, String> nameToReturnTypeMap) {
+    this.nameToReturnTypeMap = nameToReturnTypeMap;
+  }
+
+  public List<String> getUsedLibraries() {
+    return new ArrayList<>(usedLibraries);
+  }
+
+  private List<String> formatUsedLibraries() {
+    Set<String> usedLibraryFormatted = new HashSet<>();
+    for (String usedLibrary : usedLibraries) {
+      IncludeDef def = (IncludeDef) this.library.resolve(usedLibrary);
+      usedLibraryFormatted.add(def.getPath() + "-" + def.getVersion() + "|" + usedLibrary);
     }
 
-    public List<String> getUsedLibraries() {
-        return new ArrayList<>(usedLibraries);
-    }
+    return new ArrayList<>(usedLibraryFormatted);
+  }
 
-    private List<String> formatUsedLibraries() {
-        Set<String> usedLibraryFormatted = new HashSet<>();
-        for (String usedLibrary : usedLibraries) {
-            IncludeDef def = (IncludeDef) this.library.resolve(usedLibrary);
-            usedLibraryFormatted.add(def.getPath() + "-" + def.getVersion() + "|" + usedLibrary);
-        }
+  public List<String> getUsedCodes() {
+    return new ArrayList<>(usedCodes);
+  }
 
-        return new ArrayList<>(usedLibraryFormatted);
-    }
+  public List<String> getUsedCodeSystems() {
+    return new ArrayList<>(usedCodeSystems);
+  }
 
-    public List<String> getUsedCodes() {
-        return new ArrayList<>(usedCodes);
-    }
+  public List<String> getUsedValuesets() {
+    return new ArrayList<>(usedValuesets);
+  }
 
-    public List<String> getUsedCodeSystems() {
-        return new ArrayList<>(usedCodeSystems);
-    }
+  public List<String> getUsedParameters() {
+    return new ArrayList<>(usedParameters);
+  }
 
-    public List<String> getUsedValuesets() {
-        return new ArrayList<>(usedValuesets);
-    }
+  public List<String> getUsedDefinitions() {
+    return new ArrayList<>(usedDefinitions);
+  }
 
-    public List<String> getUsedParameters() {
-        return new ArrayList<>(usedParameters);
-    }
+  public List<String> getUsedFunctions() {
+    return new ArrayList<>(usedFunctions);
+  }
 
-    public List<String> getUsedDefinitions() {
-        return new ArrayList<>(usedDefinitions);
-    }
+  public Map<String, Map<String, Set<String>>> getExpressionNameToValuesetDataTypeMap() {
+    return expressionNameToValuesetDataTypeMap;
+  }
 
-    public List<String> getUsedFunctions() {
-        return new ArrayList<>(usedFunctions);
-    }
+  public Map<String, Map<String, Set<String>>> getExpressionNameToCodeDataTypeMap() {
+    return expressionNameToCodeDataTypeMap;
+  }
 
-    public Map<String, Map<String, Set<String>>> getExpressionNameToValuesetDataTypeMap() {
-        return expressionNameToValuesetDataTypeMap;
-    }
+  public DataCriteria getDataCriteria() {
+    return dataCriteria;
+  }
 
-    public Map<String, Map<String, Set<String>>> getExpressionNameToCodeDataTypeMap() {
-        return expressionNameToCodeDataTypeMap;
-    }
+  @Override
+  public String toString() {
 
-    public DataCriteria getDataCriteria() {
-        return dataCriteria;
-    }
+    StringBuilder builder = new StringBuilder();
 
-    @Override
-    public String toString() {
+    builder.append("RETURN TYPE MAP: " + this.getAllNamesToReturnTypeMap());
+    builder.append("\n");
+    builder.append("VALUSET-DATATYPE MAP: " + this.getValuesetDataTypeMap());
+    builder.append("\n");
+    builder.append("CODE-DATATYPE MAP: " + this.getCodeDataTypeMap());
+    builder.append("\n");
+    builder.append(
+        "EXPRESSION NAME - VALUSET-DATATYPE MAP: " + this.getExpressionNameToValuesetDataTypeMap());
+    builder.append("\n");
+    builder.append(
+        "EXPRESSION NAME - CODE-DATATYPE MAP: " + this.getExpressionNameToCodeDataTypeMap());
+    builder.append("\n");
+    builder.append("USED LIBRARIES: " + this.getUsedLibraries());
+    builder.append("\n");
+    builder.append("USED VALUESETS: " + this.getUsedValuesets());
+    builder.append("\n");
+    builder.append("USED CODESYSTEMS: " + this.getUsedCodeSystems());
+    builder.append("\n");
+    builder.append("USED CODES: " + this.getUsedCodes());
+    builder.append("\n");
+    builder.append("USED PARAMETERS: " + this.getUsedParameters());
+    builder.append("\n");
+    builder.append("USED DEFINITIONS: " + this.getUsedDefinitions());
+    builder.append("\n");
+    builder.append("USED FUNCTIONS " + this.getUsedFunctions());
 
-        StringBuilder builder = new StringBuilder();
+    return builder.toString();
+  }
 
-        builder.append("RETURN TYPE MAP: " + this.getAllNamesToReturnTypeMap());
-        builder.append("\n");
-        builder.append("VALUSET-DATATYPE MAP: " + this.getValuesetDataTypeMap());
-        builder.append("\n");
-        builder.append("CODE-DATATYPE MAP: " + this.getCodeDataTypeMap());
-        builder.append("\n");
-        builder.append("EXPRESSION NAME - VALUSET-DATATYPE MAP: " + this.getExpressionNameToValuesetDataTypeMap());
-        builder.append("\n");
-        builder.append("EXPRESSION NAME - CODE-DATATYPE MAP: " + this.getExpressionNameToCodeDataTypeMap());
-        builder.append("\n");
-        builder.append("USED LIBRARIES: " + this.getUsedLibraries());
-        builder.append("\n");
-        builder.append("USED VALUESETS: " + this.getUsedValuesets());
-        builder.append("\n");
-        builder.append("USED CODESYSTEMS: " + this.getUsedCodeSystems());
-        builder.append("\n");
-        builder.append("USED CODES: " + this.getUsedCodes());
-        builder.append("\n");
-        builder.append("USED PARAMETERS: " + this.getUsedParameters());
-        builder.append("\n");
-        builder.append("USED DEFINITIONS: " + this.getUsedDefinitions());
-        builder.append("\n");
-        builder.append("USED FUNCTIONS " + this.getUsedFunctions());
+  public Map<String, Map<String, String>> getAllNamesToReturnTypeMap() {
+    return allNamesToReturnTypeMap;
+  }
 
-        return builder.toString();
-    }
-
-    public Map<String, Map<String, String>> getAllNamesToReturnTypeMap() {
-        return allNamesToReturnTypeMap;
-    }
-
-    public Map<String, String> getExpressionToReturnTypeMap() {
-        return expressionToReturnTypeMap;
-    }
-
+  public Map<String, String> getExpressionToReturnTypeMap() {
+    return expressionToReturnTypeMap;
+  }
 }

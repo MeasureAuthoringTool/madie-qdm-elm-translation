@@ -10,18 +10,15 @@ public class CQLDefinition implements CQLExpression {
   private String commentString = "";
   private String returnType;
 
-
   public static class Comparator implements java.util.Comparator<CQLDefinition> {
 
     /* (non-Javadoc)
      * @see java.util.Comparator#compare(java.lang.Object, java.lang.Object)
      */
     @Override
-    public int compare(CQLDefinition o1,
-                       CQLDefinition o2) {
+    public int compare(CQLDefinition o1, CQLDefinition o2) {
       return o1.getName().compareTo(o2.getName());
     }
-
   }
 
   @Override
@@ -53,7 +50,6 @@ public class CQLDefinition implements CQLExpression {
   public void setLogic(String logic) {
     setDefinitionLogic(logic);
   }
-
 
   public String getDefinitionName() {
     return definitionName.trim();
@@ -115,6 +111,4 @@ public class CQLDefinition implements CQLExpression {
   public void setReturnType(String returnType) {
     this.returnType = returnType;
   }
-
-
 }

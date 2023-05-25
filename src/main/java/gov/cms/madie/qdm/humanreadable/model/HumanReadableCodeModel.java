@@ -5,141 +5,156 @@ import lombok.NoArgsConstructor;
 
 @NoArgsConstructor
 public class HumanReadableCodeModel implements HumanReadableTerminologyModel {
-	private String name;
-	private String oid;
-	private String codesystemName;
-	private String codesystemVersion;
-	private boolean isCodesystemVersionIncluded;
-	private String datatype; 
-	private String terminologyDisplay;
-	private String dataCriteriaDisplay; 
-	
-	public HumanReadableCodeModel(String name, String oid, String codesystemName, boolean isCodeSystemVersionIncluded, String codesystemVersion, String datatype) {
-		this.name = name;
-		this.oid = oid;
-		this.codesystemName = codesystemName;
-		this.codesystemVersion = codesystemVersion;
-		this.isCodesystemVersionIncluded = isCodeSystemVersionIncluded;
-		this.datatype = datatype; 
-		createDataCriteriaDisplay(); 
-		createTerminologyDisplay();
-	}
+  private String name;
+  private String oid;
+  private String codesystemName;
+  private String codesystemVersion;
+  private boolean isCodesystemVersionIncluded;
+  private String datatype;
+  private String terminologyDisplay;
+  private String dataCriteriaDisplay;
 
-	@Override
-	public String getName() {
-		return name;
-	}
+  public HumanReadableCodeModel(
+      String name,
+      String oid,
+      String codesystemName,
+      boolean isCodeSystemVersionIncluded,
+      String codesystemVersion,
+      String datatype) {
+    this.name = name;
+    this.oid = oid;
+    this.codesystemName = codesystemName;
+    this.codesystemVersion = codesystemVersion;
+    this.isCodesystemVersionIncluded = isCodeSystemVersionIncluded;
+    this.datatype = datatype;
+    createDataCriteriaDisplay();
+    createTerminologyDisplay();
+  }
 
-	@Override
-	public void setName(String name) {
-		this.name = name;
-	}
+  @Override
+  public String getName() {
+    return name;
+  }
 
-	public String getOid() {
-		return oid;
-	}
+  @Override
+  public void setName(String name) {
+    this.name = name;
+  }
 
-	public void setOid(String oid) {
-		this.oid = oid;
-	}
+  public String getOid() {
+    return oid;
+  }
 
-	public String getCodesystemName() {
-		return codesystemName;
-	}
+  public void setOid(String oid) {
+    this.oid = oid;
+  }
 
-	public void setCodesystemName(String taxonomy) {
-		this.codesystemName = taxonomy;
-	}
+  public String getCodesystemName() {
+    return codesystemName;
+  }
 
-	public boolean getIsCodesystemVersionIncluded() {
-		return isCodesystemVersionIncluded;
-	}
+  public void setCodesystemName(String taxonomy) {
+    this.codesystemName = taxonomy;
+  }
 
-	public void setIsCodesystemVersionIncluded(boolean isCodeSystemIncluded) {
-		this.isCodesystemVersionIncluded = isCodeSystemIncluded;
-	}
+  public boolean getIsCodesystemVersionIncluded() {
+    return isCodesystemVersionIncluded;
+  }
 
-	public String getTerminologyDisplay() {
-		createTerminologyDisplay();
-		return this.terminologyDisplay;
-	}
+  public void setIsCodesystemVersionIncluded(boolean isCodeSystemIncluded) {
+    this.isCodesystemVersionIncluded = isCodeSystemIncluded;
+  }
 
-	private void createTerminologyDisplay() {
-		String codeSystemVersion = "";
-		if (isCodesystemVersionIncluded) {
-			codeSystemVersion = " version " + codesystemVersion;
-		}
+  public String getTerminologyDisplay() {
+    createTerminologyDisplay();
+    return this.terminologyDisplay;
+  }
 
-		String codeOutput = "code \"" + name + "\" (\"" + codesystemName + codeSystemVersion + " Code (" + oid
-				+ ")\")";
-		this.terminologyDisplay = codeOutput;
-	}
+  private void createTerminologyDisplay() {
+    String codeSystemVersion = "";
+    if (isCodesystemVersionIncluded) {
+      codeSystemVersion = " version " + codesystemVersion;
+    }
 
-	@Override
-	public void setTerminologyDisplay(String display) {
-		this.terminologyDisplay = display;
-	}
+    String codeOutput =
+        "code \"" + name + "\" (\"" + codesystemName + codeSystemVersion + " Code (" + oid + ")\")";
+    this.terminologyDisplay = codeOutput;
+  }
 
-	public String getCodesystemVersion() {
-		return codesystemVersion;
-	}
+  @Override
+  public void setTerminologyDisplay(String display) {
+    this.terminologyDisplay = display;
+  }
 
-	public void setCodesystemVersion(String codesystemVersion) {
-		this.codesystemVersion = codesystemVersion;
-	}
+  public String getCodesystemVersion() {
+    return codesystemVersion;
+  }
 
-	public String getDatatype() {
-		return datatype;
-	}
+  public void setCodesystemVersion(String codesystemVersion) {
+    this.codesystemVersion = codesystemVersion;
+  }
 
-	public void setDatatype(String datatype) {
-		this.datatype = datatype;
-	}
-	
-	private void createDataCriteriaDisplay() {
-		if("attribute".equals(datatype)){
-			datatype = "Attribute";
-		}
+  public String getDatatype() {
+    return datatype;
+  }
 
-		String output = "";
-		if(isCodesystemVersionIncluded) {
-			output = String.format("\"%s: %s\" using \"%s (%s version %s Code %s)\"", datatype, name, name, codesystemName, codesystemVersion, oid);
-		} else {
-			output = String.format("\"%s: %s\" using \"%s (%s Code %s)\"", datatype, name, name, codesystemName, oid);
-		}
-			
-		this.dataCriteriaDisplay = output; 
-	}
+  public void setDatatype(String datatype) {
+    this.datatype = datatype;
+  }
 
-	@Override
-	public String getDataCriteriaDisplay() {
-		createDataCriteriaDisplay();
-		return dataCriteriaDisplay;
-	}
+  private void createDataCriteriaDisplay() {
+    if ("attribute".equals(datatype)) {
+      datatype = "Attribute";
+    }
 
-	@Override
-	public void setDataCriteriaDisplay(String dataCriteriaDisplay) {
-		this.dataCriteriaDisplay = dataCriteriaDisplay;
-	}
-	
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, oid, codesystemName, codesystemVersion, datatype);
-	}
+    String output = "";
+    if (isCodesystemVersionIncluded) {
+      output =
+          String.format(
+              "\"%s: %s\" using \"%s (%s version %s Code %s)\"",
+              datatype, name, name, codesystemName, codesystemVersion, oid);
+    } else {
+      output =
+          String.format(
+              "\"%s: %s\" using \"%s (%s Code %s)\"", datatype, name, name, codesystemName, oid);
+    }
 
-	@Override
-	public boolean equals(Object obj) {
-		HumanReadableCodeModel model = (HumanReadableCodeModel) obj; 
-		return name.equals(model.name) && oid.equals(model.oid) && codesystemName.equals(model.codesystemName) && codesystemVersion.equals(model.codesystemVersion) && isDatatypeEqual(datatype, model.datatype);
-	}
-	
-	private boolean isDatatypeEqual(String d1, String d2) {
-		// if datatype 1 is not null, then check the equality to datatype 2.
-		// if datatype 1 is null, then check to see if datatype 2 is null. 
-		if(d1 != null) {
-			return d1.equals(d2);
-		} else {
-			return d2 == null; 
-		}
-	}
+    this.dataCriteriaDisplay = output;
+  }
+
+  @Override
+  public String getDataCriteriaDisplay() {
+    createDataCriteriaDisplay();
+    return dataCriteriaDisplay;
+  }
+
+  @Override
+  public void setDataCriteriaDisplay(String dataCriteriaDisplay) {
+    this.dataCriteriaDisplay = dataCriteriaDisplay;
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(name, oid, codesystemName, codesystemVersion, datatype);
+  }
+
+  @Override
+  public boolean equals(Object obj) {
+    HumanReadableCodeModel model = (HumanReadableCodeModel) obj;
+    return name.equals(model.name)
+        && oid.equals(model.oid)
+        && codesystemName.equals(model.codesystemName)
+        && codesystemVersion.equals(model.codesystemVersion)
+        && isDatatypeEqual(datatype, model.datatype);
+  }
+
+  private boolean isDatatypeEqual(String d1, String d2) {
+    // if datatype 1 is not null, then check the equality to datatype 2.
+    // if datatype 1 is null, then check to see if datatype 2 is null.
+    if (d1 != null) {
+      return d1.equals(d2);
+    } else {
+      return d2 == null;
+    }
+  }
 }

@@ -21,24 +21,15 @@ public class CQLModel {
   private String usingModel;
   private String context;
 
-  @Builder.Default
-  private List<CQLQualityDataSetDTO> valueSetList = new ArrayList<>();
-  @Builder.Default
-  private List<CQLQualityDataSetDTO> allValueSetAndCodeList = new ArrayList<>();
-  @Builder.Default
-  private List<CQLParameter> cqlParameters = new ArrayList<>();
-  @Builder.Default
-  private List<CQLDefinition> cqlDefinitions = new ArrayList<>();
-  @Builder.Default
-  private List<CQLFunctions> cqlFunctions = new ArrayList<>();
-  @Builder.Default
-  private List<CQLCodeSystem> codeSystemList = new ArrayList<>();
-  @Builder.Default
-  private List<CQLCode> codeList = new ArrayList<>();
-  @Builder.Default
-  private List<CQLIncludeLibrary> cqlIncludeLibraries = new ArrayList<>();
-  @Builder.Default
-  private Map<CQLIncludeLibrary, CQLModel> includedLibraries = new HashMap<>();
+  @Builder.Default private List<CQLQualityDataSetDTO> valueSetList = new ArrayList<>();
+  @Builder.Default private List<CQLQualityDataSetDTO> allValueSetAndCodeList = new ArrayList<>();
+  @Builder.Default private List<CQLParameter> cqlParameters = new ArrayList<>();
+  @Builder.Default private List<CQLDefinition> cqlDefinitions = new ArrayList<>();
+  @Builder.Default private List<CQLFunctions> cqlFunctions = new ArrayList<>();
+  @Builder.Default private List<CQLCodeSystem> codeSystemList = new ArrayList<>();
+  @Builder.Default private List<CQLCode> codeList = new ArrayList<>();
+  @Builder.Default private List<CQLIncludeLibrary> cqlIncludeLibraries = new ArrayList<>();
+  @Builder.Default private Map<CQLIncludeLibrary, CQLModel> includedLibraries = new HashMap<>();
 
   private int lines;
 
@@ -187,7 +178,8 @@ public class CQLModel {
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
       for (CQLDefinition def : model.getDefinitionList()) {
-        includedDefCQLIdentifierObject.add(new CQLIdentifierObject(lib.getAliasName(), def.getName()));
+        includedDefCQLIdentifierObject.add(
+            new CQLIdentifierObject(lib.getAliasName(), def.getName()));
       }
     }
     return includedDefCQLIdentifierObject;
@@ -196,10 +188,11 @@ public class CQLModel {
   public List<CQLFunctions> getIncludedFunc() {
     List<CQLFunctions> includedFunctions = new ArrayList<>();
 
-    includedLibraries.forEach((k, v) -> {
-      v.getCqlFunctions().forEach(f -> f.setAliasName(k.getAliasName()));
-      includedFunctions.addAll(v.getCqlFunctions());
-    });
+    includedLibraries.forEach(
+        (k, v) -> {
+          v.getCqlFunctions().forEach(f -> f.setAliasName(k.getAliasName()));
+          includedFunctions.addAll(v.getCqlFunctions());
+        });
 
     return includedFunctions;
   }
@@ -209,7 +202,8 @@ public class CQLModel {
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
       for (CQLFunctions fun : model.getCqlFunctions()) {
-        includedFuncCQLIdentifierObject.add(new CQLIdentifierObject(lib.getAliasName(), fun.getName()));
+        includedFuncCQLIdentifierObject.add(
+            new CQLIdentifierObject(lib.getAliasName(), fun.getName()));
       }
     }
     return includedFuncCQLIdentifierObject;
@@ -228,7 +222,8 @@ public class CQLModel {
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
       for (CQLQualityDataSetDTO value : model.getValueSetList()) {
-        includedValueSetCQLIdentifierObject.add(new CQLIdentifierObject(lib.getAliasName(), value.getName()));
+        includedValueSetCQLIdentifierObject.add(
+            new CQLIdentifierObject(lib.getAliasName(), value.getName()));
       }
     }
     return includedValueSetCQLIdentifierObject;
@@ -247,12 +242,12 @@ public class CQLModel {
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
       for (CQLParameter param : model.getCqlParameters()) {
-        includedParamCQLIdentifierObject.add(new CQLIdentifierObject(lib.getAliasName(), param.getName()));
+        includedParamCQLIdentifierObject.add(
+            new CQLIdentifierObject(lib.getAliasName(), param.getName()));
       }
     }
     return includedParamCQLIdentifierObject;
   }
-
 
   public List<CQLCode> getIncludedCode() {
     List<CQLCode> includedCodeNames = new ArrayList<>();
@@ -267,7 +262,8 @@ public class CQLModel {
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
       for (CQLCode code : model.getCodeList()) {
-        includedCodeCQLIdentifierObject.add(new CQLIdentifierObject(lib.getAliasName(), code.getDisplayName()));
+        includedCodeCQLIdentifierObject.add(
+            new CQLIdentifierObject(lib.getAliasName(), code.getDisplayName()));
       }
     }
     return includedCodeCQLIdentifierObject;
@@ -276,7 +272,8 @@ public class CQLModel {
   /**
    * Gets a valueset by name from the parent or any children
    *
-   * @param formattedCodeName the name in the format libraryname-x.x.xxx|alias|code identifier if from child, otherwise just code identifer
+   * @param formattedCodeName the name in the format libraryname-x.x.xxx|alias|code identifier if
+   *     from child, otherwise just code identifer
    * @return the code found
    */
   public CQLCode getCodeByName(String formattedCodeName) {
@@ -291,13 +288,21 @@ public class CQLModel {
     // if the library name version is null, then the code is in the parent
     if (libraryNameVersion == null) {
       for (CQLCode code : codeList) {
-        if (code.getDisplayName() == null ? code.getCodeName().equals(codeName) : code.getDisplayName().equals(codeName)) {
+        if (code.getDisplayName() == null
+            ? code.getCodeName().equals(codeName)
+            : code.getDisplayName().equals(codeName)) {
           return code;
         }
       }
     } else {
       final String nameVersion = libraryNameVersion;
-      List<CQLIncludeLibrary> cqlIncludeLibrary = includedLibraries.keySet().stream().filter(lib -> createNameVersionString(lib.getCqlLibraryName(), lib.getVersion()).equals(nameVersion)).collect(Collectors.toList());
+      List<CQLIncludeLibrary> cqlIncludeLibrary =
+          includedLibraries.keySet().stream()
+              .filter(
+                  lib ->
+                      createNameVersionString(lib.getCqlLibraryName(), lib.getVersion())
+                          .equals(nameVersion))
+              .collect(Collectors.toList());
       if (!cqlIncludeLibrary.isEmpty()) {
         for (CQLCode code : includedLibraries.get(cqlIncludeLibrary.get(0)).getCodeList()) {
           if (code.getDisplayName().equals(codeName)) {
@@ -317,7 +322,8 @@ public class CQLModel {
   /**
    * Gets a code by name from the parent or any children
    *
-   * @param formattedValuesetName the name in the format libraryname-x.x.xxx|alias|valueset identifier
+   * @param formattedValuesetName the name in the format libraryname-x.x.xxx|alias|valueset
+   *     identifier
    * @return the code found
    */
   public CQLQualityDataSetDTO getValuesetByName(String formattedValuesetName) {
@@ -338,9 +344,16 @@ public class CQLModel {
       }
     } else {
       final String nameVersion = libraryNameVersion;
-      List<CQLIncludeLibrary> cqlIncludeLibrary = includedLibraries.keySet().stream().filter(lib -> createNameVersionString(lib.getCqlLibraryName(), lib.getVersion()).equals(nameVersion)).collect(Collectors.toList());
+      List<CQLIncludeLibrary> cqlIncludeLibrary =
+          includedLibraries.keySet().stream()
+              .filter(
+                  lib ->
+                      createNameVersionString(lib.getCqlLibraryName(), lib.getVersion())
+                          .equals(nameVersion))
+              .collect(Collectors.toList());
       if (!cqlIncludeLibrary.isEmpty()) {
-        for (CQLQualityDataSetDTO valueset : includedLibraries.get(cqlIncludeLibrary.get(0)).getValueSetList()) {
+        for (CQLQualityDataSetDTO valueset :
+            includedLibraries.get(cqlIncludeLibrary.get(0)).getValueSetList()) {
           if (valueset.getName().equals(valuesetName)) {
             return valueset;
           }

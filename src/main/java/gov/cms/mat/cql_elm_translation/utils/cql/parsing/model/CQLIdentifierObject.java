@@ -17,9 +17,7 @@ public class CQLIdentifierObject {
     this.identifier = identifier;
   }
 
-  public CQLIdentifierObject() {
-
-  }
+  public CQLIdentifierObject() {}
 
   public String getAliasName() {
     return aliasName;
@@ -28,7 +26,6 @@ public class CQLIdentifierObject {
   public void setAliasName(String aliasName) {
     this.aliasName = aliasName;
   }
-
 
   public String getIdentifier() {
     return identifier;
@@ -39,7 +36,7 @@ public class CQLIdentifierObject {
   }
 
   public String getDisplay() {
-    if(aliasName != null && !aliasName.isEmpty()) {
+    if (aliasName != null && !aliasName.isEmpty()) {
       return aliasName + "." + identifier;
     } else {
       return identifier;
@@ -48,7 +45,7 @@ public class CQLIdentifierObject {
 
   @Override
   public String toString() {
-    if(aliasName != null && !aliasName.isEmpty()) {
+    if (aliasName != null && !aliasName.isEmpty()) {
       return aliasName + "." + "\"" + identifier + "\"";
     } else {
       return "\"" + identifier + "\"";
@@ -70,5 +67,4 @@ public class CQLIdentifierObject {
   public void setReturnType(String returnType) {
     this.returnType = returnType;
   }
-
 }

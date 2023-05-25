@@ -1,17 +1,20 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
+import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -40,10 +43,15 @@ public class CqlToolsController {
 
   @GetMapping("/cql/dataCriteria")
   public ResponseEntity<DataCriteria> getDataCriteria(
-      @RequestBody String cql,
-      @RequestHeader("Authorization") String accessToken) {
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
 
-    return ResponseEntity.ok(
-        dataCriteriaService.parseDataCriteriaFromCql(cql, accessToken));
+    return ResponseEntity.ok(dataCriteriaService.parseDataCriteriaFromCql(cql, accessToken));
+  }
+
+  @GetMapping("/cql/source-data-criteria")
+  public ResponseEntity<List<SourceDataCriteria>> getSourceDataCriteria(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
   }
 }

@@ -25,6 +25,4 @@ public final class ModelTypeHelper {
   public static boolean isQdm(String type) {
     return QDM.equalsIgnoreCase(defaultTypeIfBlank(type));
   }
-
-
 }

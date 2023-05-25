@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
-
 import gov.cms.mat.cql_elm_translation.utils.cql.ModelTypeHelper;
 
 import java.sql.Timestamp;

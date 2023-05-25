@@ -18,7 +18,6 @@ public class CQLError implements Comparable<CQLError> {
 
   private String severity;
 
-
   public String getSeverity() {
     return severity;
   }
@@ -99,5 +98,4 @@ public class CQLError implements Comparable<CQLError> {
 
     return 0;
   }
-
 }

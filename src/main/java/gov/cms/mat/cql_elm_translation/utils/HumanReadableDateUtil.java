@@ -2,12 +2,13 @@ package gov.cms.mat.cql_elm_translation.utils;
 
 public class HumanReadableDateUtil {
 
-  public static String getFormattedMeasurementPeriod(boolean isCalendarYear, String startDate, String endDate) {
+  public static String getFormattedMeasurementPeriod(
+      boolean isCalendarYear, String startDate, String endDate) {
     String formattedStartDate = " ";
     String formattedEndDate = " ";
     String through = " through ";
     // if start or end are not null format the date
-    if(!isCalendarYear){
+    if (!isCalendarYear) {
       if (!" ".equals(startDate)) {
         formattedStartDate = formatDate(startDate);
       }
@@ -88,9 +89,11 @@ public class HumanReadableDateUtil {
     String[] startDateMonth = startDate.split("/");
     String[] endDateMonth = endDate.split("/");
 
-    String formattedStartDate = getMonth(startDateMonth[0]) + " " + startDateMonth[1] + ", " + startDateMonth[2];
-    String formattedEndDate = getMonth(endDateMonth[0]) + " " + endDateMonth[1] + ", " + endDateMonth[2];
+    String formattedStartDate =
+        getMonth(startDateMonth[0]) + " " + startDateMonth[1] + ", " + startDateMonth[2];
+    String formattedEndDate =
+        getMonth(endDateMonth[0]) + " " + endDateMonth[1] + ", " + endDateMonth[2];
 
-    return formattedStartDate + " through "+ formattedEndDate;
+    return formattedStartDate + " through " + formattedEndDate;
   }
 }
