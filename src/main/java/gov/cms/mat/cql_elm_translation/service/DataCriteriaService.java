@@ -94,8 +94,8 @@ public class DataCriteriaService {
     String type = dataType.replace(",", "").replace(" ", "");
     return SourceDataCriteria.builder()
         // generate fake code list id for drc, as it doesn't have one
-        .codeListId("drc-" + DigestUtils.md5Hex(type))
-        .qdmTitle(code.getName())
+        .oid("drc-" + DigestUtils.md5Hex(type))
+        .title(code.getName())
         .description(dataType + ": " + code.getName())
         .type(type)
         .drc(true)
@@ -106,8 +106,8 @@ public class DataCriteriaService {
       CQLValueSet valueSet, Set<String> dataTypes) {
     String dataType = dataTypes.stream().findFirst().orElse(null);
     return SourceDataCriteria.builder()
-        .codeListId(valueSet.getOid())
-        .qdmTitle(valueSet.getName())
+        .oid(valueSet.getOid())
+        .title(valueSet.getName())
         .description(dataType + ": " + valueSet.getName())
         .type(dataType.replace(",", "").replace(" ", ""))
         .build();

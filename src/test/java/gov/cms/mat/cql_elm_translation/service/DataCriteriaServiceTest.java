@@ -69,9 +69,8 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
     // source data criteria for value set
     assertThat(sourceDataCriteria.size(), is(equalTo(2)));
-    assertThat(
-        sourceDataCriteria.get(0).getCodeListId(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
-    assertThat(sourceDataCriteria.get(0).getQdmTitle(), is(equalTo("Encounter Inpatient")));
+    assertThat(sourceDataCriteria.get(0).getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
+    assertThat(sourceDataCriteria.get(0).getTitle(), is(equalTo("Encounter Inpatient")));
     assertThat(sourceDataCriteria.get(0).getType(), is(equalTo("EncounterPerformed")));
     assertThat(
         sourceDataCriteria.get(0).getDescription(),
@@ -81,7 +80,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     // source data criteria for direct reference code
     assertThat(sourceDataCriteria.size(), is(equalTo(2)));
     assertTrue(sourceDataCriteria.get(1).isDrc());
-    assertThat(sourceDataCriteria.get(1).getQdmTitle(), is(equalTo("Clinical Examples")));
+    assertThat(sourceDataCriteria.get(1).getTitle(), is(equalTo("Clinical Examples")));
     assertThat(sourceDataCriteria.get(1).getType(), is(equalTo("EncounterPerformed")));
     assertThat(
         sourceDataCriteria.get(1).getDescription(),

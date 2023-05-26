@@ -72,19 +72,14 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   void testGetSourceDataCriteria() {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     String token = "john";
-    var sdc =
-        SourceDataCriteria.builder()
-            .codeListId("1.2.3")
-            .description("EP: Test")
-            .qdmTitle("EP")
-            .build();
+    var sdc = SourceDataCriteria.builder().oid("1.2.3").description("EP: Test").title("EP").build();
     when(dataCriteriaService.getSourceDataCriteria(anyString(), anyString()))
         .thenReturn(List.of(sdc));
     var result = cqlToolsController.getSourceDataCriteria(cql, token);
     SourceDataCriteria sourceDataCriteria = result.getBody().get(0);
-    assertThat(sourceDataCriteria.getCodeListId(), is(equalTo(sdc.getCodeListId())));
+    assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
     assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
-    assertThat(sourceDataCriteria.getQdmTitle(), is(equalTo(sdc.getQdmTitle())));
+    assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));
   }
 
   private boolean inputMatchesOutput(String input, String output) {
