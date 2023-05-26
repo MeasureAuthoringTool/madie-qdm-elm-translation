@@ -111,7 +111,13 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(cql, token);
 
-    // source data criteria for value set
+    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetSourceDataCriteriaWhenNoCqlProvided() {
+    List<SourceDataCriteria> sourceDataCriteria =
+      dataCriteriaService.getSourceDataCriteria("", token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
 }

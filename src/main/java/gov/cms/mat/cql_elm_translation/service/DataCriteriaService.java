@@ -11,6 +11,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -56,10 +57,16 @@ public class DataCriteriaService {
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
+    if (StringUtils.isBlank(cql)) {
+      log.info("Data criteria not found as cql is blank");
+      return Collections.emptyList();
+    }
+
     DataCriteria dataCriteria = parseDataCriteriaFromCql(cql, accessToken);
     Map<CQLValueSet, Set<String>> criteriaWithValueSet =
         dataCriteria.getDataCriteriaWithValueSets();
     if (MapUtils.isEmpty(criteriaWithValueSet)) {
+      log.info("Data criteria not found for given cql");
       return Collections.emptyList();
     }
     // data criteria from value sets
