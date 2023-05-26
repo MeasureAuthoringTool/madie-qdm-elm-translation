@@ -90,14 +90,14 @@ public class DataCriteriaService {
 
   private SourceDataCriteria buildSourceDataCriteriaForCode(CQLCode code, Set<String> dataTypes) {
     String dataType = dataTypes.stream().findFirst().orElse(null);
-    // e.g "Encounter, Performed" becomes "EncounterPerformed"
-    String type = dataType.replace(",", "").replace(" ", "");
+    String type = buildCriteriaType(dataType);
+    String name = splitByPipeAndGetLast(code.getName());
     return SourceDataCriteria.builder()
         // generate fake oid for drc, as it doesn't have one
         .oid("drc-" + DigestUtils.md5Hex(type))
-        .title(code.getName())
-        .description(dataType + ": " + code.getName())
-        .type(type)
+        .title(name)
+        .description(dataType + ": " + name)
+        .type(buildCriteriaType(dataType))
         .drc(true)
         .build();
   }
@@ -105,12 +105,24 @@ public class DataCriteriaService {
   private SourceDataCriteria buildSourceDataCriteriaForValueSet(
       CQLValueSet valueSet, Set<String> dataTypes) {
     String dataType = dataTypes.stream().findFirst().orElse(null);
+    String name = splitByPipeAndGetLast(valueSet.getName());
     return SourceDataCriteria.builder()
         .oid(valueSet.getOid())
-        .title(valueSet.getName())
-        .description(dataType + ": " + valueSet.getName())
-        .type(dataType.replace(",", "").replace(" ", ""))
+        .title(name)
+        .description(dataType + ": " + name)
+        .type(buildCriteriaType(dataType))
         .build();
+  }
+
+  private String splitByPipeAndGetLast(String criteria) {
+    String[] parts = criteria.split("\\|");
+    //get last part
+    return parts[parts.length - 1];
+  }
+
+  private String buildCriteriaType(String dataType) {
+    // e.g "Encounter, Performed" becomes "EncounterPerformed"
+    return dataType.replace(",", "").replace(" ", "");
   }
 
   private Map<String, String> getIncludedLibrariesCql(
