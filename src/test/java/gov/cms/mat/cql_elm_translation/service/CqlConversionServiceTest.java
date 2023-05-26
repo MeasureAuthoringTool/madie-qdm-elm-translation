@@ -19,6 +19,7 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import gov.cms.mat.cql.elements.UsingProperties;
+import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import org.apache.commons.lang3.StringUtils;
 import org.junit.jupiter.api.AfterEach;
@@ -33,7 +34,7 @@ import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 
 @SpringBootTest
-class CqlConversionServiceTest {
+class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Autowired private CqlConversionService service;
 
@@ -206,5 +207,19 @@ class CqlConversionServiceTest {
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }
+  }
+
+  @Test
+  void testGetElmForCql() {
+    String cql = getData("/qdm_data_criteria_retrieval_test.cql");
+    List<String> elms = service.getElmForCql(cql, "token");
+    assertThat(elms.size(), is(equalTo(1)));
+    assertThat(elms.get(0).contains("DataCriteriaRetrivalTest"), is(true));
+  }
+
+  @Test
+  void testGetElmForBlankCql() {
+    List<String> elms = service.getElmForCql(null, "token");
+    assertThat(elms.size(), is(equalTo(0)));
   }
 }

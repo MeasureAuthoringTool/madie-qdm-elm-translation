@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -28,6 +29,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
 
   @InjectMocks private CqlToolsController cqlToolsController;
   @Mock private DataCriteriaService dataCriteriaService;
+  @Mock private CqlConversionService cqlConversionService;
 
   @Test
   void formatCql() {
@@ -80,6 +82,17 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
     assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
     assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));
+  }
+
+  @Test
+  void testGetLibraryElms() {
+    when(cqlConversionService.getElmForCql(anyString(), anyString()))
+        .thenReturn(List.of("Elm 1", "Elm 2"));
+    var result = cqlToolsController.getLibraryElms("test cql", "john");
+    List<String> elms = result.getBody();
+    assertThat(elms.size(), is(equalTo(2)));
+    assertThat(elms.get(0), is(equalTo("Elm 1")));
+    assertThat(elms.get(1), is(equalTo("Elm 2")));
   }
 
   private boolean inputMatchesOutput(String input, String output) {

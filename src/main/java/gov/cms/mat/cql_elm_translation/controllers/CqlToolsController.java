@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -22,6 +23,7 @@ import java.util.List;
 public class CqlToolsController {
 
   private final DataCriteriaService dataCriteriaService;
+  private final CqlConversionService cqlConversionService;
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
@@ -53,5 +55,12 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @GetMapping("/cql/elm")
+  public ResponseEntity<List<String>> getLibraryElms(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(cqlConversionService.getElmForCql(cql, accessToken));
   }
 }
