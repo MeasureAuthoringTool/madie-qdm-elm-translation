@@ -93,7 +93,7 @@ public class DataCriteriaService {
     // e.g "Encounter, Performed" becomes "EncounterPerformed"
     String type = dataType.replace(",", "").replace(" ", "");
     return SourceDataCriteria.builder()
-        // generate fake code list id for drc, as it doesn't have one
+        // generate fake oid for drc, as it doesn't have one
         .oid("drc-" + DigestUtils.md5Hex(type))
         .title(code.getName())
         .description(dataType + ": " + code.getName())
