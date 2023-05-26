@@ -116,7 +116,7 @@ public class DataCriteriaService {
 
   private String splitByPipeAndGetLast(String criteria) {
     String[] parts = criteria.split("\\|");
-    //get last part
+    // get last part
     return parts[parts.length - 1];
   }
 
