@@ -423,7 +423,8 @@ public final class CQLUtilityClass {
   //            for (CQLIncludeLibrary includeLib : includeLibList) {
   //                sb.append("include ").append(includeLib.getCqlLibraryName());
   //
-  // sb.append(VERSION).append("'").append(MeasureUtility.formatVersionText(includeLib.getVersion())).append("' ");
+  // sb.append(VERSION).append("'")
+  //  .append(MeasureUtility.formatVersionText(includeLib.getVersion())).append("' ");
   //                sb.append("called ").append(includeLib.getAliasName());
   //                sb.append("\n");
   //            }

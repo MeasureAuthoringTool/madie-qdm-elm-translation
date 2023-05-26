@@ -6,6 +6,12 @@
 
 <suppressions>
   <suppress checks="FileLength"
-    files="ParameterHandler.java"
+    files="gov/cms/mat/cql_elm_translation/utils/cql/"
+  />
+  <suppress checks="MethodLength"
+            files="gov/cms/mat/cql_elm_translation/utils/cql/"
+  />
+  <suppress checks="NeedBraces"
+            files="gov/cms/mat/cql_elm_translation/utils/cql/"
   />
 </suppressions>
