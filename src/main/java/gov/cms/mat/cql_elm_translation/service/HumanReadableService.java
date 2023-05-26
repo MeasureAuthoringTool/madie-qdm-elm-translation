@@ -52,7 +52,7 @@ public class HumanReadableService {
   /**
    * Full HR Generation.
    *
-   * @param model
+   * @param model Human Readable custom model
    * @return
    * @throws IOException
    * @throws TemplateException
@@ -63,36 +63,6 @@ public class HumanReadableService {
     setMeasurementPeriodForQdm(model.getMeasureInformation());
     return FreeMarkerTemplateUtils.processTemplateIntoString(
         freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl"), paramsMap);
-  }
-
-  public String generateSinglePopulation(HumanReadablePopulationModel population)
-      throws IOException, TemplateException {
-    Map<String, Object> paramsMap = new HashMap<>();
-    paramsMap.put("population", population);
-    return FreeMarkerTemplateUtils.processTemplateIntoString(
-        freemarkerConfiguration.getTemplate("humanreadable/population_human_readable.ftl"),
-        paramsMap);
-  }
-
-  /**
-   * Truncated HR originally displayed on MAT's Measure Details page.
-   *
-   * @param measureInformationModel
-   * @param measureModel
-   * @return
-   * @throws IOException
-   * @throws TemplateException
-   */
-  public String generate(
-      HumanReadableMeasureInformationModel measureInformationModel, String measureModel)
-      throws IOException, TemplateException {
-    HumanReadable model = new HumanReadable();
-    model.setMeasureInformation(measureInformationModel);
-    Map<String, Object> paramsMap = new HashMap<>();
-    paramsMap.put("model", model);
-    return FreeMarkerTemplateUtils.processTemplateIntoString(
-        freemarkerConfiguration.getTemplate("humanreadable/human_readable_measuredetails.ftl"),
-        paramsMap);
   }
 
   private void setMeasurementPeriodForQdm(HumanReadableMeasureInformationModel model) {
