@@ -50,14 +50,14 @@ public class CqlToolsController {
     return ResponseEntity.ok(dataCriteriaService.parseDataCriteriaFromCql(cql, accessToken));
   }
 
-  @GetMapping("/cql/source-data-criteria")
+  @PutMapping("/cql/source-data-criteria")
   public ResponseEntity<List<SourceDataCriteria>> getSourceDataCriteria(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
   }
 
-  @GetMapping("/cql/elm")
+  @PutMapping("/cql/elm")
   public ResponseEntity<List<String>> getLibraryElms(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
