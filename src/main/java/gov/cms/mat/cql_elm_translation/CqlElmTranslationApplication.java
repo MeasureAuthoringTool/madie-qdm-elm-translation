@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation;
 
+import freemarker.template.Template;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -18,6 +19,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import jakarta.annotation.PostConstruct;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
+import java.io.IOException;
 import java.util.TimeZone;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
@@ -41,6 +43,16 @@ public class CqlElmTranslationApplication {
     FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
     freeMarkerConfigurer.setTemplateLoaderPath("classpath:/templates");
     return freeMarkerConfigurer;
+  }
+
+  @Bean
+  public Template baseHumanReadableTemplate(
+      freemarker.template.Configuration freemarkerConfiguration) {
+    try {
+      return freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl");
+    } catch (IOException e) {
+      throw new RuntimeException("Unable to load Human Readable Template", e);
+    }
   }
 
   @Bean(name = "FilterRegistrationBeanSecurityFilter")

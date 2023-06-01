@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
@@ -25,17 +25,16 @@ import java.util.stream.Collectors;
 @Component
 @AllArgsConstructor
 public class HumanReadableService {
-  private Configuration freemarkerConfiguration;
+
+  private Template baseHumanReadableTemplate;
 
   /**
    * Transforms MADiE Measure to the QDM HumanReadable data model, then generates the HR HTML.
    *
    * @param measure MADiE Measure
-   * @return String QDM Human Readable HTML
-   * @throws TemplateException bad end
-   * @throws IOException bad end
+   * @return QDM Human Readable HTML
    */
-  public String generate(Measure measure) throws TemplateException, IOException {
+  public String generate(Measure measure) {
 
     HumanReadable hr =
         HumanReadable.builder()
@@ -49,20 +48,16 @@ public class HumanReadableService {
     return generate(hr);
   }
 
-  /**
-   * Full HR Generation.
-   *
-   * @param model Human Readable custom model
-   * @return
-   * @throws IOException
-   * @throws TemplateException
-   */
-  public String generate(HumanReadable model) throws IOException, TemplateException {
+  private String generate(HumanReadable model) {
     Map<String, Object> paramsMap = new HashMap<>();
     paramsMap.put("model", model);
     setMeasurementPeriodForQdm(model.getMeasureInformation());
-    return FreeMarkerTemplateUtils.processTemplateIntoString(
-        freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl"), paramsMap);
+    try {
+      return FreeMarkerTemplateUtils.processTemplateIntoString(
+          baseHumanReadableTemplate, paramsMap);
+    } catch (IOException | TemplateException e) {
+      throw new RuntimeException("Unable to process Human Readable from Measure", e);
+    }
   }
 
   private void setMeasurementPeriodForQdm(HumanReadableMeasureInformationModel model) {
@@ -74,7 +69,7 @@ public class HumanReadableService {
             isCalendarYear, measurementPeriodStartDate, measurementPeriodEndDate));
   }
 
-  private HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
+  HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
     // TODO Needs safety checks
     return HumanReadableMeasureInformationModel.builder()
         .qdmVersion(5.6) // TODO Replace hardcode
@@ -99,7 +94,7 @@ public class HumanReadableService {
         .build();
   }
 
-  private List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
+  List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
     return measure.getGroups().stream()
         .map(
             group ->
@@ -125,11 +120,11 @@ public class HumanReadableService {
         .collect(Collectors.toList());
   }
 
-  private List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
+  List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
     return List.of(new HumanReadableExpressionModel());
   }
 
-  private List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
+  List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
     return List.of(new HumanReadableValuesetModel());
   }
 }
