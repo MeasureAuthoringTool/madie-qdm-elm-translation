@@ -495,6 +495,11 @@
             </configuration>
           </execution>
         </executions>
+        <configuration>
+          <excludes>
+            <exclude>**/model/**/*</exclude>
+          </excludes>
+        </configuration>
       </plugin>
 
       <plugin>
