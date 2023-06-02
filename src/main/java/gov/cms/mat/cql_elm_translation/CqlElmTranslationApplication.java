@@ -51,7 +51,7 @@ public class CqlElmTranslationApplication {
     try {
       return freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl");
     } catch (IOException e) {
-      throw new RuntimeException("Unable to load Human Readable Template", e);
+      throw new IllegalStateException("Unable to load Human Readable Template", e);
     }
   }
 

@@ -56,7 +56,7 @@ public class HumanReadableService {
       return FreeMarkerTemplateUtils.processTemplateIntoString(
           baseHumanReadableTemplate, paramsMap);
     } catch (IOException | TemplateException e) {
-      throw new RuntimeException("Unable to process Human Readable from Measure", e);
+      throw new IllegalStateException("Unable to process Human Readable from Measure", e);
     }
   }
 
