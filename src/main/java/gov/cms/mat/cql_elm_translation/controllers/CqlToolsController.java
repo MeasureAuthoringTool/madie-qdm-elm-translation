@@ -1,22 +1,31 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
+import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequiredArgsConstructor
 public class CqlToolsController {
+
+  private final DataCriteriaService dataCriteriaService;
+  private final CqlConversionService cqlConversionService;
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
@@ -34,5 +43,19 @@ public class CqlToolsController {
       log.info("User [{}] is unable to format the CQL", principal.getName());
       throw new CqlFormatException(e.getMessage());
     }
+  }
+
+  @PutMapping("/cql/source-data-criteria")
+  public ResponseEntity<List<SourceDataCriteria>> getSourceDataCriteria(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @PutMapping("/cql/elm")
+  public ResponseEntity<List<String>> getLibraryElms(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(cqlConversionService.getElmForCql(cql, accessToken));
   }
 }

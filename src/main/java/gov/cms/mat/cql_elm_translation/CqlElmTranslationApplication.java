@@ -16,6 +16,8 @@ import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import jakarta.annotation.PostConstruct;
+import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
+
 import java.util.TimeZone;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
@@ -32,6 +34,13 @@ public class CqlElmTranslationApplication {
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     log.info("Set timezone to UTC.");
+  }
+
+  @Bean
+  public FreeMarkerConfigurer freemarkerConfig() {
+    FreeMarkerConfigurer freeMarkerConfigurer = new FreeMarkerConfigurer();
+    freeMarkerConfigurer.setTemplateLoaderPath("classpath:/templates");
+    return freeMarkerConfigurer;
   }
 
   @Bean(name = "FilterRegistrationBeanSecurityFilter")

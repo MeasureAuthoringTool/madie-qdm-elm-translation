@@ -9,15 +9,20 @@ import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
+import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.springframework.stereotype.Service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -92,6 +97,33 @@ public class CqlConversionService {
     return TranslationResource.getInstance(
             usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
         .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
+  }
+
+  public List<String> getElmForCql(String cql, String accessToken) {
+    if (StringUtils.isBlank(cql)) {
+      return Collections.emptyList();
+    }
+
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData(cql)
+            .showWarnings(false)
+            .signatures(LibraryBuilder.SignatureLevel.All)
+            .annotations(true)
+            .locators(true)
+            .disableListDemotion(true)
+            .disableListPromotion(true)
+            .disableMethodInvocation(false)
+            .validateUnits(true)
+            .resultTypes(true)
+            .build();
+
+    setUpLibrarySourceProvider(cql, accessToken);
+    CqlTranslator translator = processCqlData(requestData);
+    String library = translator.toJson();
+    List<String> libraries = new ArrayList<>(translator.getLibrariesAsJSON().values());
+    libraries.add(library);
+    return libraries;
   }
 
   private List<CqlCompilerException> processErrors(

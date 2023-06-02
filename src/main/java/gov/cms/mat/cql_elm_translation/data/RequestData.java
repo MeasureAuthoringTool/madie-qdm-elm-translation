@@ -9,7 +9,7 @@ import javax.ws.rs.core.MultivaluedMap;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-@Builder
+@Builder(toBuilder = true)
 public class RequestData {
 
   @Getter String cqlData;
