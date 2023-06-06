@@ -12,6 +12,7 @@ import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableDateUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -24,17 +25,21 @@ import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class HumanReadableService {
 
   private Template baseHumanReadableTemplate;
 
   /**
-   * Transforms MADiE Measure to the QDM HumanReadable data model, then generates the HR HTML.
+   * Generates the QDM Human Readable HTML from a MADiE Measure.
    *
    * @param measure MADiE Measure
    * @return QDM Human Readable HTML
    */
   public String generate(Measure measure) {
+    if (measure == null) {
+      throw new IllegalArgumentException("Measure cannot be null.");
+    }
 
     HumanReadable hr =
         HumanReadable.builder()
@@ -75,8 +80,7 @@ public class HumanReadableService {
         .qdmVersion(5.6) // TODO Replace hardcode
         .ecqmTitle(measure.getEcqmTitle())
         .ecqmVersionNumber(measure.getVersion().toString())
-        // TODO What is dis? Maybe MAT's "Calendar Year (January 1, 20XX through December 31, 20XX)"
-        .calendarYear(false)
+        .calendarYear(false) // Unsupported MAT feature, default to false
         .guid(measure.getMeasureSetId())
         // TODO needs safety check
         .patientBased(measure.getGroups().get(0).getPopulationBasis().equals("boolean"))

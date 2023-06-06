@@ -5,6 +5,7 @@ import gov.cms.madie.models.common.Version;
 import gov.cms.madie.models.measure.*;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationCriteriaModel;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -110,5 +111,16 @@ class HumanReadableServiceTest {
     List<HumanReadablePopulationCriteriaModel> populationCriteriaModels =
         humanReadableService.buildPopCriteria(measure);
     assertThat(populationCriteriaModels.size(), is(equalTo(1)));
+
+    Group group = measure.getGroups().get(0);
+    HumanReadablePopulationCriteriaModel popCriteriaModel = populationCriteriaModels.get(0);
+    assertThat(popCriteriaModel.getName(), is(equalTo(group.getGroupDescription())));
+    assertThat(popCriteriaModel.getPopulations().size(), is(group.getPopulations().size()));
+
+    Population measurePopulation = group.getPopulations().get(0);
+    HumanReadablePopulationModel populationModel = popCriteriaModel.getPopulations().get(0);
+    assertThat(populationModel.getDisplay(), is(measurePopulation.getName().getDisplay()));
+    assertThat(populationModel.getLogic(), is(equalTo(measurePopulation.getDefinition())));
+    assertThat(populationModel.getExpressionName(), is(equalTo(measurePopulation.getDefinition())));
   }
 }
