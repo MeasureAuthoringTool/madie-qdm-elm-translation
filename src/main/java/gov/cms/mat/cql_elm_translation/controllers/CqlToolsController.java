@@ -1,9 +1,11 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
+import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
+import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
@@ -26,6 +28,7 @@ public class CqlToolsController {
 
   private final DataCriteriaService dataCriteriaService;
   private final CqlConversionService cqlConversionService;
+  private final HumanReadableService humanReadableService;
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
@@ -50,6 +53,15 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @PutMapping("/human-readable")
+  public ResponseEntity<String> generateHumanReadable(@RequestBody Measure madieMeasure,
+                                                      Principal principal) {
+    log.info("User [{}] requested QDM Human Readable for Measure ID [{}]",
+        principal.getName(), madieMeasure.getId());
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(humanReadableService.generate(madieMeasure));
   }
 
   @PutMapping("/cql/elm")
