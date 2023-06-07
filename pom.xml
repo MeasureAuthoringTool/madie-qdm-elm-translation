@@ -124,10 +124,24 @@
       <artifactId>elm-fhir</artifactId>
       <version>${cqframework.version}</version>
     </dependency>
+
+    <!--  Dependencies for R4, R5, and hapi-fhir all need to have the same version # or classes will turn up undefined  -->
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>6.4.0</version>
+      <version>6.6.1</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>okhttp</artifactId>
+          <groupId>com.squareup.okhttp3</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-r5</artifactId>
+      <version>6.6.1</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -139,7 +153,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>6.4.0</version>
+      <version>6.6.1</version>
     </dependency>
 
     <dependency>
