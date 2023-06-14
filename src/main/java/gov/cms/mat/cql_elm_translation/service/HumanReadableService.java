@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import freemarker.template.Configuration;
+import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
@@ -12,6 +12,7 @@ import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableDateUtil;
 import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
@@ -24,18 +25,21 @@ import java.util.stream.Collectors;
 
 @Component
 @AllArgsConstructor
+@Slf4j
 public class HumanReadableService {
-  private Configuration freemarkerConfiguration;
+
+  private Template baseHumanReadableTemplate;
 
   /**
-   * Transforms MADiE Measure to the QDM HumanReadable data model, then generates the HR HTML.
+   * Generates the QDM Human Readable HTML from a MADiE Measure.
    *
    * @param measure MADiE Measure
-   * @return String QDM Human Readable HTML
-   * @throws TemplateException bad end
-   * @throws IOException bad end
+   * @return QDM Human Readable HTML
    */
-  public String generate(Measure measure) throws TemplateException, IOException {
+  public String generate(Measure measure) {
+    if (measure == null) {
+      throw new IllegalArgumentException("Measure cannot be null.");
+    }
 
     HumanReadable hr =
         HumanReadable.builder()
@@ -49,20 +53,16 @@ public class HumanReadableService {
     return generate(hr);
   }
 
-  /**
-   * Full HR Generation.
-   *
-   * @param model Human Readable custom model
-   * @return
-   * @throws IOException
-   * @throws TemplateException
-   */
-  public String generate(HumanReadable model) throws IOException, TemplateException {
+  private String generate(HumanReadable model) {
     Map<String, Object> paramsMap = new HashMap<>();
     paramsMap.put("model", model);
     setMeasurementPeriodForQdm(model.getMeasureInformation());
-    return FreeMarkerTemplateUtils.processTemplateIntoString(
-        freemarkerConfiguration.getTemplate("humanreadable/human_readable.ftl"), paramsMap);
+    try {
+      return FreeMarkerTemplateUtils.processTemplateIntoString(
+          baseHumanReadableTemplate, paramsMap);
+    } catch (IOException | TemplateException e) {
+      throw new IllegalStateException("Unable to process Human Readable from Measure", e);
+    }
   }
 
   private void setMeasurementPeriodForQdm(HumanReadableMeasureInformationModel model) {
@@ -74,14 +74,13 @@ public class HumanReadableService {
             isCalendarYear, measurementPeriodStartDate, measurementPeriodEndDate));
   }
 
-  private HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
+  HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
     // TODO Needs safety checks
     return HumanReadableMeasureInformationModel.builder()
         .qdmVersion(5.6) // TODO Replace hardcode
         .ecqmTitle(measure.getEcqmTitle())
         .ecqmVersionNumber(measure.getVersion().toString())
-        // TODO What is dis? Maybe MAT's "Calendar Year (January 1, 20XX through December 31, 20XX)"
-        .calendarYear(false)
+        .calendarYear(false) // Unsupported MAT feature, default to false
         .guid(measure.getMeasureSetId())
         // TODO needs safety check
         .patientBased(measure.getGroups().get(0).getPopulationBasis().equals("boolean"))
@@ -99,7 +98,7 @@ public class HumanReadableService {
         .build();
   }
 
-  private List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
+  List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
     return measure.getGroups().stream()
         .map(
             group ->
@@ -125,11 +124,11 @@ public class HumanReadableService {
         .collect(Collectors.toList());
   }
 
-  private List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
+  List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
     return List.of(new HumanReadableExpressionModel());
   }
 
-  private List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
+  List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
     return List.of(new HumanReadableValuesetModel());
   }
 }
