@@ -14,7 +14,7 @@
   <description>Translates CQL to ELM for MADiE</description>
 
   <properties>
-    <cqframework.version>2.7.0</cqframework.version>
+    <cqframework.version>2.10.0</cqframework.version>
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
     <mvn.checkstyle.version>3.1.2</mvn.checkstyle.version>
@@ -124,10 +124,24 @@
       <artifactId>elm-fhir</artifactId>
       <version>${cqframework.version}</version>
     </dependency>
+
+    <!--  Dependencies for R4, R5, and hapi-fhir all need to have the same version # or classes will turn up undefined  -->
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>6.4.0</version>
+      <version>6.6.1</version>
+      <exclusions>
+        <exclusion>
+          <artifactId>okhttp</artifactId>
+          <groupId>com.squareup.okhttp3</groupId>
+        </exclusion>
+      </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>ca.uhn.hapi.fhir</groupId>
+      <artifactId>hapi-fhir-structures-r5</artifactId>
+      <version>6.6.1</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -139,7 +153,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>6.4.0</version>
+      <version>6.6.1</version>
     </dependency>
 
     <dependency>
