@@ -5,6 +5,8 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.File;
@@ -13,6 +15,7 @@ import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
 import javax.ws.rs.core.MultivaluedHashMap;
@@ -21,7 +24,10 @@ import javax.ws.rs.core.MultivaluedMap;
 import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
@@ -38,6 +44,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Autowired private CqlConversionService service;
 
+  @Mock private CqlLibraryService cqlLibraryService;
   @Mock RequestData requestData;
 
   private final String LIBRARY_CQL =
@@ -56,6 +63,19 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertThat(usingProperties, is(notNullValue()));
     assertThat(usingProperties.getLibraryType(), is(equalTo("QICore")));
     assertThat(usingProperties.getVersion(), is(equalTo("4.1.1")));
+  }
+
+  @Test
+  void setUpLibrarySourceProvider_ValidCqlAndAccessToken_SuccessfullySetsLibrarySourceProvider() {
+    CqlConversionService service = new CqlConversionService(cqlLibraryService);
+    String cql = "using FHIR version '4.0.0'";
+    String accessToken = "test_token";
+    service.setUpLibrarySourceProvider(cql, accessToken);
+    // Verify that the MadieLibrarySourceProvider is properly set up
+    UsingProperties usingProperties = MadieLibrarySourceProvider.getUsingProperties();
+    assertNotNull(usingProperties);
+    assertEquals("FHIR", usingProperties.getLibraryType());
+    assertEquals(accessToken, MadieLibrarySourceProvider.getAccessToken());
   }
 
   @Test

@@ -56,12 +56,13 @@ public class CqlToolsController {
   }
 
   @PutMapping("/human-readable")
-  public ResponseEntity<String> generateHumanReadable(@RequestBody Measure madieMeasure,
-                                                      Principal principal) {
-    log.info("User [{}] requested QDM Human Readable for Measure ID [{}]",
-        principal.getName(), madieMeasure.getId());
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(humanReadableService.generate(madieMeasure));
+  public ResponseEntity<String> generateHumanReadable(
+      @RequestBody Measure madieMeasure, Principal principal) {
+    log.info(
+        "User [{}] requested QDM Human Readable for Measure ID [{}]",
+        principal.getName(),
+        madieMeasure.getId());
+    return ResponseEntity.status(HttpStatus.OK).body(humanReadableService.generate(madieMeasure));
   }
 
   @PutMapping("/cql/elm")
