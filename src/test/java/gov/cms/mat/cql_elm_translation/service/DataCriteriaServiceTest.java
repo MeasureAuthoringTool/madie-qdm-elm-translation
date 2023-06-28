@@ -91,14 +91,12 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
   @Test
   void testGetSourceDataCriteriaWhenNoSourceCriteriaFound() {
     String cql =
-        """
-            library DataCriteriaRetrivalTest version '0.0.000'
-            using QDM version '5.6'
-            valueset "Encounter Inpatient": 'urn:oid:2.16.840.1.113883.3.666.5.307'
-            parameter "Measurement Period" Interval<DateTime>
-            context Patient
-            define "Qualifying Encounters":
-             true""";
+        "library DataCriteriaRetrivalTest version '0.0.000'\n"
+            + "using QDM version '5.6'\n"
+            + "valueset \"Encounter Inpatient\": 'urn:oid:2.16.840.1.113883.3.666.5.307'\n"
+            + "parameter \"Measurement Period\" Interval<DateTime>\n"
+            + "context Patient\n"
+            + "define \"Qualifying Encounters\":\n true";
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     CqlTranslator translator =

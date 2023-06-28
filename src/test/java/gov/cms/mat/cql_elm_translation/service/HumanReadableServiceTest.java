@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import freemarker.template.Template;
 import gov.cms.madie.models.common.Organization;
 import gov.cms.madie.models.common.Version;
 import gov.cms.madie.models.measure.*;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.DateFormat;
@@ -25,6 +27,8 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 @ExtendWith(MockitoExtension.class)
 class HumanReadableServiceTest {
   @InjectMocks HumanReadableService humanReadableService;
+
+  @Mock Template template;
 
   private Measure measure;
   private final Date now = new Date();
