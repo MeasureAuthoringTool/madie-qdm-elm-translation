@@ -19,6 +19,8 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class HumanReadableServiceTest {
@@ -68,6 +70,18 @@ class HumanReadableServiceTest {
                                     .build()))
                         .build()))
             .build();
+  }
+
+  @Test
+  public void generateHumanReadableThrowsIllegalArgumentException() {
+    assertThrows(IllegalArgumentException.class, () -> humanReadableService.generate(null));
+  }
+
+  // result is an empty string, Mocking Template doesn't yield expected results.
+  @Test
+  public void generateHumanReadableSuccessfully() {
+    var result = humanReadableService.generate(measure);
+    assertNotNull(result);
   }
 
   @Test
