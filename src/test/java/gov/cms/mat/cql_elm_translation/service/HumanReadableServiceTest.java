@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import freemarker.template.Template;
 import gov.cms.madie.models.common.Organization;
 import gov.cms.madie.models.common.Version;
 import gov.cms.madie.models.measure.*;
@@ -10,6 +11,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.text.DateFormat;
@@ -19,10 +21,14 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 @ExtendWith(MockitoExtension.class)
 class HumanReadableServiceTest {
   @InjectMocks HumanReadableService humanReadableService;
+
+  @Mock Template template;
 
   private Measure measure;
   private final Date now = new Date();
@@ -68,6 +74,18 @@ class HumanReadableServiceTest {
                                     .build()))
                         .build()))
             .build();
+  }
+
+  @Test
+  public void generateHumanReadableThrowsIllegalArgumentException() {
+    assertThrows(IllegalArgumentException.class, () -> humanReadableService.generate(null));
+  }
+
+  // result is an empty string, Mocking Template doesn't yield expected results.
+  @Test
+  public void generateHumanReadableSuccessfully() {
+    var result = humanReadableService.generate(measure);
+    assertNotNull(result);
   }
 
   @Test

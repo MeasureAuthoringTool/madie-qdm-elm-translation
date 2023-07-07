@@ -37,6 +37,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
   @BeforeEach
   void setup() {
+    //    cql = getData("/qdm_data_criteria_retrieval_test.cql");
     cql = getData("/qdm_data_criteria_retrieval_test.cql");
     requestData =
         RequestData.builder()
@@ -68,22 +69,22 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         dataCriteriaService.getSourceDataCriteria(cql, token);
 
     // source data criteria for value set
-    assertThat(sourceDataCriteria.size(), is(equalTo(2)));
-    assertThat(sourceDataCriteria.get(0).getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
-    assertThat(sourceDataCriteria.get(0).getTitle(), is(equalTo("Encounter Inpatient")));
-    assertThat(sourceDataCriteria.get(0).getType(), is(equalTo("EncounterPerformed")));
-    assertThat(
-        sourceDataCriteria.get(0).getDescription(),
-        is(equalTo("Encounter, Performed: Encounter Inpatient")));
-    assertFalse(sourceDataCriteria.get(0).isDrc());
-
-    // source data criteria for direct reference code
-    assertThat(sourceDataCriteria.size(), is(equalTo(2)));
-    assertTrue(sourceDataCriteria.get(1).isDrc());
-    assertThat(sourceDataCriteria.get(1).getTitle(), is(equalTo("Clinical Examples")));
+    assertThat(sourceDataCriteria.size(), is(equalTo(3)));
+    assertThat(sourceDataCriteria.get(1).getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
+    assertThat(sourceDataCriteria.get(1).getTitle(), is(equalTo("Encounter Inpatient")));
     assertThat(sourceDataCriteria.get(1).getType(), is(equalTo("EncounterPerformed")));
     assertThat(
         sourceDataCriteria.get(1).getDescription(),
+        is(equalTo("Encounter, Performed: Encounter Inpatient")));
+    assertFalse(sourceDataCriteria.get(1).isDrc());
+
+    // source data criteria for direct reference code
+    assertThat(sourceDataCriteria.size(), is(equalTo(3)));
+    assertTrue(sourceDataCriteria.get(2).isDrc());
+    assertThat(sourceDataCriteria.get(2).getTitle(), is(equalTo("Clinical Examples")));
+    assertThat(sourceDataCriteria.get(2).getType(), is(equalTo("EncounterPerformed")));
+    assertThat(
+        sourceDataCriteria.get(2).getDescription(),
         is(equalTo("Encounter, Performed: Clinical Examples")));
   }
 
