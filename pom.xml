@@ -4,7 +4,7 @@
   <parent>
     <groupId>org.springframework.boot</groupId>
     <artifactId>spring-boot-starter-parent</artifactId>
-    <version>3.0.5</version>
+    <version>3.0.9</version>
   </parent>
   <groupId>gov.cms.madie</groupId>
   <artifactId>cql-elm-translation</artifactId>
@@ -201,7 +201,7 @@
     <dependency>
       <groupId>com.okta.spring</groupId>
       <artifactId>okta-spring-boot-starter</artifactId>
-      <version>2.1.6</version>
+      <version>2.1.7</version>
     </dependency>
     <dependency>
       <groupId>com.jayway.jsonpath</groupId>
