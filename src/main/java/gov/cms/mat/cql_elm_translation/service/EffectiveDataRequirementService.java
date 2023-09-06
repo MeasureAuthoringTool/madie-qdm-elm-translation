@@ -147,8 +147,7 @@ public class EffectiveDataRequirementService {
             entry ->
                 StringUtils.equalsIgnoreCase(
                         "Library", entry.getResource().getResourceType().toString())
-                    && StringUtils.equalsIgnoreCase(
-                        "Library/" + libraryName, entry.getResource().getId()))
+                    && StringUtils.equalsIgnoreCase(libraryName, entry.getResource().getIdPart()))
         .findFirst();
   }
 
