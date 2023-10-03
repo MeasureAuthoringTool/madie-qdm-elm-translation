@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
@@ -21,11 +22,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -36,6 +33,10 @@ public class DataCriteriaService {
   private final CqlConversionService cqlConversionService;
 
   public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
+    return parseCql(cql, accessToken).getDataCriteria();
+  }
+
+  private CQLTools parseCql(String cql, String accessToken) {
     // Run Translator to compile libraries
     MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
@@ -53,7 +54,55 @@ public class DataCriteriaService {
     } catch (IOException e) {
       throw new RuntimeException(e);
     }
-    return cqlTools.getDataCriteria();
+    return cqlTools;
+  }
+
+  public List<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
+    if (StringUtils.isBlank(measure.getCql())) {
+      log.info("Data criteria not found as cql is blank");
+      return Collections.emptyList();
+    }
+
+    List<SourceDataCriteria> sourceDataCriteria =
+        getSourceDataCriteria(measure.getCql(), accessToken);
+
+    CQLTools tools = parseCql(measure.getCql(), accessToken);
+
+    Set<String> usedDefinitions = new HashSet<>();
+    measure
+        .getGroups()
+        .forEach(
+            group -> {
+              group
+                  .getPopulations()
+                  .forEach(
+                      population -> {
+                        if (!population.getDefinition().isEmpty()) {
+                          usedDefinitions.add(population.getDefinition());
+                        }
+                      });
+            });
+
+    Set<String> values = new HashSet<>();
+    usedDefinitions.forEach(
+        def -> {
+          if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())) {
+            tools
+                .getExpressionNameToValuesetDataTypeMap()
+                .get(def)
+                .forEach((expression, valueSet) -> values.add(expression));
+          }
+          if (!MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap())) {
+            tools
+                .getExpressionNameToCodeDataTypeMap()
+                .get(def)
+                .forEach((expression, valueSet) -> values.add(expression));
+          }
+        });
+
+    return sourceDataCriteria.stream()
+        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
+        .toList();
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
