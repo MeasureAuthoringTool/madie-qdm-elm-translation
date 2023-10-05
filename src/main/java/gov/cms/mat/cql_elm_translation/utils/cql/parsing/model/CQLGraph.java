@@ -74,9 +74,8 @@ public class CQLGraph {
   public String toString() {
     StringBuilder builder = new StringBuilder();
     for (String node : graph.keySet()) {
-      builder.append(node + " ---> " + graph.get(node) + "\n");
+      builder.append(node).append(" ---> ").append(graph.get(node)).append("\n");
     }
-
     return builder.toString();
   }
 
