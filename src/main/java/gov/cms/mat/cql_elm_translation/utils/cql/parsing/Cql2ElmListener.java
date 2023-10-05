@@ -517,5 +517,6 @@ public class Cql2ElmListener extends cqlBaseListener {
     valueSetDataTypeMap.putAll(listener.getValueSetDataTypeMap());
     codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
     valueSetOids.putAll(listener.getValueSetOids());
+    drcs.putAll(listener.getDrcs());
   }
 }
