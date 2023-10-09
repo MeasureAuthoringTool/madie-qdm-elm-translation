@@ -287,11 +287,12 @@ public class Cql2ElmListener extends cqlBaseListener {
       }
 
       current.get(formattedIdentifier).add(dataType);
-      drcs.putIfAbsent(formattedIdentifier,
+      drcs.putIfAbsent(
+          formattedIdentifier,
           CQLCode.builder()
-              .id(((CodeDef)element).getId())
+              .id(((CodeDef) element).getId())
               .codeName(formattedIdentifier)
-              .codeSystemName(((CodeDef)element).getCodeSystem().getName())
+              .codeSystemName(((CodeDef) element).getCodeSystem().getName())
               .build());
     }
   }

@@ -109,8 +109,8 @@ public class CQLTools {
   /**
    * The CQL Filter Entry Point.
    *
-   * <p>This function will find all the used CQL expressions, create a valueset - datatype map
-   * and code - datatype map, and find return types for each expression.
+   * <p>This function will find all the used CQL expressions, create a valueset - datatype map and
+   * code - datatype map, and find return types for each expression.
    *
    * @throws IOException
    */
