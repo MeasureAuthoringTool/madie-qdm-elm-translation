@@ -109,6 +109,7 @@ public class EffectiveDataRequirementService {
     Set<String> expressionList = getExpressions(r5Measure);
     var dqReqTrans = new DataRequirementsProcessor();
     CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+    options.setCollapseDataRequirements(true); //removing duplicate data requirements
 
     org.hl7.fhir.r5.model.Library effectiveDataRequirements =
         dqReqTrans.gatherDataRequirements(
