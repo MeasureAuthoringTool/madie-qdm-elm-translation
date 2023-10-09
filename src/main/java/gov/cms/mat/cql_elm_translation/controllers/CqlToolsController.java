@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -70,5 +71,13 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(cqlConversionService.getElmForCql(cql, accessToken));
+  }
+
+  @PutMapping("/qdm/relevant-elements")
+  public ResponseEntity<List<SourceDataCriteria>> getRelevantElements(
+      @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(dataCriteriaService.getRelevantElements(measure, accessToken));
   }
 }

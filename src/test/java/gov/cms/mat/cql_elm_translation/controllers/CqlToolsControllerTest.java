@@ -1,6 +1,8 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
+import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.Population;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
@@ -15,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
 import java.security.Principal;
+import java.util.Collections;
 import java.util.List;
 import java.util.Objects;
 
@@ -108,6 +111,21 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     var result = cqlToolsController.generateHumanReadable(new Measure(), principal);
     assertEquals(result.getBody(), "test human Readable");
     assertEquals(result.getStatusCode(), HttpStatus.OK);
+  }
+
+  @Test
+  void testGetRelevantElements() {
+    String cql = getData("/qdm_data_criteria_retrieval_test.cql");
+    Measure measure = Measure.builder().cql(cql).build();
+    String token = "john";
+    var sdc = SourceDataCriteria.builder().oid("1.2.3").description("EP: Test").title("EP").build();
+    when(dataCriteriaService.getRelevantElements(any(Measure.class), anyString()))
+        .thenReturn(List.of(sdc));
+    var result = cqlToolsController.getRelevantElements(measure, token);
+    SourceDataCriteria sourceDataCriteria = result.getBody().get(0);
+    assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
+    assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
+    assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));
   }
 
   private boolean inputMatchesOutput(String input, String output) {
