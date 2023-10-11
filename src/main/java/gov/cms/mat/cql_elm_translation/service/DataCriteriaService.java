@@ -147,12 +147,7 @@ public class DataCriteriaService {
         .oid(
             "drc-"
                 + DigestUtils.md5Hex(
-                    "#"
-                        + code.getCodeSystemName()
-                        + "#"
-                        + code.getId()
-                        + "#"
-                        + code.getCodeSystemVersion()))
+                    code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
         .title(name)
         .description(dataType + ": " + name)
         .type(type)
