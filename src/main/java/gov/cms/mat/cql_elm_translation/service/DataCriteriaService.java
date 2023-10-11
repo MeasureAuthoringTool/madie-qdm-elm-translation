@@ -142,8 +142,17 @@ public class DataCriteriaService {
     String type = buildCriteriaType(dataType);
     String name = splitByPipeAndGetLast(code.getName());
     return SourceDataCriteria.builder()
-        // generate fake oid for drc, as it doesn't have one
-        .oid("drc-" + DigestUtils.md5Hex(type + name + code.getCodeSystemVersion()))
+        // generate fake oid for drc, as it doesn't have one: e.g.id='71802-3',
+        // codeSystemName='LOINC', codeSystemVersion='null'
+        .oid(
+            "drc-"
+                + DigestUtils.md5Hex(
+                    "#"
+                        + code.getCodeSystemName()
+                        + "#"
+                        + code.getId()
+                        + "#"
+                        + code.getCodeSystemVersion()))
         .title(name)
         .description(dataType + ": " + name)
         .type(type)
