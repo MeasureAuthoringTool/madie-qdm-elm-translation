@@ -109,8 +109,8 @@ public class CQLTools {
   /**
    * The CQL Filter Entry Point.
    *
-   * <p>This function will find all of the used CQL expressions, create a valueset - datatype map
-   * and code - datatype map, and find return types for each expression.
+   * <p>This function will find all the used CQL expressions, create a valueset - datatype map and
+   * code - datatype map, and find return types for each expression.
    *
    * @throws IOException
    */
@@ -142,6 +142,7 @@ public class CQLTools {
         new HashMap<>(listener.getValueSetDataTypeMap());
     Map<String, Map<String, Set<String>>> codeMap = new HashMap<>(listener.getCodeDataTypeMap());
     Map<String, String> valueSetOids = new HashMap<>(listener.getValueSetOids());
+    Map<String, CQLCode> drcs = new HashMap<>(listener.getDrcs());
 
     collectUsedExpressions(
         graph,
@@ -154,10 +155,10 @@ public class CQLTools {
         functionsSet);
     collectValueSetCodeDataType(valuesetMap, codeMap);
     collectReturnTypeMap();
-    collectDataCriteria(valueSetOids);
+    collectDataCriteria(valueSetOids, drcs);
   }
 
-  private void collectDataCriteria(Map<String, String> valueSetOids) {
+  private void collectDataCriteria(Map<String, String> valueSetOids, Map<String, CQLCode> drcs) {
     valuesetDataTypeMap
         .keySet()
         .forEach(
@@ -174,15 +175,7 @@ public class CQLTools {
             code ->
                 dataCriteria
                     .getDataCriteriaWithCodes()
-                    .put(
-                        CQLCode.builder()
-                            .codeName(code)
-                            // TODO lookup code & code system details
-                            .codeOID("shrug")
-                            .codeSystemName("shrug")
-                            .codeSystemOID("shrug")
-                            .build(),
-                        codeDataTypeMap.get(code)));
+                    .put(drcs.get(code), codeDataTypeMap.get(code)));
   }
 
   private void collectUsedExpressions(

@@ -148,6 +148,7 @@ public class DataCriteriaService {
         .description(dataType + ": " + name)
         .type(buildCriteriaType(dataType))
         .drc(true)
+        .codeId(code.getId())
         .build();
   }
 

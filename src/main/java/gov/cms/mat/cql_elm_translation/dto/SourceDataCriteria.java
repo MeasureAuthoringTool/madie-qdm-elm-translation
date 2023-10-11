@@ -11,4 +11,6 @@ public class SourceDataCriteria {
   private String description;
   private String type;
   private boolean drc;
+  // MAT-6210: codeId used for drc
+  private String codeId;
 }
