@@ -2,19 +2,15 @@ package gov.cms.mat.cql_elm_translation.data;
 
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
-import java.util.Map;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.springframework.data.util.Pair;
 
-import lombok.AccessLevel;
 import lombok.Builder;
 import lombok.Getter;
-import lombok.Setter;
 
 @Builder(toBuilder = true)
 public class RequestData {
