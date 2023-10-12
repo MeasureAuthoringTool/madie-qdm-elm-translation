@@ -1,14 +1,21 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.madie.models.measure.Group;
-import gov.cms.madie.models.measure.Measure;
-import gov.cms.madie.models.measure.Population;
-import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
-import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
-import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
+import java.io.IOException;
+import java.security.Principal;
+import java.util.List;
+import java.util.Objects;
+
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -16,20 +23,13 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 
-import java.io.IOException;
-import java.security.Principal;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
+import gov.cms.madie.models.measure.Measure;
+import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
+import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
+import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 
 @ExtendWith(MockitoExtension.class)
 class CqlToolsControllerTest implements ResourceFileUtil {
