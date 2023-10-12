@@ -69,8 +69,12 @@ public class CqlToolsController {
   @PutMapping("/cql/elm")
   public ResponseEntity<List<String>> getLibraryElms(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(cqlConversionService.getElmForCql(cql, accessToken));
+    try {
+      return ResponseEntity.status(HttpStatus.OK)
+          .body(cqlConversionService.getElmForCql(cql, accessToken));
+    } catch (IOException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+    }
   }
 
   @PutMapping("/qdm/relevant-elements")

@@ -60,9 +60,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
   @Test
   void testGetSourceDataCriteria() {
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
+    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(requestData);
 
     Mockito.doNothing()
         .when(cqlConversionService)
@@ -103,9 +101,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             + "define \"Qualifying Encounters\":\n true";
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap());
+    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(data);
 
     Mockito.doNothing()
         .when(cqlConversionService)
@@ -130,9 +126,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     Population population = Population.builder().definition("Qualifying Encounters").build();
     Group group = Group.builder().populations(Collections.singletonList(population)).build();
     Measure measure = Measure.builder().cql(cql).groups(Collections.singletonList(group)).build();
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
+    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(requestData);
 
     Mockito.doNothing()
         .when(cqlConversionService)
@@ -178,7 +172,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     CqlTranslator translator =
         TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap());
+            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
         .when(cqlConversionService)

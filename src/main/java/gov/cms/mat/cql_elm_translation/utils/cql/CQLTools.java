@@ -29,6 +29,7 @@ import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 public class CQLTools {
 
@@ -61,7 +62,7 @@ public class CQLTools {
 
   private Map<String, String> qdmTypeInfoMap = new HashMap<>();
 
-  private Map<String, CompiledLibrary> CompiledLibraryMap;
+  private Map<VersionedIdentifier, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
   private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
@@ -83,6 +84,7 @@ public class CQLTools {
       Map<String, String> childrenLibraries,
       List<String> parentExpressions,
       CqlTranslator translator) {
+
     this(
         parentLibraryString,
         childrenLibraries,
@@ -96,7 +98,7 @@ public class CQLTools {
       Map<String, String> childrenLibraries,
       List<String> parentExpressions,
       CqlTranslator translator,
-      Map<String, CompiledLibrary> translatedLibraries) {
+      Map<VersionedIdentifier, CompiledLibrary> translatedLibraries) {
 
     this.parentLibraryString = parentLibraryString;
     this.translator = translator;
