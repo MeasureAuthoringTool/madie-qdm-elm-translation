@@ -6,7 +6,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.NotNull;
@@ -46,7 +48,7 @@ public class Cql2ElmListener extends cqlBaseListener {
    * The identifier of the current library, relative to the library that brought us here. Will be in
    * the form of libraryName|alias
    */
-  private String libraryIdentifier;
+  private final String libraryIdentifier;
 
   /**
    * The include def object which we are current parsing, relative to the library that brought us
@@ -55,7 +57,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   IncludeDef libraryAccessor = null;
 
   /** The current library object from the parser */
-  private CompiledLibrary library;
+  private final CompiledLibrary library;
 
   /** The map of the other libraries in the current library */
   Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap;
@@ -63,20 +65,21 @@ public class Cql2ElmListener extends cqlBaseListener {
   /** The current context, aka which expression are we currently in. */
   private String currentContext;
 
-  private Set<String> libraries = new HashSet<>();
-  private Set<String> valuesets = new HashSet<>();
-  private Set<String> codes = new HashSet<>();
-  private Set<String> codesystems = new HashSet<>();
-  private Set<String> parameters = new HashSet<>();
-  private Set<String> definitions = new HashSet<>();
-  private Set<String> functions = new HashSet<>();
-  private HashMap<String, String> valueSetOids = new HashMap<>();
-  private Map<String, Map<String, Set<String>>> valueSetDataTypeMap = new HashMap<>();
-  private Map<String, Map<String, Set<String>>> codeDataTypeMap = new HashMap<>();
+  @Getter private final Set<String> libraries = new HashSet<>();
+  @Getter private final Set<String> valuesets = new HashSet<>();
+  @Getter private final Set<String> codes = new HashSet<>();
+  @Getter private final Set<String> codesystems = new HashSet<>();
+  @Getter private final Set<String> parameters = new HashSet<>();
+  @Getter private final Set<String> definitions = new HashSet<>();
+  @Getter private final Set<String> functions = new HashSet<>();
+  @Getter private final HashMap<String, String> valueSetOids = new HashMap<>();
+  @Getter private final HashMap<String, CQLCode> drcs = new HashMap<>();
+  @Getter private final Map<String, Map<String, Set<String>>> valueSetDataTypeMap = new HashMap<>();
+  @Getter private final Map<String, Map<String, Set<String>>> codeDataTypeMap = new HashMap<>();
 
-  private Stack<String> namespace = new Stack<>();
+  private final Stack<String> namespace = new Stack<>();
 
-  private CQLGraph graph;
+  @Getter private final CQLGraph graph;
 
   public Cql2ElmListener(
       CQLGraph graph,
@@ -131,7 +134,7 @@ public class Cql2ElmListener extends cqlBaseListener {
     String qualifier = "";
 
     if (shouldResolve(identifier)) {
-      // a qualified identifier can take on the form (qualifier) '.')* identifier. If there is only
+      // a qualified identifier can take on the form (qualifier '.')* identifier. If there is only
       // one qualifier,
       // then that could be a library. Resolve the qualifier to check if it's a library.
       if (CollectionUtils.isNotEmpty(ctx.qualifierExpression())
@@ -270,6 +273,7 @@ public class Cql2ElmListener extends cqlBaseListener {
       current.get(formattedIdentifier).add(dataType);
       valueSetOids.putIfAbsent(
           formattedIdentifier, ((ValueSetDef) element).getId().substring("urn:oid:".length()));
+
     } else if (element instanceof CodeDef) {
       Map<String, Set<String>> current = codeDataTypeMap.get(currentContext);
       if (current == null) {
@@ -284,6 +288,13 @@ public class Cql2ElmListener extends cqlBaseListener {
       }
 
       current.get(formattedIdentifier).add(dataType);
+      drcs.putIfAbsent(
+          formattedIdentifier,
+          CQLCode.builder()
+              .id(((CodeDef) element).getId())
+              .codeName(formattedIdentifier)
+              .codeSystemName(((CodeDef) element).getCodeSystem().getName())
+              .build());
     }
   }
 
@@ -508,49 +519,6 @@ public class Cql2ElmListener extends cqlBaseListener {
     valueSetDataTypeMap.putAll(listener.getValueSetDataTypeMap());
     codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
     valueSetOids.putAll(listener.getValueSetOids());
-  }
-
-  public Set<String> getLibraries() {
-    return libraries;
-  }
-
-  public Set<String> getValuesets() {
-    return valuesets;
-  }
-
-  public Set<String> getCodes() {
-    return codes;
-  }
-
-  public Set<String> getCodesystems() {
-    return codesystems;
-  }
-
-  public Set<String> getParameters() {
-    return parameters;
-  }
-
-  public Set<String> getDefinitions() {
-    return definitions;
-  }
-
-  public Set<String> getFunctions() {
-    return functions;
-  }
-
-  public Map<String, Map<String, Set<String>>> getValueSetDataTypeMap() {
-    return valueSetDataTypeMap;
-  }
-
-  public Map<String, Map<String, Set<String>>> getCodeDataTypeMap() {
-    return codeDataTypeMap;
-  }
-
-  public Map<String, String> getValueSetOids() {
-    return valueSetOids;
-  }
-
-  public CQLGraph getGraph() {
-    return graph;
+    drcs.putAll(listener.getDrcs());
   }
 }

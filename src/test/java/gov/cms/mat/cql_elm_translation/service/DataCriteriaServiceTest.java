@@ -88,6 +88,11 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     assertThat(
         sourceDataCriteria.get(2).getDescription(),
         is(equalTo("Encounter, Performed: Clinical Examples")));
+
+    // MAT-6210 only setCodeId for direct reference code
+    assertThat(sourceDataCriteria.get(0).getCodeId(), is(equalTo(null)));
+    assertThat(sourceDataCriteria.get(1).getCodeId(), is(equalTo(null)));
+    assertThat(sourceDataCriteria.get(2).getCodeId(), is(equalTo("1021859")));
   }
 
   @Test
