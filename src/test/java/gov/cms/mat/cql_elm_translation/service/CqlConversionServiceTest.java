@@ -210,7 +210,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGetElmForCql() {
+  void testGetElmForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     List<String> elms = service.getElmForCql(cql, "token");
     assertThat(elms.size(), is(equalTo(1)));
@@ -218,7 +218,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGetElmForBlankCql() {
+  void testGetElmForBlankCql() throws IOException {
     List<String> elms = service.getElmForCql(null, "token");
     assertThat(elms.size(), is(equalTo(0)));
   }
