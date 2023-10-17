@@ -136,7 +136,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     CqlTranslator translator =
         TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap());
+            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
         .when(cqlConversionService)
