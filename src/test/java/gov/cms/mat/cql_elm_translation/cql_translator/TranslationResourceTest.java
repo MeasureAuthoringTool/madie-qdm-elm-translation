@@ -12,7 +12,7 @@ class TranslationResourceTest {
     Assertions.assertThrows(
         TranslationFailureException.class,
         () -> {
-          translationResource.buildTranslator(null, null);
+          translationResource.buildTranslator(null, null, null);
         });
   }
 }

@@ -1,15 +1,12 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.IParser;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
+import java.util.HashSet;
+import java.util.Optional;
+import java.util.Set;
+
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerOptions;
 import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlTranslatorOptions;
 import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
@@ -21,10 +18,13 @@ import org.hl7.fhir.r4.model.Library;
 import org.hl7.fhir.r4.model.Resource;
 import org.springframework.stereotype.Service;
 
-import java.io.ByteArrayInputStream;
-import java.util.HashSet;
-import java.util.Optional;
-import java.util.Set;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.parser.IParser;
+import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
+import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -46,8 +46,10 @@ public class EffectiveDataRequirementService {
     return fhirContext.newJsonParser();
   }
 
-  private RequestData createDefaultRequestData() {
+  private RequestData createDefaultRequestData(String identifier, String cql) {
     return RequestData.builder()
+        .cqlData(cql)
+        .identifier(identifier)
         .showWarnings(false)
         .annotations(true)
         .locators(true)
@@ -96,19 +98,24 @@ public class EffectiveDataRequirementService {
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
 
     var translationResource = TranslationResource.getInstance(true);
-    CqlTranslator cqlTranslator =
-        translationResource.buildTranslator(
-            new ByteArrayInputStream(cql.getBytes()), createDefaultRequestData().createMap());
+    RequestData requestData = createDefaultRequestData(library.getId(), cql);
+    CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
     CompiledLibrary translatedLibrary = cqlTranslator.getTranslatedLibrary();
     LibraryManager libraryManager = translationResource.getLibraryManager();
 
-    // providing compiled measureLibrary, as it cannot be fetched using LibrarySourceProvider ( we
+    // providing compiled measureLibrary, as it cannot be fetched using
+    // LibrarySourceProvider ( we
     // are not storing measure libraries in HAPI)
-    libraryManager.cacheLibrary(translatedLibrary);
+
+    // MAT-6402:  Following line was commented out because cacheLibrary was unceremoniously
+    //  removed from the LibraryManager class.. it appears that it can be replaced by resolveLibrary
+    // ¯\_(ツ)_/¯
+    //  libraryManager.cacheLibrary(translatedLibrary);
+    libraryManager.resolveLibrary(requestData.getSourceInfo());
 
     Set<String> expressionList = getExpressions(r5Measure);
     var dqReqTrans = new DataRequirementsProcessor();
-    CqlTranslatorOptions options = CqlTranslatorOptions.defaultOptions();
+    CqlCompilerOptions options = CqlCompilerOptions.defaultOptions();
     options.setCollapseDataRequirements(true); // removing duplicate data requirements
 
     org.hl7.fhir.r5.model.Library effectiveDataRequirements =

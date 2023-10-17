@@ -1,20 +1,26 @@
 package gov.cms.mat.cql_elm_translation.data;
 
-import lombok.Builder;
-import lombok.Getter;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.hl7.elm.r1.VersionedIdentifier;
+
+import lombok.Builder;
+import lombok.Getter;
 
 @Builder(toBuilder = true)
 public class RequestData {
 
-  @Getter String cqlData;
+  @Getter private String cqlData;
 
-  @Getter boolean showWarnings;
+  @Getter private boolean showWarnings;
+  @Getter private VersionedIdentifier sourceInfo;
+
+  @Getter String identifier;
 
   LibraryBuilder.SignatureLevel signatures;
   Boolean annotations;
@@ -49,5 +55,14 @@ public class RequestData {
     }
 
     return map;
+  }
+
+  public static class RequestDataBuilder {
+
+    public RequestDataBuilder identifier(String identifier) {
+
+      this.sourceInfo = new VersionedIdentifier().withId(identifier).withSystem("text/cql");
+      return this;
+    }
   }
 }

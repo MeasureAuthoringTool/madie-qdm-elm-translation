@@ -1,16 +1,29 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
-import ca.uhn.fhir.parser.JsonParser;
-import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
-import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.when;
+
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
+import java.util.Optional;
+
 import org.hl7.fhir.r4.model.Attachment;
 import org.hl7.fhir.r4.model.Bundle;
 import org.hl7.fhir.r4.model.Library;
+import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.hl7.fhir.r4.model.Period;
 import org.hl7.fhir.r4.model.Resource;
-import org.hl7.fhir.r4.model.Measure.MeasureSupplementalDataComponent;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -18,15 +31,13 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
-
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.when;
+import ca.uhn.fhir.context.FhirContext;
+import ca.uhn.fhir.model.api.TemporalPrecisionEnum;
+import ca.uhn.fhir.parser.JsonParser;
+import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.exceptions.ResourceNotFoundException;
+import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 
 @ExtendWith(MockitoExtension.class)
 class EffectiveDataRequirementServiceTest {
@@ -235,7 +246,7 @@ class EffectiveDataRequirementServiceTest {
   @Test
   public void testGetEffectiveDataRequirementsSuccess() {
     library.getContent().replaceAll(attachment -> attachment.setContentType("text/cql"));
-    library.setId("Library/" + CQL_LIBRARY_NAME);
+    library.setId("TestCVPopulations");
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
@@ -250,7 +261,29 @@ class EffectiveDataRequirementServiceTest {
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
         effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
+    String cql = new String(library.getContentFirstRep().getData(), StandardCharsets.UTF_8);
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
 
+    String fhirHelperString = ResourceUtils.getData("/fhirhelpers.cql");
+    String suppDataString = ResourceUtils.getData("/SupplementalDataElements.cql");
+    String cqlLibrary = ResourceUtils.getData("/cv_populations.cql");
+
+    doReturn(fhirHelperString)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("FHIRHelpers"), eq("4.0.001"), nullable(String.class));
+    ;
+
+    doReturn(suppDataString)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("SupplementalDataElementsFHIR4"), eq("4.0.001"), nullable(String.class));
+    ;
+
+    doReturn(cqlLibrary)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("TestCVPopulations"), nullable(String.class), nullable(String.class));
+    ;
+
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     org.hl7.fhir.r5.model.Library r5Library =
         effectiveDataRequirementService.getEffectiveDataRequirements(
             r5Measure, library, testAccessToken);
@@ -260,7 +293,7 @@ class EffectiveDataRequirementServiceTest {
   @Test
   public void testGetEffectiveDataRequirementsStr() {
     library.getContent().replaceAll(attachment -> attachment.setContentType("text/cql"));
-    library.setId("Library/" + CQL_LIBRARY_NAME);
+    library.setId("TestCVPopulations");
 
     Bundle.BundleEntryComponent measureBundleEntryComponent = getBundleEntryComponent(measure);
     Bundle.BundleEntryComponent libraryBundleEntryComponent = getBundleEntryComponent(library);
@@ -275,7 +308,29 @@ class EffectiveDataRequirementServiceTest {
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
         effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
+    String cql = new String(library.getContentFirstRep().getData(), StandardCharsets.UTF_8);
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
 
+    String fhirHelperString = ResourceUtils.getData("/fhirhelpers.cql");
+    String suppDataString = ResourceUtils.getData("/SupplementalDataElements.cql");
+    String cqlLibrary = ResourceUtils.getData("/cv_populations.cql");
+
+    doReturn(fhirHelperString)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("FHIRHelpers"), eq("4.0.001"), nullable(String.class));
+    ;
+
+    doReturn(suppDataString)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("SupplementalDataElementsFHIR4"), eq("4.0.001"), nullable(String.class));
+    ;
+
+    doReturn(cqlLibrary)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("TestCVPopulations"), nullable(String.class), nullable(String.class));
+    ;
+
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     org.hl7.fhir.r5.model.Library r5Library =
         effectiveDataRequirementService.getEffectiveDataRequirements(
             r5Measure, library, testAccessToken);

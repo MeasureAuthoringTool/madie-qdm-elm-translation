@@ -17,13 +17,22 @@ import net.minidev.json.JSONArray;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.LibraryContentType;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.hl7.elm.r1.Library;
 import org.springframework.stereotype.Service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -96,10 +105,10 @@ public class CqlConversionService {
     UsingProperties usingProperties = cqlTextParser.getUsing();
     return TranslationResource.getInstance(
             usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
-        .buildTranslator(requestData.getCqlDataInputStream(), requestData.createMap());
+        .buildTranslator(requestData);
   }
 
-  public List<String> getElmForCql(String cql, String accessToken) {
+  public List<String> getElmForCql(String cql, String accessToken) throws IOException {
     if (StringUtils.isBlank(cql)) {
       return Collections.emptyList();
     }
@@ -121,9 +130,21 @@ public class CqlConversionService {
     setUpLibrarySourceProvider(cql, accessToken);
     CqlTranslator translator = processCqlData(requestData);
     String library = translator.toJson();
-    List<String> libraries = new ArrayList<>(translator.getLibrariesAsJSON().values());
+    var result = new HashMap<VersionedIdentifier, String>();
+    for (Map.Entry<VersionedIdentifier, CompiledLibrary> entry :
+        translator.getTranslatedLibraries().entrySet()) {
+      result.put(entry.getKey(), convertToXml(entry.getValue().getLibrary()));
+    }
+
+    List<String> libraries = new ArrayList<>(result.values());
     libraries.add(library);
     return libraries;
+  }
+
+  public static String convertToXml(Library library) throws IOException {
+    StringWriter writer = new StringWriter();
+    ElmLibraryWriterFactory.getWriter(LibraryContentType.XML.mimeType()).write(library, writer);
+    return writer.getBuffer().toString();
   }
 
   private List<CqlCompilerException> processErrors(

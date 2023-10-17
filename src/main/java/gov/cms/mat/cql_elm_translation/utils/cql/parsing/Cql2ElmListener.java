@@ -37,6 +37,7 @@ import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.ValueSetDef;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 public class Cql2ElmListener extends cqlBaseListener {
 
@@ -59,7 +60,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   private final CompiledLibrary library;
 
   /** The map of the other libraries in the current library */
-  Map<String, CompiledLibrary> translatedLibraryMap;
+  Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap;
 
   /** The current context, aka which expression are we currently in. */
   private String currentContext;
@@ -83,7 +84,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   public Cql2ElmListener(
       CQLGraph graph,
       CompiledLibrary library,
-      Map<String, CompiledLibrary> translatedLibraryMap,
+      Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap,
       Map<String, String> childrenLibraries) {
     this.graph = graph;
     this.library = library;
@@ -96,7 +97,7 @@ public class Cql2ElmListener extends cqlBaseListener {
       String libraryIdentifier,
       CQLGraph graph,
       CompiledLibrary library,
-      Map<String, CompiledLibrary> translatedLibraryMap,
+      Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap,
       Map<String, String> childrenLibraries) {
     this.graph = graph;
     this.library = library;
