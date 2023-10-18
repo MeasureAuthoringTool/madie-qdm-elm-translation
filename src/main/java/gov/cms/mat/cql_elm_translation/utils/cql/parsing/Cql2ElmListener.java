@@ -60,7 +60,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   private final CompiledLibrary library;
 
   /** The map of the other libraries in the current library */
-  Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap;
+  Map<String, CompiledLibrary> translatedLibraryMap;
 
   /** The current context, aka which expression are we currently in. */
   private String currentContext;
@@ -84,7 +84,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   public Cql2ElmListener(
       CQLGraph graph,
       CompiledLibrary library,
-      Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap,
+      Map<String, CompiledLibrary> translatedLibraryMap,
       Map<String, String> childrenLibraries) {
     this.graph = graph;
     this.library = library;
@@ -97,7 +97,7 @@ public class Cql2ElmListener extends cqlBaseListener {
       String libraryIdentifier,
       CQLGraph graph,
       CompiledLibrary library,
-      Map<VersionedIdentifier, CompiledLibrary> translatedLibraryMap,
+      Map<String, CompiledLibrary> translatedLibraryMap,
       Map<String, String> childrenLibraries) {
     this.graph = graph;
     this.library = library;

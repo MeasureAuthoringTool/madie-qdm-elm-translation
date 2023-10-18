@@ -18,6 +18,7 @@ import org.apache.commons.collections4.MapUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -42,12 +43,18 @@ public class DataCriteriaService {
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
     CqlTranslator cqlTranslator = runTranslator(cql);
 
+    Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
+    cqlTranslator
+        .getTranslatedLibraries()
+        .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
+
     CQLTools cqlTools =
         new CQLTools(
             cql,
             getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
             getParentExpressions(cql),
-            cqlTranslator);
+            cqlTranslator,
+            translatedLibraries);
 
     try {
       cqlTools.generate();
