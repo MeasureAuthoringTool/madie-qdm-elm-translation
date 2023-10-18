@@ -25,7 +25,7 @@ info:
 madie:
   library:
     service:
-      baseUrl: ${CQL_LIBRARY_SERVICE_URL:http://localhost:8083/api}
+      baseUrl: ${CQL_LIBRARY_SERVICE_URL:http://localhost:8082/api}
       cql:
         uri: /cql-libraries/cql
 
@@ -41,7 +41,7 @@ logging:
 
 okta:
   oauth2:
-    issuer: ${OKTA_ISSUER:https://dev-53861726.okta.com/oauth2/default}
+    issuer: ${OKTA_ISSUER:https://dev-18092578.okta.com/oauth2/default}
     audience: ${OKTA_AUDIENCE:api://default}
 
 lambda-api-key: ${LAMBDA_API_KEY:9202c9fa}

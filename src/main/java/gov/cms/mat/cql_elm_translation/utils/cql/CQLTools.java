@@ -79,20 +79,6 @@ public class CQLTools {
   Set<String> usedCodeSystems = new HashSet<>();
   DataCriteria dataCriteria = new DataCriteria();
 
-  //  public CQLTools(
-  //      String parentLibraryString,
-  //      Map<String, String> childrenLibraries,
-  //      List<String> parentExpressions,
-  //      CqlTranslator translator) {
-  //
-  //    this(
-  //        parentLibraryString,
-  //        childrenLibraries,
-  //        parentExpressions,
-  //        translator,
-  //        translator.getTranslatedLibraries());
-  //  }
-
   public CQLTools(
       String parentLibraryString,
       Map<String, String> childrenLibraries,
