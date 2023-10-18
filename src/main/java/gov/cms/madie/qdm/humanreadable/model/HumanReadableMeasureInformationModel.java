@@ -38,7 +38,7 @@ public class HumanReadableMeasureInformationModel {
   private String rationale;
   private String clinicalRecommendationStatement;
   private String improvementNotation;
-  private List<ReferenceTextAndType> references;
+
   private String definition;
   private String guidance;
   private String transmissionFormat;

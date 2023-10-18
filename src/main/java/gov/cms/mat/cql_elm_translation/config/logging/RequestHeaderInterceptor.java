@@ -23,7 +23,7 @@ import static gov.cms.mat.config.logging.MdcHeaderString.MDC_PARAMS_ID;
 import static gov.cms.mat.config.logging.MdcHeaderString.MDC_START_KEY;
 
 /** Class that get the header data from the request and set in the MDC context */
-@Slf4j
+@Slf4j()
 public class RequestHeaderInterceptor implements HandlerInterceptor {
   private static final String HEADER_TEMPLATE = "%s:\"%s\"";
 

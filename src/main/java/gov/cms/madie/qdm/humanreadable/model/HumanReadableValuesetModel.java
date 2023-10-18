@@ -1,10 +1,13 @@
 package gov.cms.madie.qdm.humanreadable.model;
 
 import java.util.Objects;
+
+import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.apache.commons.lang3.StringUtils;
 
 @NoArgsConstructor
+@Data
 public class HumanReadableValuesetModel implements HumanReadableTerminologyModel {
   private String name;
   private String oid;
@@ -30,22 +33,6 @@ public class HumanReadableValuesetModel implements HumanReadableTerminologyModel
   @Override
   public void setName(String name) {
     this.name = name;
-  }
-
-  public String getOid() {
-    return oid;
-  }
-
-  public void setOid(String oid) {
-    this.oid = oid;
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
   }
 
   private void createTerminologyDisplay() {

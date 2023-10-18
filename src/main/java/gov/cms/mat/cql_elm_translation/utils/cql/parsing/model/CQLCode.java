@@ -2,12 +2,14 @@ package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
+import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Objects;
 
 /** The Class CQLCode. */
 @Builder
+@Data
 @NoArgsConstructor
 @AllArgsConstructor
 public class CQLCode implements CQLExpression {
@@ -167,14 +169,6 @@ public class CQLCode implements CQLExpression {
   public int hashCode() {
     return Objects.hash(
         codeName, codeSystemName, codeSystemVersion, codeSystemOID, codeOID, codeIdentifier);
-  }
-
-  public String getCodeName() {
-    return this.codeName;
-  }
-
-  public void setCodeName(String name) {
-    this.codeName = name;
   }
 
   @Override

@@ -3,7 +3,6 @@ package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 import java.util.*;
 import java.util.stream.Collectors;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.ModelTypeHelper;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -33,136 +32,8 @@ public class CQLModel {
 
   private int lines;
 
-  public boolean isFhir() {
-    return ModelTypeHelper.isFhir(usingModel);
-  }
-
-  public String getContext() {
-    return context;
-  }
-
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  public List<CQLQualityDataSetDTO> getValueSetList() {
-    return valueSetList;
-  }
-
-  public void setValueSetList(List<CQLQualityDataSetDTO> valueSetList) {
-    this.valueSetList = valueSetList;
-  }
-
-  public List<CQLParameter> getCqlParameters() {
-    return cqlParameters;
-  }
-
-  public void setCqlParameters(List<CQLParameter> cqlParameters) {
-    this.cqlParameters = cqlParameters;
-  }
-
   public List<CQLDefinition> getDefinitionList() {
     return cqlDefinitions;
-  }
-
-  public void setDefinitionList(List<CQLDefinition> definitionList) {
-    cqlDefinitions = definitionList;
-  }
-
-  public List<CQLFunctions> getCqlFunctions() {
-    return cqlFunctions;
-  }
-
-  public void setCqlFunctions(List<CQLFunctions> cqlFunctions) {
-    this.cqlFunctions = cqlFunctions;
-  }
-
-  public int getLines() {
-    return lines;
-  }
-
-  public void setLines(int lines) {
-    this.lines = lines;
-  }
-
-  public List<CQLCodeSystem> getCodeSystemList() {
-    return codeSystemList;
-  }
-
-  public void setCodeSystemList(List<CQLCodeSystem> list) {
-    this.codeSystemList = list;
-  }
-
-  public List<CQLCode> getCodeList() {
-    return codeList;
-  }
-
-  public void setCodeList(List<CQLCode> codeList) {
-    this.codeList = codeList;
-  }
-
-  public List<CQLQualityDataSetDTO> getAllValueSetAndCodeList() {
-    return allValueSetAndCodeList;
-  }
-
-  public void setAllValueSetAndCodeList(List<CQLQualityDataSetDTO> allValueSetAndCodeList) {
-    this.allValueSetAndCodeList = allValueSetAndCodeList;
-  }
-
-  public List<CQLIncludeLibrary> getCqlIncludeLibraries() {
-    return cqlIncludeLibraries;
-  }
-
-  public void setCqlIncludeLibraries(List<CQLIncludeLibrary> cqlIncludeLibraries) {
-    this.cqlIncludeLibraries = cqlIncludeLibraries;
-  }
-
-  public String getLibraryName() {
-    return libraryName;
-  }
-
-  public void setLibraryName(String libraryName) {
-    this.libraryName = libraryName;
-  }
-
-  public String getVersionUsed() {
-    return versionUsed;
-  }
-
-  public void setVersionUsed(String versionUsed) {
-    this.versionUsed = versionUsed;
-  }
-
-  public String getLibraryComment() {
-    return libraryComment;
-  }
-
-  public void setLibraryComment(String libraryComment) {
-    this.libraryComment = libraryComment;
-  }
-
-  public String getUsingModelVersion() {
-    return usingModelVersion;
-  }
-
-  public void setUsingModelVersion(String usingModelVersion) {
-    this.usingModelVersion = usingModelVersion;
-  }
-
-  public String getUsingModel() {
-    return usingModel;
-  }
-
-  public void setUsingModel(String name) {
-    this.usingModel = name;
-  }
-
-  public Map<CQLIncludeLibrary, CQLModel> getIncludedLibraries() {
-    return includedLibraries;
-  }
-
-  public void setIncludedLibraries(Map<CQLIncludeLibrary, CQLModel> includedLibraries) {
-    this.includedLibraries = includedLibraries;
   }
 
   public List<CQLDefinition> getIncludedDef() {

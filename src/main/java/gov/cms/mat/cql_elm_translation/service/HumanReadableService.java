@@ -9,7 +9,6 @@ import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationCriteriaModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
-import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableDateUtil;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -126,9 +125,5 @@ public class HumanReadableService {
 
   List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
     return List.of(new HumanReadableExpressionModel());
-  }
-
-  List<HumanReadableValuesetModel> buildValueSetCriteriaList(Measure measure) {
-    return List.of(new HumanReadableValuesetModel());
   }
 }
