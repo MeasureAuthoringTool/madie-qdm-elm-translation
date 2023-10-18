@@ -62,7 +62,7 @@ public class CQLTools {
 
   private Map<String, String> qdmTypeInfoMap = new HashMap<>();
 
-  private Map<VersionedIdentifier, CompiledLibrary> CompiledLibraryMap;
+  private Map<String, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
   private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
@@ -79,26 +79,26 @@ public class CQLTools {
   Set<String> usedCodeSystems = new HashSet<>();
   DataCriteria dataCriteria = new DataCriteria();
 
-  public CQLTools(
-      String parentLibraryString,
-      Map<String, String> childrenLibraries,
-      List<String> parentExpressions,
-      CqlTranslator translator) {
-
-    this(
-        parentLibraryString,
-        childrenLibraries,
-        parentExpressions,
-        translator,
-        translator.getTranslatedLibraries());
-  }
+  //  public CQLTools(
+  //      String parentLibraryString,
+  //      Map<String, String> childrenLibraries,
+  //      List<String> parentExpressions,
+  //      CqlTranslator translator) {
+  //
+  //    this(
+  //        parentLibraryString,
+  //        childrenLibraries,
+  //        parentExpressions,
+  //        translator,
+  //        translator.getTranslatedLibraries());
+  //  }
 
   public CQLTools(
       String parentLibraryString,
       Map<String, String> childrenLibraries,
       List<String> parentExpressions,
       CqlTranslator translator,
-      Map<VersionedIdentifier, CompiledLibrary> translatedLibraries) {
+      Map<String, CompiledLibrary> translatedLibraries) {
 
     this.parentLibraryString = parentLibraryString;
     this.translator = translator;
