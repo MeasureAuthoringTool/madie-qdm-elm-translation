@@ -44,14 +44,9 @@ public class DataCriteriaService {
     CqlTranslator cqlTranslator = runTranslator(cql);
 
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
-
-    for (Map.Entry<VersionedIdentifier, CompiledLibrary> entry :
-        cqlTranslator.getTranslatedLibraries().entrySet()) {
-      VersionedIdentifier versionedIdentifier = entry.getKey();
-      CompiledLibrary compiledLibrary = entry.getValue();
-      String id = versionedIdentifier.getId();
-      translatedLibraries.put(id, compiledLibrary);
-    }
+    cqlTranslator
+        .getTranslatedLibraries()
+        .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
 
     CQLTools cqlTools =
         new CQLTools(
