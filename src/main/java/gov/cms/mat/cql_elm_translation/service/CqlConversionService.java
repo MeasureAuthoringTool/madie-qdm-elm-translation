@@ -6,6 +6,7 @@ import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
@@ -130,20 +131,25 @@ public class CqlConversionService {
     setUpLibrarySourceProvider(cql, accessToken);
     CqlTranslator translator = processCqlData(requestData);
     String library = translator.toJson();
-    var result = new HashMap<VersionedIdentifier, String>();
-    for (Map.Entry<VersionedIdentifier, CompiledLibrary> entry :
-        translator.getTranslatedLibraries().entrySet()) {
-      result.put(entry.getKey(), convertToXml(entry.getValue().getLibrary()));
-    }
+    List<String> libraries = new ArrayList<>();
+    translator
+        .getTranslatedLibraries()
+        .forEach(
+            (key, value) -> {
+              try {
+                libraries.add(convertToJson(value.getLibrary()));
+              } catch (IOException e) {
+                throw new InternalServerException(e.getMessage());
+              }
+            });
 
-    List<String> libraries = new ArrayList<>(result.values());
     libraries.add(library);
     return libraries;
   }
 
-  public static String convertToXml(Library library) throws IOException {
+  public static String convertToJson(Library library) throws IOException {
     StringWriter writer = new StringWriter();
-    ElmLibraryWriterFactory.getWriter(LibraryContentType.XML.mimeType()).write(library, writer);
+    ElmLibraryWriterFactory.getWriter(LibraryContentType.JSON.mimeType()).write(library, writer);
     return writer.getBuffer().toString();
   }
 
