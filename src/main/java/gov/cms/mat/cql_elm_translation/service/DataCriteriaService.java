@@ -114,7 +114,9 @@ public class DataCriteriaService {
     DataCriteria dataCriteria = parseDataCriteriaFromCql(cql, accessToken);
     Map<CQLValueSet, Set<String>> criteriaWithValueSet =
         dataCriteria.getDataCriteriaWithValueSets();
-    if (MapUtils.isEmpty(criteriaWithValueSet)) {
+
+    Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
+    if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
       log.info("Data criteria not found for given cql");
       return Collections.emptyList();
     }
@@ -127,7 +129,6 @@ public class DataCriteriaService {
             .collect(Collectors.toList());
 
     // data criteria from direct reference codes
-    Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
     List<SourceDataCriteria> codeCriteria =
         criteriaWithCodes.entrySet().stream()
             .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
