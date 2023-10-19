@@ -111,7 +111,7 @@ public class EffectiveDataRequirementService {
     //  removed from the LibraryManager class.. it appears that it can be replaced by resolveLibrary
     // ¯\_(ツ)_/¯
     //  libraryManager.cacheLibrary(translatedLibrary);
-    libraryManager.resolveLibrary(requestData.getSourceInfo());
+    // libraryManager.resolveLibrary(requestData.getSourceInfo());
 
     Set<String> expressionList = getExpressions(r5Measure);
     var dqReqTrans = new DataRequirementsProcessor();
