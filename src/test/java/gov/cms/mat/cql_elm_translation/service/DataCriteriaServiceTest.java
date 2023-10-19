@@ -19,7 +19,6 @@ import java.util.stream.Collectors;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -70,8 +69,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             .resultTypes(true)
             .build();
   }
-
-
 
   @Test
   void testGetSourceDataCriteria() {
