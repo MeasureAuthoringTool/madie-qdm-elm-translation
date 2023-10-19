@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Data
 @Builder
-public class SourceDataCriteria {
+public class SourceDataCriteria implements Comparable<SourceDataCriteria> {
   private String oid;
   private String title;
   private String description;
@@ -13,4 +13,9 @@ public class SourceDataCriteria {
   private boolean drc;
   // MAT-6210: codeId used for drc
   private String codeId;
+
+  @Override
+  public int compareTo(SourceDataCriteria o) {
+    return this.oid.compareTo(o.oid);
+  }
 }

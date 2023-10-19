@@ -1,6 +1,5 @@
 package gov.cms.madie.qdm.humanreadable.model;
 
-import java.util.Random;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
