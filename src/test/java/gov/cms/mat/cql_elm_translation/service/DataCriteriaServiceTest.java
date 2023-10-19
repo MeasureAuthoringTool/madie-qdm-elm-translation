@@ -71,8 +71,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             .build();
   }
 
-  @AfterEach
-  void tearDown() {}
+
 
   @Test
   void testGetSourceDataCriteria() {

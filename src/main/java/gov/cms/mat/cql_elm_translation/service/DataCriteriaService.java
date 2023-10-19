@@ -18,7 +18,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
