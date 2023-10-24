@@ -15,6 +15,7 @@ import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 import java.util.Objects;
+import java.util.TreeSet;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -120,10 +121,13 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     Measure measure = Measure.builder().cql(cql).build();
     String token = "john";
     var sdc = SourceDataCriteria.builder().oid("1.2.3").description("EP: Test").title("EP").build();
+    TreeSet<SourceDataCriteria> sdcSet = new TreeSet<SourceDataCriteria>();
+    sdcSet.add(sdc);
     when(dataCriteriaService.getRelevantElements(any(Measure.class), anyString()))
-        .thenReturn(List.of(sdc));
+        .thenReturn(sdcSet);
     var result = cqlToolsController.getRelevantElements(measure, token);
-    SourceDataCriteria sourceDataCriteria = result.getBody().get(0);
+    SourceDataCriteria sourceDataCriteria =
+        ((TreeSet<SourceDataCriteria>) result.getBody()).first();
     assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
     assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
     assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));

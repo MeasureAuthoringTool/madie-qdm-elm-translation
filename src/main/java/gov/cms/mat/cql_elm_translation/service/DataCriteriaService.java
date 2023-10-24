@@ -18,7 +18,6 @@ import org.apache.commons.collections4.MapUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -39,6 +38,7 @@ public class DataCriteriaService {
 
   private CQLTools parseCql(String cql, String accessToken) {
     // Run Translator to compile libraries
+
     MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
     CqlTranslator cqlTranslator = runTranslator(cql);
@@ -64,10 +64,10 @@ public class DataCriteriaService {
     return cqlTools;
   }
 
-  public List<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
+  public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
     if (StringUtils.isBlank(measure.getCql())) {
       log.info("Data criteria not found as cql is blank");
-      return Collections.emptyList();
+      return Collections.emptySet();
     }
 
     List<SourceDataCriteria> sourceDataCriteria =
@@ -106,10 +106,14 @@ public class DataCriteriaService {
                 .forEach((expression, valueSet) -> values.add(expression));
           }
         });
-
-    return sourceDataCriteria.stream()
+    Set<SourceDataCriteria> relevantSet = new TreeSet<>();
+    sourceDataCriteria.stream()
         .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
-        .toList();
+        .forEach(
+            src -> {
+              relevantSet.add(src);
+            });
+    return relevantSet;
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
@@ -168,12 +172,15 @@ public class DataCriteriaService {
       CQLValueSet valueSet, Set<String> dataTypes) {
     String dataType = dataTypes.stream().findFirst().orElse(null);
     String name = splitByPipeAndGetLast(valueSet.getName());
-    return SourceDataCriteria.builder()
-        .oid(valueSet.getOid())
-        .title(name)
-        .description(dataType + ": " + name)
-        .type(buildCriteriaType(dataType))
-        .build();
+    String oid = valueSet.getOid();
+    SourceDataCriteria result =
+        SourceDataCriteria.builder()
+            .oid(oid)
+            .title(name)
+            .description(dataType + ": " + name)
+            .type(buildCriteriaType(dataType))
+            .build();
+    return result;
   }
 
   private String splitByPipeAndGetLast(String criteria) {

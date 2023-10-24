@@ -1,5 +1,8 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
+import lombok.Data;
+
+@Data
 public class CQLParameter implements CQLExpression {
   private String parameterName;
   private String cqlType;
@@ -8,38 +11,6 @@ public class CQLParameter implements CQLExpression {
   private String id;
   private boolean readOnly;
   private String commentString = "";
-
-  public String getCqlType() {
-    return cqlType;
-  }
-
-  public void setCqlType(String cqlType) {
-    this.cqlType = cqlType;
-  }
-
-  public String getDefaultValue() {
-    return defaultValue;
-  }
-
-  public void setDefaultValue(String defaultValue) {
-    this.defaultValue = defaultValue;
-  }
-
-  public boolean isReadOnly() {
-    return readOnly;
-  }
-
-  public void setReadOnly(boolean isReadOnly) {
-    this.readOnly = isReadOnly;
-  }
-
-  public String getCommentString() {
-    return commentString;
-  }
-
-  public void setCommentString(String commentString) {
-    this.commentString = commentString;
-  }
 
   public String getParameterName() {
     return parameterName.trim();

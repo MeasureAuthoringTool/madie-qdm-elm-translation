@@ -3,6 +3,7 @@ target/
 !**/src/main/**
 !**/src/test/**
 *.bak
+*.tmp
 
 ### STS ###
 .apt_generated

@@ -2,36 +2,22 @@ package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import java.util.Objects;
 
+import lombok.Data;
+
 /** The Class CQLIncludeLibrary. */
+@Data
 public class CQLIncludeLibrary {
 
   private String id;
-
   private String aliasName;
-
   private String cqlLibraryId;
-
   private String version;
-
   private String cqlLibraryName;
-
   private String qdmVersion;
-
   private String setId;
-
   private String isComponent;
-
   private String measureId;
-
   private String libraryModelType = "QDM";
-
-  public String getSetId() {
-    return setId;
-  }
-
-  public void setSetId(String setId) {
-    this.setId = setId;
-  }
 
   public CQLIncludeLibrary(CQLLibraryDataSetObject dto) {
     this.cqlLibraryId = dto.getId();
@@ -54,62 +40,6 @@ public class CQLIncludeLibrary {
   }
 
   public CQLIncludeLibrary() {}
-
-  public String getId() {
-    return id;
-  }
-
-  public void setId(String id) {
-    this.id = id;
-  }
-
-  public String getAliasName() {
-    return aliasName;
-  }
-
-  public void setAliasName(String aliasName) {
-    this.aliasName = aliasName;
-  }
-
-  public String getCqlLibraryId() {
-    return cqlLibraryId;
-  }
-
-  public void setCqlLibraryId(String cqlLibraryId) {
-    this.cqlLibraryId = cqlLibraryId;
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  public String getCqlLibraryName() {
-    return cqlLibraryName;
-  }
-
-  public void setCqlLibraryName(String cqlLibraryName) {
-    this.cqlLibraryName = cqlLibraryName;
-  }
-
-  public String getQdmVersion() {
-    return qdmVersion;
-  }
-
-  public void setQdmVersion(String qdmVersion) {
-    this.qdmVersion = qdmVersion;
-  }
-
-  public String getLibraryModelType() {
-    return libraryModelType;
-  }
-
-  public void setLibraryModelType(String libraryModelType) {
-    this.libraryModelType = libraryModelType;
-  }
 
   @Override
   public boolean equals(Object arg0) {
@@ -161,21 +91,5 @@ public class CQLIncludeLibrary {
         + this.version
         + "|"
         + this.libraryModelType;
-  }
-
-  public String getIsComponent() {
-    return isComponent;
-  }
-
-  public void setIsComponent(String isComponent) {
-    this.isComponent = isComponent;
-  }
-
-  public String getMeasureId() {
-    return measureId;
-  }
-
-  public void setMeasureId(String measureId) {
-    this.measureId = measureId;
   }
 }

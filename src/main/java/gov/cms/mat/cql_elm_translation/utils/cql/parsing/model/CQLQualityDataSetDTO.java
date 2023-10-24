@@ -1,6 +1,9 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
+import lombok.Data;
+
 /** The Class QualityDataSetDTO. */
+@Data
 public class CQLQualityDataSetDTO implements CQLExpression {
 
   /** QDM Modified At VSAC. */
@@ -32,7 +35,9 @@ public class CQLQualityDataSetDTO implements CQLExpression {
   private String valueSetType;
   private String isValidatedWithVsac = "VALID";
 
-  /* (non-Javadoc)
+  /*
+   * (non-Javadoc)
+   *
    * @see java.lang.Object#equals(java.lang.Object)
    */
   @Override
@@ -44,190 +49,12 @@ public class CQLQualityDataSetDTO implements CQLExpression {
     return false;
   }
 
-  public String getCodeListName() {
-    return codeListName;
-  }
-
-  public String getSuffix() {
-    return suffix;
-  }
-
-  public void setSuffix(String suffix) {
-    this.suffix = suffix;
-  }
-
-  public String getOriginalCodeListName() {
-    return originalCodeListName;
-  }
-
-  public void setOriginalCodeListName(String originalCodeListName) {
-    this.originalCodeListName = originalCodeListName;
-  }
-
-  public String getCodeSystemName() {
-    return codeSystemName;
-  }
-
-  public String getDataType() {
-    return dataType;
-  }
-
-  public String getOid() {
-    return oid;
-  }
-
   public String getQDMElement() {
     return codeListName + ": " + dataType;
   }
 
-  public String getTaxonomy() {
-    return taxonomy;
-  }
-
-  public String getType() {
-    return type;
-  }
-
-  public String getUuid() {
-    return uuid;
-  }
-
-  public String getVersion() {
-    return version;
-  }
-
-  public String getRelease() {
-    return release;
-  }
-
-  public String getProgram() {
-    return program;
-  }
-
-  public boolean isSuppDataElement() {
-    return suppDataElement;
-  }
-
-  public void setCodeListName(String codeListName) {
-    this.codeListName = codeListName;
-  }
-
-  public void setCodeSystemName(String codeSystemName) {
-    this.codeSystemName = codeSystemName;
-  }
-
-  public void setDataType(String dataType) {
-    this.dataType = dataType;
-  }
-
-  public void setOid(String oid) {
-    this.oid = oid;
-  }
-
-  public void setSuppDataElement(boolean suppDataElement) {
-    this.suppDataElement = suppDataElement;
-  }
-
-  public void setTaxonomy(String taxonomy) {
-    this.taxonomy = taxonomy;
-  }
-
-  public void setType(String type) {
-    this.type = type;
-  }
-
-  public void setUuid(String uuid) {
-    this.uuid = uuid;
-  }
-
-  public void setVersion(String version) {
-    this.version = version;
-  }
-
-  public void setRelease(String release) {
-    this.release = release;
-  }
-
-  public void setProgram(String program) {
-    this.program = program;
-  }
-
-  public boolean isDataTypeHasRemoved() {
-    return dataTypeHasRemoved;
-  }
-
-  public void setDataTypeHasRemoved(boolean dataTypeHasRemoved) {
-    this.dataTypeHasRemoved = dataTypeHasRemoved;
-  }
-
   public int compare(CQLQualityDataSetDTO o1, CQLQualityDataSetDTO o2) {
     return o1.getUuid().compareTo(o2.getUuid());
-  }
-
-  public boolean isHasModifiedAtVSAC() {
-    return hasModifiedAtVSAC;
-  }
-
-  public void setHasModifiedAtVSAC(boolean hasModifiedAtVSAC) {
-    this.hasModifiedAtVSAC = hasModifiedAtVSAC;
-  }
-
-  public boolean isNotFoundInVSAC() {
-    return notFoundInVSAC;
-  }
-
-  public void setNotFoundInVSAC(boolean notFoundInVSAC) {
-    this.notFoundInVSAC = notFoundInVSAC;
-  }
-
-  public boolean isUsed() {
-    return isUsed;
-  }
-
-  public void setUsed(boolean isUsed) {
-    this.isUsed = isUsed;
-  }
-
-  public String getDisplayName() {
-    return displayName;
-  }
-
-  public void setDisplayName(String displayName) {
-    this.displayName = displayName;
-  }
-
-  public String getCodeSystemOID() {
-    return codeSystemOID;
-  }
-
-  public void setCodeSystemOID(String codeSystemOID) {
-    this.codeSystemOID = codeSystemOID;
-  }
-
-  public String getCodeIdentifier() {
-    return codeIdentifier;
-  }
-
-  public void setCodeIdentifier(String codeIdentifier) {
-    this.codeIdentifier = codeIdentifier;
-  }
-
-  public boolean isReadOnly() {
-    return isReadOnly;
-  }
-
-  public void setReadOnly(boolean isReadOnly) {
-    this.isReadOnly = isReadOnly;
-  }
-
-  @Override
-  public String getId() {
-    return id;
-  }
-
-  @Override
-  public void setId(String id) {
-    this.id = id;
   }
 
   @Override
@@ -247,14 +74,6 @@ public class CQLQualityDataSetDTO implements CQLExpression {
 
   @Override
   public void setLogic(String logic) {}
-
-  public String getValueSetType() {
-    return valueSetType;
-  }
-
-  public void setValueSetType(String valueSetType) {
-    this.valueSetType = valueSetType;
-  }
 
   @Override
   public String toString() {

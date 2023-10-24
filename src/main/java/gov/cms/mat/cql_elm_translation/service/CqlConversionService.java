@@ -1,5 +1,25 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
+import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.LibraryContentType;
+import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
+import org.hl7.elm.r1.Library;
+import org.springframework.stereotype.Service;
+
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql.elements.UsingProperties;
@@ -10,32 +30,10 @@ import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
-import org.apache.commons.lang3.StringUtils;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibraryContentType;
-import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
-import org.hl7.elm.r1.VersionedIdentifier;
-import org.hl7.elm.r1.Library;
-import org.springframework.stereotype.Service;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @Service
 @Slf4j

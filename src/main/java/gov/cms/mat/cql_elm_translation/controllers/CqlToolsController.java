@@ -21,6 +21,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
+import java.util.Set;
 
 @Slf4j
 @RestController
@@ -78,7 +79,7 @@ public class CqlToolsController {
   }
 
   @PutMapping("/qdm/relevant-elements")
-  public ResponseEntity<List<SourceDataCriteria>> getRelevantElements(
+  public ResponseEntity<Set<SourceDataCriteria>> getRelevantElements(
       @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON)

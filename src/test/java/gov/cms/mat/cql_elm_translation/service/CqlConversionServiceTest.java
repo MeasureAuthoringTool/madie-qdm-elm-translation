@@ -213,8 +213,12 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   void testGetElmForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     List<String> elms = service.getElmForCql(cql, "token");
-    assertThat(elms.size(), is(equalTo(1)));
-    assertThat(elms.get(0).contains("DataCriteriaRetrivalTest"), is(true));
+    AtomicBoolean foundAMatch = new AtomicBoolean();
+    elms.forEach(
+        elm -> {
+          foundAMatch.set(elm.contains("DataCriteriaRetrivalTest"));
+        });
+    assertThat(foundAMatch.get(), is(true));
   }
 
   @Test

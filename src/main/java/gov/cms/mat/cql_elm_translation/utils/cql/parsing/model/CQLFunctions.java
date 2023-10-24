@@ -2,6 +2,9 @@ package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import java.util.List;
 
+import lombok.Data;
+
+@Data
 public class CQLFunctions implements CQLExpression {
 
   private String aliasName;
@@ -81,62 +84,5 @@ public class CQLFunctions implements CQLExpression {
   @Override
   public void setLogic(String logic) {
     setFunctionLogic(logic);
-  }
-
-  public String getFunctionName() {
-    return functionName.trim();
-  }
-
-  public void setFunctionName(String name) {
-    this.functionName = name.trim();
-  }
-
-  public String getFunctionLogic() {
-    return functionLogic.trim();
-  }
-
-  public void setFunctionLogic(String logic) {
-    this.functionLogic = logic.trim();
-  }
-  /**
-   * Gets the context.
-   *
-   * @return the context
-   */
-  public String getContext() {
-    return context;
-  }
-
-  /**
-   * Sets the context.
-   *
-   * @param context the new context
-   */
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  public String getCommentString() {
-    return commentString;
-  }
-
-  public void setCommentString(String commentString) {
-    this.commentString = commentString;
-  }
-
-  public String getReturnType() {
-    return returnType;
-  }
-
-  public void setReturnType(String returnType) {
-    this.returnType = returnType;
-  }
-
-  public String getAliasName() {
-    return aliasName;
-  }
-
-  public void setAliasName(String aliasName) {
-    this.aliasName = aliasName;
   }
 }

@@ -1,5 +1,8 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
+import lombok.Data;
+
+@Data
 public class CQLDefinition implements CQLExpression {
   private String id;
   private String definitionName;
@@ -51,64 +54,8 @@ public class CQLDefinition implements CQLExpression {
     setDefinitionLogic(logic);
   }
 
-  public String getDefinitionName() {
-    return definitionName.trim();
-  }
-
-  public void setDefinitionName(String name) {
-    this.definitionName = name.trim();
-  }
-
-  public String getDefinitionLogic() {
-    return definitionLogic.trim();
-  }
-
-  public void setDefinitionLogic(String logic) {
-    this.definitionLogic = logic.trim();
-  }
-
-  public String getContext() {
-    return context;
-  }
-
-  public void setContext(String context) {
-    this.context = context;
-  }
-
-  public boolean isSupplDataElement() {
-    return supplDataElement;
-  }
-
-  public void setSupplDataElement(boolean supplDataElement) {
-    this.supplDataElement = supplDataElement;
-  }
-
   @Override
   public String toString() {
     return this.definitionName;
-  }
-
-  public boolean isPopDefinition() {
-    return popDefinition;
-  }
-
-  public void setPopDefinition(boolean popDefinition) {
-    this.popDefinition = popDefinition;
-  }
-
-  public String getCommentString() {
-    return commentString;
-  }
-
-  public void setCommentString(String commentString) {
-    this.commentString = commentString;
-  }
-
-  public String getReturnType() {
-    return returnType;
-  }
-
-  public void setReturnType(String returnType) {
-    this.returnType = returnType;
   }
 }

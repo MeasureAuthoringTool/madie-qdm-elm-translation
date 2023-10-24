@@ -145,8 +145,9 @@ public class TranslationResource {
 
       libraryManager.setUcumService(ucumService);
       libraryManager.getCqlCompilerOptions().setOptions(options);
-
-      return CqlTranslator.fromStream(nsInfo, sourceInfo, cqlStream, libraryManager);
+      CqlTranslator translator =
+          CqlTranslator.fromStream(nsInfo, sourceInfo, cqlStream, libraryManager);
+      return translator;
 
     } catch (Exception e) {
       throw new TranslationFailureException("Unable to read request", e);
