@@ -32,7 +32,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
-import net.sf.saxon.expr.PJConverter.Atomic;
+
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
