@@ -33,7 +33,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 
-
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
 
