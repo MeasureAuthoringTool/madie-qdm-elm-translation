@@ -104,14 +104,8 @@ public class EffectiveDataRequirementService {
     LibraryManager libraryManager = translationResource.getLibraryManager();
 
     // providing compiled measureLibrary, as it cannot be fetched using
-    // LibrarySourceProvider ( we
-    // are not storing measure libraries in HAPI)
-
-    // MAT-6402:  Following line was commented out because cacheLibrary was unceremoniously
-    //  removed from the LibraryManager class.. it appears that it can be replaced by resolveLibrary
-    // ¯\_(ツ)_/¯
-    //  libraryManager.cacheLibrary(translatedLibrary);
-    // libraryManager.resolveLibrary(requestData.getSourceInfo());
+    // LibrarySourceProvider ( we are not storing measure libraries in MADiE cql-library-service)
+    libraryManager.getCompiledLibraries().put(translatedLibrary.getIdentifier(), translatedLibrary);
 
     Set<String> expressionList = getExpressions(r5Measure);
     var dqReqTrans = new DataRequirementsProcessor();
