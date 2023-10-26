@@ -11,16 +11,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import gov.cms.mat.cql_elm_translation.data.DataCriteria;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.Cql2ElmListener;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorVisitor;
 import org.cqframework.cql.gen.cqlLexer;
@@ -29,7 +25,16 @@ import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.ParameterDef;
-import org.hl7.elm.r1.VersionedIdentifier;
+
+import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql.elements.UsingProperties;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
+import gov.cms.mat.cql_elm_translation.data.DataCriteria;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.Cql2ElmListener;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
 public class CQLTools {
 
@@ -110,11 +115,21 @@ public class CQLTools {
     cqlParser parser = new cqlParser(tokens);
 
     CQLGraph graph = new CQLGraph();
+
     Cql2ElmListener listener =
         new Cql2ElmListener(graph, library, CompiledLibraryMap, childrenLibraries);
+
     ParseTree tree = parser.library();
-    CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor();
-    preprocessor.setTokenStream(tokens);
+    CqlTextParser cqlTextParser = new CqlTextParser(this.parentLibraryString);
+    UsingProperties usingProperties = cqlTextParser.getUsing();
+    TranslationResource translationResource =
+        TranslationResource.getInstance(
+            usingProperties.getLibraryType() == "FHIR"); // <-- BADDDDD!!!! Defaults to fhir
+
+    CqlPreprocessorVisitor preprocessor =
+        new CqlPreprocessorVisitor(
+            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
+
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);

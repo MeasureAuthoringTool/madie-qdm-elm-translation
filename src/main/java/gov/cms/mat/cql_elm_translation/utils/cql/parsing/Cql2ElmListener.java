@@ -4,17 +4,19 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.*;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
+import java.util.Stack;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
-import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.collections4.CollectionUtils;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorVisitor;
 import org.cqframework.cql.gen.cqlBaseListener;
@@ -37,7 +39,11 @@ import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.IncludeDef;
 import org.hl7.elm.r1.ParameterDef;
 import org.hl7.elm.r1.ValueSetDef;
-import org.hl7.elm.r1.VersionedIdentifier;
+
+import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import lombok.Getter;
 
 public class Cql2ElmListener extends cqlBaseListener {
 
@@ -503,8 +509,14 @@ public class Cql2ElmListener extends cqlBaseListener {
             translatedLibraryMap,
             childrenLibraries);
     ParseTree tree = parser.library();
-    CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor();
-    preprocessor.setTokenStream(tokens);
+
+    TranslationResource translationResource =
+        TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
+
+    CqlPreprocessorVisitor preprocessor =
+        new CqlPreprocessorVisitor(
+            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
+
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);

@@ -51,7 +51,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
   @BeforeEach
   void setup() {
-    //    cql = getData("/qdm_data_criteria_retrieval_test.cql");
     matGlobalCql = getData("/mat_global_common_functions.cql");
     cql = getData("/qdm_data_criteria_retrieval_test.cql");
 
