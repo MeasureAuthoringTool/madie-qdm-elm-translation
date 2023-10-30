@@ -93,8 +93,8 @@ public class TranslationResource {
     this.libraryManager = new LibraryManager(modelManager, new CqlCompilerOptions());
   }
 
-  public static TranslationResource getInstance(boolean model) {
-    instance = new TranslationResource(model);
+  public static TranslationResource getInstance(boolean isFhir) {
+    instance = new TranslationResource(isFhir);
     // returns the singleton object
     return instance;
   }
