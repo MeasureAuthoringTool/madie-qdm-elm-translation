@@ -93,13 +93,15 @@ public class DataCriteriaService {
     Set<String> values = new HashSet<>();
     usedDefinitions.forEach(
         def -> {
-          if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())) {
+          if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())
+              && !MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap().get(def))) {
             tools
                 .getExpressionNameToValuesetDataTypeMap()
                 .get(def)
                 .forEach((expression, valueSet) -> values.add(expression));
           }
-          if (!MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap())) {
+          if (!MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap())
+              && !MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap().get(def))) {
             tools
                 .getExpressionNameToCodeDataTypeMap()
                 .get(def)
