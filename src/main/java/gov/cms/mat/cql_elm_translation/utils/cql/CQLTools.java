@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -84,6 +85,10 @@ public class CQLTools {
   Set<String> usedCodeSystems = new HashSet<>();
   @Getter
   DataCriteria dataCriteria = new DataCriteria();
+  @Getter
+  Map<String, String> definitionContent = new HashMap<>();
+  @Getter
+  Map<String, Set<String>> callstack = new HashMap<>();
 
   public CQLTools(
       String parentLibraryString,
@@ -134,6 +139,9 @@ public class CQLTools {
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
+
+    definitionContent.putAll(listener.getDefinitionContent());
+    callstack = graph.getAdjacencyList();
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
