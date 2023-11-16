@@ -21,7 +21,7 @@ public class CqlParsingService extends CqlTooling {
   private final CqlConversionService cqlConversionService;
 
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService, false);
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
 
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
     // remove null key, only contains included library references
