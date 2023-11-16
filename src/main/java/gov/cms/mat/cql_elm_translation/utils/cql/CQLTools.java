@@ -50,13 +50,16 @@ public class CQLTools {
   private Map<String, Set<String>> codeDataTypeMap = new HashMap<>();
 
   /** Maps an expression, to it's internal valueset - datatype map */
+  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
       new HashMap<>();
 
   /** Maps an expression, to it's internal code - datatype map */
+  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
   /** Maps an expression name to its return type (only function and definitions) */
+  @Getter
   private Map<String, String> nameToReturnTypeMap = new HashMap<>();
 
   /**
@@ -70,8 +73,10 @@ public class CQLTools {
   private Map<String, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
+  @Getter
   private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
 
+  @Getter
   private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
   // used expression sets
@@ -82,6 +87,7 @@ public class CQLTools {
   Set<String> usedDefinitions = new HashSet<>();
   Set<String> usedFunctions = new HashSet<>();
   Set<String> usedCodeSystems = new HashSet<>();
+  @Getter
   DataCriteria dataCriteria = new DataCriteria();
 
   public CQLTools(
@@ -469,10 +475,6 @@ public class CQLTools {
     return codeDataTypeMapWithList;
   }
 
-  public Map<String, String> getNameToReturnTypeMap() {
-    return nameToReturnTypeMap;
-  }
-
   public void setNameToReturnTypeMap(Map<String, String> nameToReturnTypeMap) {
     this.nameToReturnTypeMap = nameToReturnTypeMap;
   }
@@ -515,18 +517,6 @@ public class CQLTools {
     return new ArrayList<>(usedFunctions);
   }
 
-  public Map<String, Map<String, Set<String>>> getExpressionNameToValuesetDataTypeMap() {
-    return expressionNameToValuesetDataTypeMap;
-  }
-
-  public Map<String, Map<String, Set<String>>> getExpressionNameToCodeDataTypeMap() {
-    return expressionNameToCodeDataTypeMap;
-  }
-
-  public DataCriteria getDataCriteria() {
-    return dataCriteria;
-  }
-
   @Override
   public String toString() {
 
@@ -559,13 +549,5 @@ public class CQLTools {
     builder.append("USED FUNCTIONS " + this.getUsedFunctions());
 
     return builder.toString();
-  }
-
-  public Map<String, Map<String, String>> getAllNamesToReturnTypeMap() {
-    return allNamesToReturnTypeMap;
-  }
-
-  public Map<String, String> getExpressionToReturnTypeMap() {
-    return expressionToReturnTypeMap;
   }
 }
