@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -59,8 +60,7 @@ public class CQLTools {
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
   /** Maps an expression name to its return type (only function and definitions) */
-  @Getter
-  private Map<String, String> nameToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, String> nameToReturnTypeMap = new HashMap<>();
 
   /**
    * The list of parent expressions. Often times, these are populations from MAT. Anything that can
@@ -73,11 +73,9 @@ public class CQLTools {
   private Map<String, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
-  @Getter
-  private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
 
-  @Getter
-  private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
   // used expression sets
   Set<String> usedLibraries = new HashSet<>();
@@ -87,8 +85,7 @@ public class CQLTools {
   Set<String> usedDefinitions = new HashSet<>();
   Set<String> usedFunctions = new HashSet<>();
   Set<String> usedCodeSystems = new HashSet<>();
-  @Getter
-  DataCriteria dataCriteria = new DataCriteria();
+  @Getter DataCriteria dataCriteria = new DataCriteria();
 
   public CQLTools(
       String parentLibraryString,

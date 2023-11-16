@@ -18,8 +18,8 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public abstract class CqlTooling {
-  private boolean includeFunctionsInGraph = true;
-  public CQLTools parseCql(String cql, String accessToken, CqlConversionService cqlConversionService) {
+  public CQLTools parseCql(
+      String cql, String accessToken, CqlConversionService cqlConversionService) {
     // Run Translator to compile libraries
     MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
@@ -30,13 +30,13 @@ public abstract class CqlTooling {
         .getTranslatedLibraries()
         .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
 
-    CQLTools cqlTools = new CQLTools(
-        cql,
-        getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
-        getParentExpressions(cql),
-        cqlTranslator,
-        translatedLibraries,
-        includeFunctionsInGraph);
+    CQLTools cqlTools =
+        new CQLTools(
+            cql,
+            getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
+            getParentExpressions(cql),
+            cqlTranslator,
+            translatedLibraries);
 
     try {
       cqlTools.generate();
@@ -44,11 +44,6 @@ public abstract class CqlTooling {
       throw new RuntimeException(e);
     }
     return cqlTools;
-  }
-
-  public CQLTools parseCql(String cql, String accessToken, CqlConversionService cqlConversionService, boolean includeFunctionsInGraph) {
-    this.includeFunctionsInGraph = includeFunctionsInGraph;
-    return parseCql(cql, accessToken, cqlConversionService);
   }
 
   private Map<String, String> getIncludedLibrariesCql(
