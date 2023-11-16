@@ -49,7 +49,7 @@ public class CQLTools {
   private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
       new HashMap<>();
 
-  /** Maps an expression, to it's internal code - datatype map */
+  /** Maps an expression, to its internal code - datatype map */
   @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
@@ -82,12 +82,9 @@ public class CQLTools {
   Map<String, Set<String>> usedDefinitions = new HashMap<>();
   Set<String> usedFunctions = new HashSet<>();
   Set<String> usedCodeSystems = new HashSet<>();
-  @Getter
-  DataCriteria dataCriteria = new DataCriteria();
-  @Getter
-  Map<String, String> definitionContent = new HashMap<>();
-  @Getter
-  Map<String, Set<String>> callstack = new HashMap<>();
+  @Getter DataCriteria dataCriteria = new DataCriteria();
+  @Getter Map<String, String> definitionContent = new HashMap<>();
+  @Getter Map<String, Set<String>> callstack = new HashMap<>();
 
   public CQLTools(
       String parentLibraryString,
