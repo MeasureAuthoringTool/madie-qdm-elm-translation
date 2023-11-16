@@ -18,7 +18,8 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public abstract class CqlTooling {
-  public CQLTools parseCql(String cql, String accessToken, CqlConversionService cqlConversionService) {
+  public CQLTools parseCql(
+      String cql, String accessToken, CqlConversionService cqlConversionService) {
     // Run Translator to compile libraries
     MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
@@ -29,12 +30,13 @@ public abstract class CqlTooling {
         .getTranslatedLibraries()
         .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
 
-    CQLTools cqlTools = new CQLTools(
-        cql,
-        getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
-        getParentExpressions(cql),
-        cqlTranslator,
-        translatedLibraries);
+    CQLTools cqlTools =
+        new CQLTools(
+            cql,
+            getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
+            getParentExpressions(cql),
+            cqlTranslator,
+            translatedLibraries);
 
     try {
       cqlTools.generate();

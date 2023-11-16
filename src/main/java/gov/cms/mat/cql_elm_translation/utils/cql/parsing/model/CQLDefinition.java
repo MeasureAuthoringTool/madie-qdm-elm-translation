@@ -17,7 +17,6 @@ public class CQLDefinition implements CQLExpression {
   private String libraryVersion;
   private boolean isFunction;
 
-
   public static class Comparator implements java.util.Comparator<CQLDefinition> {
 
     /* (non-Javadoc)
