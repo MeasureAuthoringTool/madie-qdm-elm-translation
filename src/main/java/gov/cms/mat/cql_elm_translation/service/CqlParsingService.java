@@ -28,6 +28,8 @@ public class CqlParsingService extends CqlTooling {
     nodeGraph.remove(null);
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
+    // remove nodes for functions -- ensures function paths are not included
+    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
 
     // Build Set of all Definitions from graph
     Set<CQLDefinition> definitions = nodeGraph
