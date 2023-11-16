@@ -12,6 +12,11 @@ public class CQLDefinition implements CQLExpression {
   private boolean popDefinition;
   private String commentString = "";
   private String returnType;
+  private String parentLibrary;
+  private String libraryDisplayName;
+  private String libraryVersion;
+  private boolean isFunction;
+
 
   public static class Comparator implements java.util.Comparator<CQLDefinition> {
 
