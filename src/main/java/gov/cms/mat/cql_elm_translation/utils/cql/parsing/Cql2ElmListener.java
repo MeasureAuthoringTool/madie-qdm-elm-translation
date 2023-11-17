@@ -205,9 +205,9 @@ public class Cql2ElmListener extends cqlBaseListener {
     String identifier = parseString(ctx.identifier().getText());
     this.currentContext = libraryIdentifier + identifier;
     String content =
-        ctx.getStart().getInputStream().getText(
-            new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex())
-        );
+        ctx.getStart()
+            .getInputStream()
+            .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
     definitionContent.putIfAbsent(currentContext, content);
     graph.addNode(currentContext);
   }
