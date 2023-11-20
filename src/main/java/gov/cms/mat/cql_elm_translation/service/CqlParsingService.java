@@ -23,21 +23,19 @@ public class CqlParsingService extends CqlTooling {
 
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
-
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
+
+    Set<CQLDefinition> cqlDefinitions =
+        nodeGraph.keySet().stream()
+            .map(node -> parseDefinitionNode(node, cqlTools.getDefinitionContent()))
+            .filter(Objects::nonNull) //mapping function will return null for non-Definition nodes
+            .collect(toSet());
     // remove null key, only contains included library references
     nodeGraph.remove(null);
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
     // remove nodes for functions -- ensures function paths are not included
     nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
-
-    // Build Set of all Definitions from graph
-    Set<CQLDefinition> definitions =
-        nodeGraph.keySet().stream()
-            .map(node -> parseDefinitionNode(node, cqlTools.getDefinitionContent()))
-            .filter(Objects::nonNull)
-            .collect(toSet());
 
     Map<String, Set<CQLDefinition>> callstack = new HashMap<>();
 
@@ -47,7 +45,7 @@ public class CqlParsingService extends CqlTooling {
 
       for (String defName : defNames) {
         Optional<CQLDefinition> calledDefinition =
-            definitions.stream().filter(d -> d.getId().equals(defName)).findFirst();
+            cqlDefinitions.stream().filter(d -> d.getId().equals(defName)).findFirst();
         calledDefinition.ifPresent(calledDefinitions::add);
       }
 
