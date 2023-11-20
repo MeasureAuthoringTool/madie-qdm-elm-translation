@@ -58,7 +58,6 @@ public class CqlParsingService extends CqlTooling {
 
   private CQLDefinition parseDefinitionNode(String node, Map<String, String> cqlDefinitionContent) {
     // Graph includes retrieves, functions, and included library references.
-    // None are needed for CQL Definition callstack creation.
     // Filter out any node that does not have CQL Definition text content.
     if (!cqlDefinitionContent.containsKey(node)) {
       return null;
