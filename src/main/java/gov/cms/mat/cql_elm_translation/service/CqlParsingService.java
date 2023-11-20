@@ -74,9 +74,6 @@ public class CqlParsingService extends CqlTooling {
     } else if (parts.length >= 3) {
       definition.setLibraryDisplayName(parts[1]);
       definition.setDefinitionName(parts[2]);
-      if (parts.length == 4) {
-        definition.setFunction(true);
-      }
       String[] libraryParts = parts[0].split("-");
       if (libraryParts.length == 2) {
         definition.setParentLibrary(libraryParts[0]);
