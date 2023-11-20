@@ -49,7 +49,7 @@ public class CQLGraph {
 
     while (!queue.isEmpty()) {
       String currentNode = queue.remove();
-      List<String> adjacentVertices = new ArrayList<>(this.getAdjacencyList().get(currentNode));
+      List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
 
       for (String adjacentNode : adjacentVertices) {
         // we've found the destination node that we were looking for, so return true.
@@ -80,6 +80,6 @@ public class CQLGraph {
   }
 
   public Map<String, Set<String>> getAdjacencyList() {
-    return graph;
+    return new HashMap<>(graph);
   }
 }
