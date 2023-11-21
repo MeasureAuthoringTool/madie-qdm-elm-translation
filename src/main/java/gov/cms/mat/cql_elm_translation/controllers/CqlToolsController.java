@@ -21,10 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -61,12 +58,11 @@ public class CqlToolsController {
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
   }
 
-  @PutMapping("/cql/definitionsGraph")
-  public ResponseEntity< List<String>> getDefinitionsGraph(
+  @PutMapping("/cql/definitions")
+  public ResponseEntity<Set<CQLDefinition>> getAllDefinitions(
           @RequestBody String cql,  @RequestHeader("Authorization") String accessToken) {
-    List<String> populations= Arrays.asList("test1", "test2", "Initial Population", "test3");
     return ResponseEntity.status(HttpStatus.OK)
-            .body(cqlParsingService.parseUsedDefinitionsFromCql(cql, populations, accessToken));
+            .body(cqlParsingService.getAllDefinitions(cql, accessToken));
   }
 
   @PutMapping("/human-readable")

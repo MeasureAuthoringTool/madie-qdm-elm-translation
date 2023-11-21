@@ -22,11 +22,12 @@ import static java.util.stream.Collectors.toSet;
 public class CqlParsingService extends CqlTooling {
   private final CqlConversionService cqlConversionService;
 
-  public List<String> parseUsedDefinitionsFromCql(String cql, List<String> populations,String accessToken) {
-    Set<String> combinedSet = new HashSet<>(populations);
-    combinedSet.addAll(parseCql(cql, accessToken, cqlConversionService).getUsedDefinitions());
-
-    return parseCql(cql, accessToken, cqlConversionService).getUsedDefinitions();
+  public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
+    return  cqlTools.getDefinitionContent().keySet().stream()
+        .map(def ->
+            parseDefinitionNode(def, cqlTools.getDefinitionContent()))
+        .collect(toSet());
   }
 
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
