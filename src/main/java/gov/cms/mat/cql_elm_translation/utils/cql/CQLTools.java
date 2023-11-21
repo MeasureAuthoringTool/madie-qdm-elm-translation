@@ -29,7 +29,6 @@ import org.hl7.elm.r1.ParameterDef;
 
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.Cql2ElmListener;
@@ -55,7 +54,7 @@ public class CQLTools {
   private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
       new HashMap<>();
 
-  /** Maps an expression, to it's internal code - datatype map */
+  /** Maps an expression, to its internal code - datatype map */
   @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
@@ -86,6 +85,8 @@ public class CQLTools {
   Set<String> usedFunctions = new HashSet<>();
   Set<String> usedCodeSystems = new HashSet<>();
   @Getter DataCriteria dataCriteria = new DataCriteria();
+  @Getter Map<String, String> definitionContent = new HashMap<>();
+  @Getter Map<String, Set<String>> callstack = new HashMap<>();
 
   public CQLTools(
       String parentLibraryString,
@@ -136,6 +137,9 @@ public class CQLTools {
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
+
+    definitionContent.putAll(listener.getDefinitionContent());
+    callstack = graph.getAdjacencyList();
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());

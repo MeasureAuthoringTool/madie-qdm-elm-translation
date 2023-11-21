@@ -12,6 +12,7 @@ import java.util.Stack;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
 import org.antlr.v4.runtime.tree.ParseTreeWalker;
@@ -77,6 +78,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   @Getter private final Set<String> codesystems = new HashSet<>();
   @Getter private final Set<String> parameters = new HashSet<>();
   @Getter private final Set<String> definitions = new HashSet<>();
+  @Getter private final Map<String, String> definitionContent = new HashMap<>();
   @Getter private final Set<String> functions = new HashSet<>();
   @Getter private final HashMap<String, String> valueSetOids = new HashMap<>();
   @Getter private final HashMap<String, CQLCode> drcs = new HashMap<>();
@@ -202,13 +204,18 @@ public class Cql2ElmListener extends cqlBaseListener {
   public void enterExpressionDefinition(@NotNull cqlParser.ExpressionDefinitionContext ctx) {
     String identifier = parseString(ctx.identifier().getText());
     this.currentContext = libraryIdentifier + identifier;
+    String content =
+        ctx.getStart()
+            .getInputStream()
+            .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
+    definitionContent.putIfAbsent(currentContext, content);
     graph.addNode(currentContext);
   }
 
   @Override
   public void enterFunctionDefinition(@NotNull cqlParser.FunctionDefinitionContext ctx) {
     String identifier = parseString(ctx.identifierOrFunctionIdentifier().getText());
-    this.currentContext = libraryIdentifier + identifier;
+    this.currentContext = libraryIdentifier + identifier + "|function";
     for (cqlParser.OperandDefinitionContext operand : ctx.operandDefinition()) {
       namespace.push(operand.referentialIdentifier().getText());
     }
@@ -532,5 +539,6 @@ public class Cql2ElmListener extends cqlBaseListener {
     codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
     valueSetOids.putAll(listener.getValueSetOids());
     drcs.putAll(listener.getDrcs());
+    definitionContent.putAll(listener.getDefinitionContent());
   }
 }
