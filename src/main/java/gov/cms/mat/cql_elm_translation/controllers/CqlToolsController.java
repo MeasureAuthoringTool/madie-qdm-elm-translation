@@ -1,9 +1,12 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.PopulationType;
+import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +23,7 @@ import org.springframework.web.bind.annotation.RestController;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Set;
 
@@ -31,6 +35,7 @@ public class CqlToolsController {
   private final DataCriteriaService dataCriteriaService;
   private final CqlConversionService cqlConversionService;
   private final HumanReadableService humanReadableService;
+  private final CqlParsingService cqlParsingService;
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
@@ -55,6 +60,14 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @PutMapping("/cql/definitionsGraph")
+  public ResponseEntity< List<String>> getDefinitionsGraph(
+          @RequestBody String cql,  @RequestHeader("Authorization") String accessToken) {
+    List<String> populations= Arrays.asList("test1", "test2", "Initial Population", "test3");
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(cqlParsingService.parseUsedDefinitionsFromCql(cql, populations, accessToken));
   }
 
   @PutMapping("/human-readable")
