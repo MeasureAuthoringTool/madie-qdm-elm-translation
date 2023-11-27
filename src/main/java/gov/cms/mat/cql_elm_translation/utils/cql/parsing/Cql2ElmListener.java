@@ -215,7 +215,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   @Override
   public void enterFunctionDefinition(@NotNull cqlParser.FunctionDefinitionContext ctx) {
     String identifier = parseString(ctx.identifierOrFunctionIdentifier().getText());
-    this.currentContext = libraryIdentifier + identifier + "|function";
+    this.currentContext = libraryIdentifier + identifier;
     for (cqlParser.OperandDefinitionContext operand : ctx.operandDefinition()) {
       namespace.push(operand.referentialIdentifier().getText());
     }
