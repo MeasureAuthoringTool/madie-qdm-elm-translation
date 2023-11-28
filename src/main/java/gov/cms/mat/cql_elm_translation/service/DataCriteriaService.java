@@ -90,8 +90,32 @@ public class DataCriteriaService {
                       });
             });
 
-    Set<String> values = new HashSet<>();
+    // Combines explicitly called definitions with any in the tree
+    Set<String> allUsedDefinitions = new HashSet<>();
     usedDefinitions.forEach(
+        entry -> {
+          allUsedDefinitions.add(entry);
+          tools
+              .getUsedDefinitions()
+              .forEach(
+                  (definition, parentExpressions) -> {
+                    if (parentExpressions.contains(entry)) {
+                      allUsedDefinitions.add(definition);
+                    }
+                  });
+        });
+
+    //    tools.getUsedDefinitions().forEach((definition, parentExpressions) -> {
+    //      usedDefinitions.forEach(entry -> {
+    //        allUsedDefinitions.add(entry);
+    //        if (parentExpressions.contains(entry)) {
+    //          allUsedDefinitions.add(definition);
+    //        }
+    //      });
+    //    });
+
+    Set<String> values = new HashSet<>();
+    allUsedDefinitions.forEach(
         def -> {
           if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())
               && !MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap().get(def))) {
@@ -108,6 +132,7 @@ public class DataCriteriaService {
                 .forEach((expression, valueSet) -> values.add(expression));
           }
         });
+
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
         .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
