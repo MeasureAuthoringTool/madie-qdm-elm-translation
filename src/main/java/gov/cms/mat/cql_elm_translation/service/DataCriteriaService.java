@@ -105,15 +105,6 @@ public class DataCriteriaService {
                   });
         });
 
-    //    tools.getUsedDefinitions().forEach((definition, parentExpressions) -> {
-    //      usedDefinitions.forEach(entry -> {
-    //        allUsedDefinitions.add(entry);
-    //        if (parentExpressions.contains(entry)) {
-    //          allUsedDefinitions.add(definition);
-    //        }
-    //      });
-    //    });
-
     Set<String> values = new HashSet<>();
     allUsedDefinitions.forEach(
         def -> {
