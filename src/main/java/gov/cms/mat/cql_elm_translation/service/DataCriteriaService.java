@@ -75,23 +75,25 @@ public class DataCriteriaService {
 
     CQLTools tools = parseCql(measure.getCql(), accessToken);
 
-    Set<String> usedDefinitions = new HashSet<>();
-    measure
-        .getGroups()
-        .forEach(
-            group -> {
-              group
-                  .getPopulations()
-                  .forEach(
-                      population -> {
-                        if (!population.getDefinition().isEmpty()) {
-                          usedDefinitions.add(population.getDefinition());
-                        }
-                      });
-            });
+    Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
+
+    // Combines explicitly called definitions with any in the tree
+    Set<String> allUsedDefinitions = new HashSet<>();
+    usedDefinitions.forEach(
+        entry -> {
+          allUsedDefinitions.add(entry);
+          tools
+              .getUsedDefinitions()
+              .forEach(
+                  (definition, parentExpressions) -> {
+                    if (parentExpressions.contains(entry)) {
+                      allUsedDefinitions.add(definition);
+                    }
+                  });
+        });
 
     Set<String> values = new HashSet<>();
-    usedDefinitions.forEach(
+    allUsedDefinitions.forEach(
         def -> {
           if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())
               && !MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap().get(def))) {
@@ -108,6 +110,7 @@ public class DataCriteriaService {
                 .forEach((expression, valueSet) -> values.add(expression));
           }
         });
+
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
         .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
@@ -116,6 +119,24 @@ public class DataCriteriaService {
               relevantSet.add(src);
             });
     return relevantSet;
+  }
+
+  private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
+    Set<String> usedDefinitions = new HashSet<>();
+    measure
+        .getGroups()
+        .forEach(
+            group -> {
+              group
+                  .getPopulations()
+                  .forEach(
+                      population -> {
+                        if (!population.getDefinition().isEmpty()) {
+                          usedDefinitions.add(population.getDefinition());
+                        }
+                      });
+            });
+    return usedDefinitions;
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {

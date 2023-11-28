@@ -4,12 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -79,7 +74,7 @@ public class CQLTools {
   Set<String> usedCodes = new HashSet<>();
   Set<String> usedValuesets = new HashSet<>();
   Set<String> usedParameters = new HashSet<>();
-  Set<String> usedDefinitions = new HashSet<>();
+  Map<String, Set<String>> usedDefinitions = new HashMap<>();
   Set<String> usedFunctions = new HashSet<>();
   Set<String> usedCodeSystems = new HashSet<>();
   DataCriteria dataCriteria = new DataCriteria();
@@ -242,7 +237,12 @@ public class CQLTools {
       if (graph.isPath(parentExpression, definition)
           && !definition.equalsIgnoreCase("Patient")
           && !definition.equalsIgnoreCase("Population")) {
-        usedDefinitions.add(definition);
+        if (usedDefinitions.containsKey(definition)) {
+          usedDefinitions.get(definition).add(parentExpression);
+        } else {
+          usedDefinitions.putIfAbsent(
+              definition, new HashSet<>(Collections.singleton(parentExpression)));
+        }
       }
     }
   }
@@ -507,8 +507,8 @@ public class CQLTools {
     return new ArrayList<>(usedParameters);
   }
 
-  public List<String> getUsedDefinitions() {
-    return new ArrayList<>(usedDefinitions);
+  public Map<String, Set<String>> getUsedDefinitions() {
+    return new HashMap<>(usedDefinitions);
   }
 
   public List<String> getUsedFunctions() {
