@@ -113,7 +113,7 @@ public class DataCriteriaService {
 
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
-        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
+        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getName()))
         .forEach(
             src -> {
               relevantSet.add(src);
@@ -188,6 +188,7 @@ public class DataCriteriaService {
         .type(type)
         .drc(true)
         .codeId(code.getId())
+        .name(code.getName())
         .build();
   }
 
@@ -202,6 +203,7 @@ public class DataCriteriaService {
             .title(name)
             .description(dataType + ": " + name)
             .type(buildCriteriaType(dataType))
+            .name(valueSet.getName())
             .build();
     return result;
   }
