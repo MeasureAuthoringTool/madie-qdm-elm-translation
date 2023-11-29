@@ -37,14 +37,14 @@ public class CqlParsingService extends CqlTooling {
     Set<CQLDefinition> cqlDefinitions =
         nodeGraph.keySet().stream()
             .map(node -> parseDefinitionNode(node, cqlTools.getDefinitionContent()))
-            .filter(Objects::nonNull) //mapping function will return null for non-Definition nodes
+            .filter(Objects::nonNull) // mapping function will return null for non-Definition nodes
             .collect(toSet());
     // remove null key, only contains included library references
     nodeGraph.remove(null);
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
     // remove nodes for functions -- ensures function paths are not included
-    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
+    //    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
 
     Map<String, Set<CQLDefinition>> callstack = new HashMap<>();
 
@@ -87,6 +87,10 @@ public class CqlParsingService extends CqlTooling {
         definition.setParentLibrary(libraryParts[0]);
         definition.setLibraryVersion(libraryParts[1]);
       }
+    }
+
+    if(definition.getDefinitionLogic().startsWith("define function")) {
+      definition.setFunction(true);
     }
     return definition;
   }
