@@ -1,6 +1,8 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.PopulationType;
+import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
@@ -19,9 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -56,6 +56,13 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @PutMapping("/cql/definitions")
+  public ResponseEntity<Set<CQLDefinition>> getAllDefinitions(
+          @RequestBody String cql,  @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+            .body(cqlParsingService.getAllDefinitions(cql, accessToken));
   }
 
   @PutMapping("/human-readable")

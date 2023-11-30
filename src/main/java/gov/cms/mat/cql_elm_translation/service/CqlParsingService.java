@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -21,6 +22,14 @@ import static java.util.stream.Collectors.toSet;
 public class CqlParsingService extends CqlTooling {
   private final CqlConversionService cqlConversionService;
 
+  public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
+    return  cqlTools.getDefinitionContent().keySet().stream()
+        .map(def ->
+            parseDefinitionNode(def, cqlTools.getDefinitionContent()))
+        .collect(toSet());
+  }
+
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
@@ -28,14 +37,14 @@ public class CqlParsingService extends CqlTooling {
     Set<CQLDefinition> cqlDefinitions =
         nodeGraph.keySet().stream()
             .map(node -> parseDefinitionNode(node, cqlTools.getDefinitionContent()))
-            .filter(Objects::nonNull) //mapping function will return null for non-Definition nodes
+            .filter(Objects::nonNull) // mapping function will return null for non-Definition nodes
             .collect(toSet());
     // remove null key, only contains included library references
     nodeGraph.remove(null);
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
     // remove nodes for functions -- ensures function paths are not included
-    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
+    //    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
 
     Map<String, Set<CQLDefinition>> callstack = new HashMap<>();
 
@@ -78,6 +87,10 @@ public class CqlParsingService extends CqlTooling {
         definition.setParentLibrary(libraryParts[0]);
         definition.setLibraryVersion(libraryParts[1]);
       }
+    }
+
+    if(definition.getDefinitionLogic().startsWith("define function")) {
+      definition.setFunction(true);
     }
     return definition;
   }

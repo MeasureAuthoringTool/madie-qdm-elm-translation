@@ -219,6 +219,11 @@ public class Cql2ElmListener extends cqlBaseListener {
     for (cqlParser.OperandDefinitionContext operand : ctx.operandDefinition()) {
       namespace.push(operand.referentialIdentifier().getText());
     }
+    String content =
+        ctx.getStart()
+            .getInputStream()
+            .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
+    definitionContent.putIfAbsent(currentContext, content);
 
     graph.addNode(currentContext);
   }
