@@ -136,6 +136,9 @@ public class DataCriteriaService {
                         }
                       });
             });
+
+    measure.getSupplementalData().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    measure.getRiskAdjustments().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
     return usedDefinitions;
   }
 
