@@ -110,4 +110,72 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     assertThat(definitionCallstacks.get("define 2"), contains(define1));
     assertThat(definitionCallstacks.get("define 4"), containsInAnyOrder(helperDefine, function));
   }
+
+  @Test
+  void testAllDefinitions() {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+
+    CqlTranslator translator = TranslationResource.getInstance(true).buildTranslator(requestData);
+    verify(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
+    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
+
+    Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(cql, "token");
+
+    CQLDefinition define1 =
+        CQLDefinition.builder()
+            .id("measure 1")
+            .definitionName("define 1")
+            .definitionLogic("define \"define 1\":\n" + "    true")
+            .build();
+
+    CQLDefinition define2 =
+        CQLDefinition.builder()
+            .id("define 2")
+            .definitionName("define 2")
+            .definitionLogic("define \"define 2\":\n" + "    \"define 1\"")
+            .build();
+
+    CQLDefinition define3 =
+        CQLDefinition.builder()
+            .id("define 3")
+            .definitionName("define 3")
+            .definitionLogic("define \"define 3\":\n" + "    \"define 1\" and \"define 2\"")
+            .build();
+
+    CQLDefinition define4 =
+        CQLDefinition.builder()
+            .id("define 4")
+            .definitionName("define 4")
+            .definitionLogic(
+                "define \"define 4\":\n"
+                    + "    exists Helper.\"Inpatient Encounter\" and \"func\"()")
+            .build();
+
+    CQLDefinition function =
+        CQLDefinition.builder()
+            .id("func")
+            .definitionName("func")
+            .definitionLogic("define function \"func\":\n" + "    true")
+            .build();
+
+    CQLDefinition helperDefine =
+        CQLDefinition.builder()
+            .id("HelperLibrary-0.0.000|Helper|Inpatient Encounter")
+            .definitionName("Inpatient Encounter")
+            .definitionLogic(
+                "define \"Inpatient Encounter\":\n"
+                    + "  [Encounter: \"Encounter Inpatient\"] EncounterInpatient\n"
+                    + "\t\twhere EncounterInpatient.status = 'finished'\n"
+                    + "\t\tand EncounterInpatient.period ends during day of \"Measurement Period\"")
+            .parentLibrary("HelperLibrary")
+            .libraryDisplayName("Helper")
+            .libraryVersion("0.0.000")
+            .build();
+
+    assertThat(
+        allDefs, containsInAnyOrder(define1, define2, define3, define4, helperDefine, function));
+  }
 }
