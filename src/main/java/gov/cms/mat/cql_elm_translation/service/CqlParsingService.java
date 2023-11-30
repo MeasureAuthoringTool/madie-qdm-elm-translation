@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -22,6 +21,13 @@ import static java.util.stream.Collectors.toSet;
 public class CqlParsingService extends CqlTooling {
   private final CqlConversionService cqlConversionService;
 
+  /**
+   * Parses the CQL and generates objects for all CQL Definitions
+   * and Functions found in the Main and Included Libraries.
+   * @param cql Main Library CQL
+   * @param accessToken Requesting User's Okta Bearer token
+   * @return Set of all CQL Definitions and Functions in the main and included Libraries.
+   */
   public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
     return  cqlTools.getDefinitionContent().keySet().stream()
@@ -30,6 +36,26 @@ public class CqlParsingService extends CqlTooling {
         .collect(toSet());
   }
 
+  /***
+   * <p>
+   * Maps the references between CQL Definitions. In other words, which CQL Definitions and Functions
+   * are called by which other CQL Definition.
+   * <p>
+   * Note that the resulting Map will most likely not contain all CQL Definitions and Function in the provided CQL,
+   * and should be used when needing to work with all CQL Definitions and/or Functions.
+   * </p>
+   *
+   * @param cql CQL to parse.
+   * @param accessToken Application user's Okta Bearer token.
+   * @return Map representation of the callstack for CQL Definitions that call at least 1 other
+   *  CQL Definition and/or Function.
+   *  <p>
+   *  Keys: Strings of CQL Definitions that reference/call 1 or more other CQL Definitions and Functions.
+   *  CQL Definitions that do not reference any other CQL Definition and/or Function will not appear as a Key.
+   *  </p><p>
+   *  Values: Set of CQL Definition Objects that are referenced in the Key CQL Definition.
+   *  </p>
+   */
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
@@ -43,8 +69,6 @@ public class CqlParsingService extends CqlTooling {
     nodeGraph.remove(null);
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
-    // remove nodes for functions -- ensures function paths are not included
-    //    nodeGraph.keySet().removeIf(def -> def.endsWith("|function"));
 
     Map<String, Set<CQLDefinition>> callstack = new HashMap<>();
 
@@ -76,10 +100,12 @@ public class CqlParsingService extends CqlTooling {
     definition.setId(node);
     definition.setDefinitionLogic(cqlDefinitionContent.get(node));
 
+    //Included Lib Define: AHAOverall-2.5.000|AHA|Has Left Ventricular Assist Device
+    //Main Lib Define: Numerator
     String[] parts = node.split("\\|");
-    if (parts.length == 1) {
+    if (parts.length == 1) {  // Define from Main Library
       definition.setDefinitionName(node);
-    } else if (parts.length >= 3) {
+    } else if (parts.length >= 3) { // Define from some included Library
       definition.setLibraryDisplayName(parts[1]);
       definition.setDefinitionName(parts[2]);
       String[] libraryParts = parts[0].split("-");
@@ -88,10 +114,8 @@ public class CqlParsingService extends CqlTooling {
         definition.setLibraryVersion(libraryParts[1]);
       }
     }
-
-    if(definition.getDefinitionLogic().startsWith("define function")) {
-      definition.setFunction(true);
-    }
+    // TODO could use a stronger comparator for determining if node is Definition or Function
+    definition.setFunction(definition.getDefinitionLogic().startsWith("define function"));
     return definition;
   }
 }
