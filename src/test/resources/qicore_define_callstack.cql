@@ -8,17 +8,17 @@ parameter "Measurement Period" Interval<DateTime>
 
 context Patient
 
-define "measure 1":
+define "define 1":
     true
 
-define "measure 2":
-    "measure 1"
+define "define 2":
+    "define 1"
 
-define "measure 3":
-    "measure 1" and "measure 2"
+define "define 3":
+    "define 1" and "define 2"
 
-define "measure 4":
-    exists Helper."Inpatient Encounter" and "measure function"()
+define "define 4":
+    exists Helper."Inpatient Encounter" and "func"()
 
-define function "measure function"():
+define function "func"():
     true

@@ -70,18 +70,25 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     Map<String, Set<CQLDefinition>> definitionCallstacks =
         cqlParsingService.getDefinitionCallstacks(cql, "token");
 
-    CQLDefinition measure1 =
+    CQLDefinition define1 =
         CQLDefinition.builder()
-            .id("measure 1")
-            .definitionName("measure 1")
-            .definitionLogic("define \"measure 1\":\n" + "    true")
+            .id("define 1")
+            .definitionName("define 1")
+            .definitionLogic("define \"define 1\":\n" + "    true")
             .build();
 
-    CQLDefinition measure2 =
+    CQLDefinition define2 =
         CQLDefinition.builder()
-            .id("measure 2")
-            .definitionName("measure 2")
-            .definitionLogic("define \"measure 2\":\n" + "    \"measure 1\"")
+            .id("define 2")
+            .definitionName("define 2")
+            .definitionLogic("define \"define 2\":\n" + "    \"define 1\"")
+            .build();
+
+    CQLDefinition function =
+        CQLDefinition.builder()
+            .id("func")
+            .definitionName("func")
+            .definitionLogic("define function \"func\":\n" + "    true")
             .build();
 
     CQLDefinition helperDefine =
@@ -99,8 +106,8 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .build();
 
     assertThat(definitionCallstacks.keySet().size(), is(3));
-    assertThat(definitionCallstacks.get("measure 3"), containsInAnyOrder(measure1, measure2));
-    assertThat(definitionCallstacks.get("measure 2"), contains(measure1));
-    assertThat(definitionCallstacks.get("measure 4"), contains(helperDefine));
+    assertThat(definitionCallstacks.get("define 3"), containsInAnyOrder(define1, define2));
+    assertThat(definitionCallstacks.get("define 2"), contains(define1));
+    assertThat(definitionCallstacks.get("define 4"), containsInAnyOrder(helperDefine, function));
   }
 }

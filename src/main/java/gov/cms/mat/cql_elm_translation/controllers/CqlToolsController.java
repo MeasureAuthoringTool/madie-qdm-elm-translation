@@ -1,8 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.measure.Measure;
-import gov.cms.madie.models.measure.PopulationType;
-import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
@@ -60,9 +58,9 @@ public class CqlToolsController {
 
   @PutMapping("/cql/definitions")
   public ResponseEntity<Set<CQLDefinition>> getAllDefinitions(
-          @RequestBody String cql,  @RequestHeader("Authorization") String accessToken) {
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
-            .body(cqlParsingService.getAllDefinitions(cql, accessToken));
+        .body(cqlParsingService.getAllDefinitions(cql, accessToken));
   }
 
   @PutMapping("/human-readable")
