@@ -13,6 +13,7 @@ public class SourceDataCriteria implements Comparable<SourceDataCriteria> {
   private boolean drc;
   // MAT-6210: codeId used for drc
   private String codeId;
+  private String name;
 
   @Override
   public int compareTo(SourceDataCriteria o) {
