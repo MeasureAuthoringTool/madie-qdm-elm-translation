@@ -38,23 +38,25 @@ public class DataCriteriaService extends CqlTooling {
 
     CQLTools tools = parseCql(measure.getCql(), accessToken, cqlConversionService);
 
-    Set<String> usedDefinitions = new HashSet<>();
-    measure
-        .getGroups()
-        .forEach(
-            group -> {
-              group
-                  .getPopulations()
-                  .forEach(
-                      population -> {
-                        if (!population.getDefinition().isEmpty()) {
-                          usedDefinitions.add(population.getDefinition());
-                        }
-                      });
-            });
+    Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
+
+    // Combines explicitly called definitions with any in the tree
+    Set<String> allUsedDefinitions = new HashSet<>();
+    usedDefinitions.forEach(
+        entry -> {
+          allUsedDefinitions.add(entry);
+          tools
+              .getUsedDefinitions()
+              .forEach(
+                  (definition, parentExpressions) -> {
+                    if (parentExpressions.contains(entry)) {
+                      allUsedDefinitions.add(definition);
+                    }
+                  });
+        });
 
     Set<String> values = new HashSet<>();
-    usedDefinitions.forEach(
+    allUsedDefinitions.forEach(
         def -> {
           if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())
               && !MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap().get(def))) {
@@ -71,14 +73,36 @@ public class DataCriteriaService extends CqlTooling {
                 .forEach((expression, valueSet) -> values.add(expression));
           }
         });
+
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
-        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
+        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getName()))
         .forEach(
             src -> {
               relevantSet.add(src);
             });
     return relevantSet;
+  }
+
+  private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
+    Set<String> usedDefinitions = new HashSet<>();
+    measure
+        .getGroups()
+        .forEach(
+            group -> {
+              group
+                  .getPopulations()
+                  .forEach(
+                      population -> {
+                        if (!population.getDefinition().isEmpty()) {
+                          usedDefinitions.add(population.getDefinition());
+                        }
+                      });
+            });
+
+    measure.getSupplementalData().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    measure.getRiskAdjustments().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    return usedDefinitions;
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
@@ -130,6 +154,7 @@ public class DataCriteriaService extends CqlTooling {
         .type(type)
         .drc(true)
         .codeId(code.getId())
+        .name(code.getName())
         .build();
   }
 
@@ -144,6 +169,7 @@ public class DataCriteriaService extends CqlTooling {
             .title(name)
             .description(dataType + ": " + name)
             .type(buildCriteriaType(dataType))
+            .name(valueSet.getName())
             .build();
     return result;
   }
