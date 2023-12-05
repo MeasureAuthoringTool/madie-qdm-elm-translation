@@ -188,11 +188,12 @@ class EffectiveDataRequirementServiceTest {
             .setType(Bundle.BundleType.TRANSACTION)
             .addEntry(measureBundleEntryComponent)
             .addEntry(libraryBundleEntryComponent);
+
     Optional<Bundle.BundleEntryComponent> result =
         effectiveDataRequirementService.getMeasureLibraryEntry(bundle, CQL_LIBRARY_NAME);
-    Library library = (Library) result.get().getResource();
-
     assertTrue(result.isPresent());
+
+    Library library = (Library) result.get().getResource();
     assertEquals("Library/" + CQL_LIBRARY_NAME, library.getId());
   }
 
@@ -271,17 +272,14 @@ class EffectiveDataRequirementServiceTest {
     doReturn(fhirHelperString)
         .when(cqlLibraryService)
         .getLibraryCql(eq("FHIRHelpers"), eq("4.0.001"), nullable(String.class));
-    ;
 
     doReturn(suppDataString)
         .when(cqlLibraryService)
         .getLibraryCql(eq("SupplementalDataElementsFHIR4"), eq("4.0.001"), nullable(String.class));
-    ;
 
     doReturn(cqlLibrary)
         .when(cqlLibraryService)
         .getLibraryCql(eq("TestCVPopulations"), nullable(String.class), nullable(String.class));
-    ;
 
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     org.hl7.fhir.r5.model.Library r5Library =
@@ -305,6 +303,7 @@ class EffectiveDataRequirementServiceTest {
 
     Optional<Bundle.BundleEntryComponent> measureEntry =
         effectiveDataRequirementService.getMeasureEntry(bundle);
+    assertTrue(measureEntry.isPresent());
     Resource measureResource = measureEntry.get().getResource();
     org.hl7.fhir.r5.model.Measure r5Measure =
         effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(measureResource);
@@ -318,17 +317,14 @@ class EffectiveDataRequirementServiceTest {
     doReturn(fhirHelperString)
         .when(cqlLibraryService)
         .getLibraryCql(eq("FHIRHelpers"), eq("4.0.001"), nullable(String.class));
-    ;
 
     doReturn(suppDataString)
         .when(cqlLibraryService)
         .getLibraryCql(eq("SupplementalDataElementsFHIR4"), eq("4.0.001"), nullable(String.class));
-    ;
 
     doReturn(cqlLibrary)
         .when(cqlLibraryService)
         .getLibraryCql(eq("TestCVPopulations"), nullable(String.class), nullable(String.class));
-    ;
 
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     org.hl7.fhir.r5.model.Library r5Library =

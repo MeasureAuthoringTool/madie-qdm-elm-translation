@@ -21,7 +21,6 @@ public abstract class CqlTooling {
   public CQLTools parseCql(
       String cql, String accessToken, CqlConversionService cqlConversionService) {
     // Run Translator to compile libraries
-    MadieLibrarySourceProvider librarySourceProvider = new MadieLibrarySourceProvider();
     cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
     CqlTranslator cqlTranslator = runTranslator(cql, cqlConversionService);
 
@@ -33,7 +32,7 @@ public abstract class CqlTooling {
     CQLTools cqlTools =
         new CQLTools(
             cql,
-            getIncludedLibrariesCql(librarySourceProvider, cqlTranslator),
+            getIncludedLibrariesCql(new MadieLibrarySourceProvider(), cqlTranslator),
             getParentExpressions(cql),
             cqlTranslator,
             translatedLibraries);
