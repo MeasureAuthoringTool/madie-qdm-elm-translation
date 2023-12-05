@@ -18,7 +18,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Map;
 import java.util.Set;
 
-import static org.hamcrest.CoreMatchers.*;
+import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -33,15 +33,14 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
   @InjectMocks private CqlParsingService cqlParsingService;
 
   private String cql;
-  private String helperCql;
-  private RequestData requestData;
+  private CqlTranslator cqlTranslator;
 
   @BeforeEach
   void setup() {
-    helperCql = getData("/qicore_included_lib.cql");
+    String helperCql = getData("/qicore_included_lib.cql");
     cql = getData("/qicore_define_callstack.cql");
 
-    requestData =
+    RequestData requestData =
         RequestData.builder()
             .cqlData(cql)
             .showWarnings(false)
@@ -54,19 +53,18 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .validateUnits(true)
             .resultTypes(true)
             .build();
+
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+
+    doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
+    cqlTranslator = TranslationResource.getInstance(true).buildTranslator(requestData);
+    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(cqlTranslator);
   }
 
   @Test
   void testCallstack() {
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
-
-    CqlTranslator translator = TranslationResource.getInstance(true).buildTranslator(requestData);
-    verify(cqlLibraryService).getLibraryCql(any(), any(), any());
-    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
-
     Map<String, Set<CQLDefinition>> definitionCallstacks =
         cqlParsingService.getDefinitionCallstacks(cql, "token");
 
@@ -113,15 +111,6 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
 
   @Test
   void testAllDefinitions() {
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
-
-    CqlTranslator translator = TranslationResource.getInstance(true).buildTranslator(requestData);
-    verify(cqlLibraryService).getLibraryCql(any(), any(), any());
-    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
-
     Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(cql, "token");
 
     CQLDefinition define1 =
