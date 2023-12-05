@@ -76,7 +76,7 @@ public class DataCriteriaService extends CqlTooling {
 
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
-        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getTitle()))
+        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getName()))
         .forEach(
             src -> {
               relevantSet.add(src);
@@ -99,6 +99,9 @@ public class DataCriteriaService extends CqlTooling {
                         }
                       });
             });
+
+    measure.getSupplementalData().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    measure.getRiskAdjustments().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
     return usedDefinitions;
   }
 
@@ -151,6 +154,7 @@ public class DataCriteriaService extends CqlTooling {
         .type(type)
         .drc(true)
         .codeId(code.getId())
+        .name(code.getName())
         .build();
   }
 
@@ -165,6 +169,7 @@ public class DataCriteriaService extends CqlTooling {
             .title(name)
             .description(dataType + ": " + name)
             .type(buildCriteriaType(dataType))
+            .name(valueSet.getName())
             .build();
     return result;
   }
