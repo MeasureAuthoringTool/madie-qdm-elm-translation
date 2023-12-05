@@ -23,7 +23,6 @@ import jakarta.annotation.PostConstruct;
 import org.springframework.web.servlet.view.freemarker.FreeMarkerConfigurer;
 
 import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.TimeZone;
 
