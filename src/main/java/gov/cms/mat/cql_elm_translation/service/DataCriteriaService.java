@@ -139,24 +139,28 @@ public class DataCriteriaService {
                           usedDefinitions.add(population.getDefinition());
                         }
                       });
-              group
-                  .getMeasureObservations()
-                  .forEach(
-                      measureObservation -> {
-                        if (!measureObservation.getDefinition().isEmpty()) {
-                          usedDefinitions.add(measureObservation.getDefinition());
-                        }
-                      });
-              group
-                  .getStratifications()
-                  .forEach(
-                      stratification -> {
-                        if (!stratification.getCqlDefinition().isEmpty()) {
-                          usedDefinitions.add(stratification.getCqlDefinition());
-                        }
-                      });
+              if (group.getMeasureObservations() != null
+                  && !group.getMeasureObservations().isEmpty()) {
+                group
+                    .getMeasureObservations()
+                    .forEach(
+                        measureObservation -> {
+                          if (!measureObservation.getDefinition().isEmpty()) {
+                            usedDefinitions.add(measureObservation.getDefinition());
+                          }
+                        });
+              }
+              if (group.getStratifications() != null && !group.getStratifications().isEmpty()) {
+                group
+                    .getStratifications()
+                    .forEach(
+                        stratification -> {
+                          if (!stratification.getCqlDefinition().isEmpty()) {
+                            usedDefinitions.add(stratification.getCqlDefinition());
+                          }
+                        });
+              }
             });
-
     measure
         .getSupplementalData()
         .forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
