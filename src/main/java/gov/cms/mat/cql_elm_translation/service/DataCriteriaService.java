@@ -12,6 +12,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
@@ -139,8 +140,7 @@ public class DataCriteriaService {
                           usedDefinitions.add(population.getDefinition());
                         }
                       });
-              if (group.getMeasureObservations() != null
-                  && !group.getMeasureObservations().isEmpty()) {
+              if (!CollectionUtils.isEmpty(group.getMeasureObservations())) {
                 group
                     .getMeasureObservations()
                     .forEach(
@@ -150,7 +150,7 @@ public class DataCriteriaService {
                           }
                         });
               }
-              if (group.getStratifications() != null && !group.getStratifications().isEmpty()) {
+              if (!CollectionUtils.isEmpty(group.getStratifications())) {
                 group
                     .getStratifications()
                     .forEach(
