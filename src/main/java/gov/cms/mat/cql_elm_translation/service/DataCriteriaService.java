@@ -8,6 +8,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -32,14 +33,10 @@ public class DataCriteriaService extends CqlTooling {
       log.info("Data criteria not found as cql is blank");
       return Collections.emptySet();
     }
-
     List<SourceDataCriteria> sourceDataCriteria =
         getSourceDataCriteria(measure.getCql(), accessToken);
-
     CQLTools tools = parseCql(measure.getCql(), accessToken, cqlConversionService);
-
     Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
-
     // Combines explicitly called definitions with any in the tree
     Set<String> allUsedDefinitions = new HashSet<>();
     usedDefinitions.forEach(
@@ -51,6 +48,14 @@ public class DataCriteriaService extends CqlTooling {
                   (definition, parentExpressions) -> {
                     if (parentExpressions.contains(entry)) {
                       allUsedDefinitions.add(definition);
+                    }
+                  });
+          tools
+              .getUsedFunctions()
+              .forEach(
+                  (function, parentExpressions) -> {
+                    if (parentExpressions.contains(entry)) {
+                      allUsedDefinitions.add(function);
                     }
                   });
         });
@@ -98,10 +103,33 @@ public class DataCriteriaService extends CqlTooling {
                           usedDefinitions.add(population.getDefinition());
                         }
                       });
+              if (!CollectionUtils.isEmpty(group.getMeasureObservations())) {
+                group
+                    .getMeasureObservations()
+                    .forEach(
+                        measureObservation -> {
+                          if (!measureObservation.getDefinition().isEmpty()) {
+                            usedDefinitions.add(measureObservation.getDefinition());
+                          }
+                        });
+              }
+              if (!CollectionUtils.isEmpty(group.getStratifications())) {
+                group
+                    .getStratifications()
+                    .forEach(
+                        stratification -> {
+                          if (!stratification.getCqlDefinition().isEmpty()) {
+                            usedDefinitions.add(stratification.getCqlDefinition());
+                          }
+                        });
+              }
             });
-
-    measure.getSupplementalData().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
-    measure.getRiskAdjustments().forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    measure
+        .getSupplementalData()
+        .forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
+    measure
+        .getRiskAdjustments()
+        .forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
     return usedDefinitions;
   }
 

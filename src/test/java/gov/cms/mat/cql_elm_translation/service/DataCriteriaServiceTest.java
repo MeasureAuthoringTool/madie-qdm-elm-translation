@@ -17,6 +17,7 @@ import java.util.Set;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
 
+import gov.cms.madie.models.measure.*;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -27,9 +28,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import gov.cms.madie.models.measure.Group;
-import gov.cms.madie.models.measure.Measure;
-import gov.cms.madie.models.measure.Population;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
@@ -174,7 +172,16 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
   @Test
   void testGetRelevantElements() {
     Population population = Population.builder().definition("Qualifying Encounters").build();
-    Group group = Group.builder().populations(Collections.singletonList(population)).build();
+    MeasureObservation observation =
+        MeasureObservation.builder().definition("Test Observation").build();
+    Stratification stratification = new Stratification();
+    stratification.setCqlDefinition("test stratification");
+    Group group =
+        Group.builder()
+            .populations(Collections.singletonList(population))
+            .measureObservations(Collections.singletonList(observation))
+            .stratifications(Collections.singletonList(stratification))
+            .build();
     Measure measure = Measure.builder().cql(cql).groups(Collections.singletonList(group)).build();
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
@@ -219,7 +226,16 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             + "define \"Qualifying Encounters\":\n true";
 
     Population population = Population.builder().definition("Qualifying Encounters").build();
-    Group group = Group.builder().populations(Collections.singletonList(population)).build();
+    MeasureObservation observation =
+        MeasureObservation.builder().definition("Test Observation").build();
+    Stratification stratification = new Stratification();
+    stratification.setCqlDefinition("test stratification");
+    Group group =
+        Group.builder()
+            .populations(Collections.singletonList(population))
+            .measureObservations(Collections.singletonList(observation))
+            .stratifications(Collections.singletonList(stratification))
+            .build();
     Measure measure = Measure.builder().cql(cql).groups(Collections.singletonList(group)).build();
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();

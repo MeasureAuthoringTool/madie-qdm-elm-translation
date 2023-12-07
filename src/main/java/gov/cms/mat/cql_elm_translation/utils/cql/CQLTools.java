@@ -77,7 +77,7 @@ public class CQLTools {
   Set<String> usedValuesets = new HashSet<>();
   Set<String> usedParameters = new HashSet<>();
   Map<String, Set<String>> usedDefinitions = new HashMap<>();
-  Set<String> usedFunctions = new HashSet<>();
+  Map<String, Set<String>> usedFunctions = new HashMap<>();
   Set<String> usedCodeSystems = new HashSet<>();
   @Getter DataCriteria dataCriteria = new DataCriteria();
   @Getter Map<String, String> definitionContent = new HashMap<>();
@@ -224,7 +224,12 @@ public class CQLTools {
       CQLGraph graph, List<String> functions, String parentExpression) {
     for (String function : functions) {
       if (graph.isPath(parentExpression, function)) {
-        usedFunctions.add(function);
+        if (usedDefinitions.containsKey(function)) {
+          usedDefinitions.get(function).add(parentExpression);
+        } else {
+          usedDefinitions.putIfAbsent(
+              function, new HashSet<>(Collections.singleton(parentExpression)));
+        }
       }
     }
   }
@@ -514,8 +519,8 @@ public class CQLTools {
     return new HashMap<>(usedDefinitions);
   }
 
-  public List<String> getUsedFunctions() {
-    return new ArrayList<>(usedFunctions);
+  public Map<String, Set<String>> getUsedFunctions() {
+    return new HashMap<>(usedFunctions);
   }
 
   @Override
