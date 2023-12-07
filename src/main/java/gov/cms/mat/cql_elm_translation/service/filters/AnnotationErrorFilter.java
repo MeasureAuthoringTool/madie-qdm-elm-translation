@@ -8,9 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.elements.LibraryProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
@@ -106,6 +104,21 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
   }
 
   private void filterByNode(JsonNode jsonNode) {
+  //    if the json node has translationVersion
+  //    clean all non translator version annotations
+  //  we want to keep a node that contains translator version that's been cleaned.
+    if (getTextFromNodeId(jsonNode, "translatorVersion").isPresent()) {
+      JsonNode copiedNode = jsonNode.deepCopy();
+        Iterator<String> fieldNames = copiedNode.fieldNames();
+        while (fieldNames.hasNext()){
+            fieldNames.next();
+            if (!Objects.equals(fieldNames.next(), "translatorVersion")){
+              fieldNames.remove();
+            }
+        }
+      keeperList.add(jsonNode);
+    }
+
     if (!isLibraryNodeValid(jsonNode)) {
       return;
     }
