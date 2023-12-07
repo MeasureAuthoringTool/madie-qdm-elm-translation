@@ -4,24 +4,22 @@ import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestHeader;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.Principal;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Slf4j
 @RestController
@@ -31,6 +29,7 @@ public class CqlToolsController {
   private final DataCriteriaService dataCriteriaService;
   private final CqlConversionService cqlConversionService;
   private final HumanReadableService humanReadableService;
+  private final CqlParsingService cqlParsingService;
 
   @PutMapping("/cql/format")
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
@@ -55,6 +54,13 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(dataCriteriaService.getSourceDataCriteria(cql, accessToken));
+  }
+
+  @PutMapping("/cql/definitions")
+  public ResponseEntity<Set<CQLDefinition>> getAllDefinitions(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.status(HttpStatus.OK)
+        .body(cqlParsingService.getAllDefinitions(cql, accessToken));
   }
 
   @PutMapping("/human-readable")
@@ -84,5 +90,11 @@ public class CqlToolsController {
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON)
         .body(dataCriteriaService.getRelevantElements(measure, accessToken));
+  }
+
+  @PutMapping("/cql/callstacks")
+  public ResponseEntity<Map<String, Set<CQLDefinition>>> getDefinitionCallstack(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    return ResponseEntity.ok(cqlParsingService.getDefinitionCallstacks(cql, accessToken));
   }
 }

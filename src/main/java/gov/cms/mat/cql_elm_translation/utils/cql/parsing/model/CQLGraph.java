@@ -19,7 +19,7 @@ public class CQLGraph {
   }
 
   public void addEdge(String parent, String child) {
-    // check to see if the nod exists yet.
+    // check to see if the node exists yet.
     if (this.graph.get(parent) == null) {
       addNode(parent);
     }
@@ -49,9 +49,9 @@ public class CQLGraph {
 
     while (!queue.isEmpty()) {
       String currentNode = queue.remove();
-      List<String> adjacentVerticies = new ArrayList<>(this.getAdjecencyList().get(currentNode));
+      List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
 
-      for (String adjacentNode : adjacentVerticies) {
+      for (String adjacentNode : adjacentVertices) {
         // we've found the destination node that we were looking for, so return true.
         if (adjacentNode.equals(destination)) {
           return true;
@@ -79,7 +79,7 @@ public class CQLGraph {
     return builder.toString();
   }
 
-  public Map<String, Set<String>> getAdjecencyList() {
-    return graph;
+  public Map<String, Set<String>> getAdjacencyList() {
+    return new HashMap<>(graph);
   }
 }

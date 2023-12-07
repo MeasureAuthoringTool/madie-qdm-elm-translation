@@ -7,19 +7,18 @@ import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.LibrarySourceProvider;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.springframework.cache.annotation.Cacheable;
 
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
 public class MadieLibrarySourceProvider implements LibrarySourceProvider {
 
   private static final String[] STRING_ARR = new String[0];
-  private static final ConcurrentHashMap<String, String> cqlLibraries = new ConcurrentHashMap<>();
   private static final ThreadLocal<UsingProperties> threadLocalValue = new ThreadLocal<>();
   private static final ThreadLocal<String> threadLocalValueAccessToken = new ThreadLocal<>();
   private static CqlLibraryService cqlLibraryService;
@@ -59,15 +58,11 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
   }
 
   @Override
+  @Cacheable("cqlLibraries")
   public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
     String usingVersion = threadLocalValue.get().getVersion(); // using FHIR version '4.0.0
     String key = createKey(libraryIdentifier.getId(), usingVersion, libraryIdentifier.getVersion());
-
-    if (cqlLibraries.containsKey(key)) {
-      return getInputStream(cqlLibraries.get(key)); // do we need to expire cache ?????
-    } else {
-      return processLibrary(libraryIdentifier, key);
-    }
+    return processLibrary(libraryIdentifier, key);
   }
 
   private InputStream processLibrary(VersionedIdentifier libraryIdentifier, String key) {
@@ -96,7 +91,6 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
       log.debug("Did not find any cql for key : {}", key);
       return null;
     } else {
-      cqlLibraries.put(key, cql);
       return getInputStream(cql);
     }
   }
