@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -23,7 +24,6 @@ import org.hl7.elm.r1.ParameterDef;
 
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.Cql2ElmListener;
@@ -45,14 +45,16 @@ public class CQLTools {
   private Map<String, Set<String>> codeDataTypeMap = new HashMap<>();
 
   /** Maps an expression, to it's internal valueset - datatype map */
+  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
       new HashMap<>();
 
-  /** Maps an expression, to it's internal code - datatype map */
+  /** Maps an expression, to its internal code - datatype map */
+  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
   /** Maps an expression name to its return type (only function and definitions) */
-  private Map<String, String> nameToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, String> nameToReturnTypeMap = new HashMap<>();
 
   /**
    * The list of parent expressions. Often times, these are populations from MAT. Anything that can
@@ -65,9 +67,9 @@ public class CQLTools {
   private Map<String, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
-  private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
 
-  private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
+  @Getter private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
   // used expression sets
   Set<String> usedLibraries = new HashSet<>();
@@ -77,7 +79,9 @@ public class CQLTools {
   Map<String, Set<String>> usedDefinitions = new HashMap<>();
   Map<String, Set<String>> usedFunctions = new HashMap<>();
   Set<String> usedCodeSystems = new HashSet<>();
-  DataCriteria dataCriteria = new DataCriteria();
+  @Getter DataCriteria dataCriteria = new DataCriteria();
+  @Getter Map<String, String> definitionContent = new HashMap<>();
+  @Getter Map<String, Set<String>> callstack = new HashMap<>();
 
   public CQLTools(
       String parentLibraryString,
@@ -128,6 +132,9 @@ public class CQLTools {
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
+
+    definitionContent.putAll(listener.getDefinitionContent());
+    callstack = graph.getAdjacencyList();
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
@@ -474,10 +481,6 @@ public class CQLTools {
     return codeDataTypeMapWithList;
   }
 
-  public Map<String, String> getNameToReturnTypeMap() {
-    return nameToReturnTypeMap;
-  }
-
   public void setNameToReturnTypeMap(Map<String, String> nameToReturnTypeMap) {
     this.nameToReturnTypeMap = nameToReturnTypeMap;
   }
@@ -520,18 +523,6 @@ public class CQLTools {
     return new HashMap<>(usedFunctions);
   }
 
-  public Map<String, Map<String, Set<String>>> getExpressionNameToValuesetDataTypeMap() {
-    return expressionNameToValuesetDataTypeMap;
-  }
-
-  public Map<String, Map<String, Set<String>>> getExpressionNameToCodeDataTypeMap() {
-    return expressionNameToCodeDataTypeMap;
-  }
-
-  public DataCriteria getDataCriteria() {
-    return dataCriteria;
-  }
-
   @Override
   public String toString() {
 
@@ -564,13 +555,5 @@ public class CQLTools {
     builder.append("USED FUNCTIONS " + this.getUsedFunctions());
 
     return builder.toString();
-  }
-
-  public Map<String, Map<String, String>> getAllNamesToReturnTypeMap() {
-    return allNamesToReturnTypeMap;
-  }
-
-  public Map<String, String> getExpressionToReturnTypeMap() {
-    return expressionToReturnTypeMap;
   }
 }
