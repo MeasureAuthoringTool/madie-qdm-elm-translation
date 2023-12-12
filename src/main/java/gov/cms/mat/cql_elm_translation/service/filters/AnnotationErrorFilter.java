@@ -104,18 +104,18 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
   }
 
   private void filterByNode(JsonNode jsonNode) {
-  //    if the json node has translationVersion
-  //    clean all non translator version annotations
-  //  we want to keep a node that contains translator version that's been cleaned.
+    //    if the json node has translationVersion
+    //    clean all non translator version annotations
+    //  we want to keep a node that contains translator version that's been cleaned.
     if (getTextFromNodeId(jsonNode, "translatorVersion").isPresent()) {
       JsonNode copiedNode = jsonNode.deepCopy();
-        Iterator<String> fieldNames = copiedNode.fieldNames();
-        while (fieldNames.hasNext()){
-            fieldNames.next();
-            if (!Objects.equals(fieldNames.next(), "translatorVersion")){
-              fieldNames.remove();
-            }
+      Iterator<String> fieldNames = copiedNode.fieldNames();
+      while (fieldNames.hasNext()) {
+        fieldNames.next();
+        if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
+          fieldNames.remove();
         }
+      }
       keeperList.add(jsonNode);
     }
 
