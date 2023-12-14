@@ -58,7 +58,8 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
 
     doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
     doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
-    CqlTranslator cqlTranslator = TranslationResource.getInstance(true).buildTranslator(requestData);
+    CqlTranslator cqlTranslator =
+        TranslationResource.getInstance(true).buildTranslator(requestData);
     when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(cqlTranslator);
   }
 
