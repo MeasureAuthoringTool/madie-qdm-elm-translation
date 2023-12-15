@@ -27,7 +27,7 @@ public class CqlTranslatorExceptionFilterTest {
   private CqlCompilerException warning = null;
 
   @BeforeEach
-  void setUp() throws JsonProcessingException {
+  void setUp() {
     cqlData = StringUtils.EMPTY;
     File cqlFile = new File(this.getClass().getResource("/syntaxError.cql").getFile());
 

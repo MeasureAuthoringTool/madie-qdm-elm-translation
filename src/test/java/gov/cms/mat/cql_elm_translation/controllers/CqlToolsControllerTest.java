@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 
+import gov.cms.mat.cql_elm_translation.dto.TranslatedLibrary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -96,13 +97,22 @@ class CqlToolsControllerTest implements ResourceFileUtil {
 
   @Test
   void testGetLibraryElms() throws IOException {
+    TranslatedLibrary translatedLibrary1 =
+        TranslatedLibrary.builder().cql("cql 1").elmJson("elm json 1").elmXml("elm xml 1").build();
+    TranslatedLibrary translatedLibrary2 =
+        TranslatedLibrary.builder().cql("cql 2").elmJson("elm json 2").elmXml("elm xml 2").build();
+
     when(cqlConversionService.getElmForCql(anyString(), anyString()))
-        .thenReturn(List.of("Elm 1", "Elm 2"));
+        .thenReturn(List.of(translatedLibrary1, translatedLibrary2));
     var result = cqlToolsController.getLibraryElms("test cql", "john");
-    List<String> elms = result.getBody();
-    assertThat(elms.size(), is(equalTo(2)));
-    assertThat(elms.get(0), is(equalTo("Elm 1")));
-    assertThat(elms.get(1), is(equalTo("Elm 2")));
+    List<TranslatedLibrary> libraries = result.getBody();
+    assertThat(libraries.size(), is(equalTo(2)));
+    assertThat(libraries.get(0).getCql(), is(equalTo(translatedLibrary1.getCql())));
+    assertThat(libraries.get(0).getElmJson(), is(equalTo(translatedLibrary1.getElmJson())));
+    assertThat(libraries.get(0).getElmXml(), is(equalTo(translatedLibrary1.getElmXml())));
+    assertThat(libraries.get(1).getCql(), is(equalTo(translatedLibrary2.getCql())));
+    assertThat(libraries.get(1).getElmJson(), is(equalTo(translatedLibrary2.getElmJson())));
+    assertThat(libraries.get(1).getElmXml(), is(equalTo(translatedLibrary2.getElmXml())));
   }
 
   @Test

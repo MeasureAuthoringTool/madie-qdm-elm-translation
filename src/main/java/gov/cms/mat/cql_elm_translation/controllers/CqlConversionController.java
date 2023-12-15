@@ -8,6 +8,7 @@ import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,6 +30,7 @@ import java.io.UncheckedIOException;
 public class CqlConversionController {
 
   private final CqlConversionService cqlConversionService;
+  private final CqlLibraryService cqlLibraryService;
 
   @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
   public CqlConversionPayload cqlToElmJson(
@@ -61,7 +63,7 @@ public class CqlConversionController {
             .resultTypes(resultTypes)
             .build();
 
-    cqlConversionService.setUpLibrarySourceProvider(cqlData, accessToken);
+    cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
     CqlConversionPayload cqlConversionPayload =
         cqlConversionService.processCqlDataWithErrors(requestData);

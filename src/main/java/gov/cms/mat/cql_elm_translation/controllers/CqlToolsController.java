@@ -2,6 +2,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.mat.cql_elm_translation.dto.TranslatedLibrary;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
@@ -74,7 +75,7 @@ public class CqlToolsController {
   }
 
   @PutMapping("/cql/elm")
-  public ResponseEntity<List<String>> getLibraryElms(
+  public ResponseEntity<List<TranslatedLibrary>> getLibraryElms(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     try {
       return ResponseEntity.status(HttpStatus.OK)

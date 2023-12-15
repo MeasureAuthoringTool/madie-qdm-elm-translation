@@ -1,23 +1,16 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
-import java.util.TreeSet;
-import java.util.stream.Collectors;
-
-import gov.cms.madie.models.measure.*;
+import gov.cms.madie.models.measure.Group;
+import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.MeasureObservation;
+import gov.cms.madie.models.measure.Population;
+import gov.cms.madie.models.measure.Stratification;
+import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
+import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -28,18 +21,24 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import gov.cms.mat.cql.CqlTextParser;
-import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import java.util.Collections;
+import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.verify;
 
 @ExtendWith(MockitoExtension.class)
 public class DataCriteriaServiceTest implements ResourceFileUtil {
-  @Mock private CqlConversionService cqlConversionService;
   @Mock private CqlLibraryService cqlLibraryService;
-
   @InjectMocks private DataCriteriaService dataCriteriaService;
 
   private final String token = "token";
@@ -69,12 +68,9 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
   @Test
   void testGetSourceDataCriteria() {
-    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(requestData);
-
     Mockito.doNothing()
-        .when(cqlConversionService)
+        .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(cql, token);
@@ -84,7 +80,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     SourceDataCriteria singleSdc =
         sourceDataCriteria.stream()
             .filter(sdc -> sdc.getTitle().equals("Encounter Inpatient"))
-            .collect(Collectors.toList())
+            .toList()
             .get(0);
     assertThat(singleSdc.getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
     assertThat(singleSdc.getTitle(), is(equalTo("Encounter Inpatient")));
@@ -119,12 +115,9 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             + "define \"Qualifying Encounters\":\n true";
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(data);
-
     Mockito.doNothing()
-        .when(cqlConversionService)
+        .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(cql, token);
@@ -152,9 +145,8 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
-        .when(cqlConversionService)
+        .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(cql, token);
@@ -190,9 +182,8 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(requestData);
     verify(cqlLibraryService).getLibraryCql(any(), any(), any());
     Mockito.doNothing()
-        .when(cqlConversionService)
+        .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
 
     Set<SourceDataCriteria> relevantElements =
         dataCriteriaService.getRelevantElements(measure, token);
@@ -244,9 +235,8 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
-        .when(cqlConversionService)
+        .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(translator);
 
     Set<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getRelevantElements(measure, token);

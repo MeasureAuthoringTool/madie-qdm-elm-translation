@@ -19,7 +19,7 @@ import static java.util.stream.Collectors.toSet;
 @Service
 @RequiredArgsConstructor
 public class CqlParsingService extends CqlTooling {
-  private final CqlConversionService cqlConversionService;
+  private final CqlLibraryService cqlLibraryService;
 
   /**
    * Parses the CQL and generates objects for all CQL Definitions and Functions found in the Main
@@ -30,7 +30,7 @@ public class CqlParsingService extends CqlTooling {
    * @return Set of all CQL Definitions and Functions in the main and included Libraries.
    */
   public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
     return cqlTools.getDefinitionContent().keySet().stream()
         .map(def -> parseDefinitionNode(def, cqlTools.getDefinitionContent()))
         .collect(toSet());
@@ -54,7 +54,7 @@ public class CqlParsingService extends CqlTooling {
    *     <p>Values: Set of CQL Definition Objects that are referenced in the Key CQL Definition.
    */
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlConversionService);
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
 
     Set<CQLDefinition> cqlDefinitions =

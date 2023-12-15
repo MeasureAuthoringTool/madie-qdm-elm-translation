@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.UncheckedIOException;
 
+import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -31,7 +32,7 @@ class CqlConversionControllerTest implements ResourceFileUtil {
   private static final String translatorOptionsTag = "\"translatorOptions\"";
 
   @Mock private CqlConversionService cqlConversionService;
-
+  @Mock private CqlLibraryService cqlLibraryService;
   @InjectMocks private CqlConversionController cqlConversionController;
 
   @Test

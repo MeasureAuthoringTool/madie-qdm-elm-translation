@@ -28,7 +28,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CqlParsingServiceTest implements ResourceFileUtil {
-  @Mock private CqlConversionService cqlConversionService;
   @Mock private CqlLibraryService cqlLibraryService;
   @InjectMocks private CqlParsingService cqlParsingService;
 
@@ -57,9 +56,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
 
     doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
-    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
-    CqlTranslator cqlTranslator = TranslationResource.getInstance(true).buildTranslator(requestData);
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(cqlTranslator);
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
   }
 
   @Test

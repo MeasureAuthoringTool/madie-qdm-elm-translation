@@ -1,5 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,12 @@ public class CqlLibraryService {
 
   @Value("${madie.library.service.cql.uri}")
   private String librariesCqlUri;
+
+  public void setUpLibrarySourceProvider(String cql, String accessToken) {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(this);
+    MadieLibrarySourceProvider.setAccessToken(accessToken);
+  }
 
   public String getLibraryCql(String name, String version, String accessToken) {
     URI uri = buildMadieLibraryServiceUri(name, version);
