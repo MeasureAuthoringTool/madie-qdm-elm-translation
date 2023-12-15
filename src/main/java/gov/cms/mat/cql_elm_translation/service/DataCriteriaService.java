@@ -209,7 +209,8 @@ public class DataCriteriaService extends CqlTooling {
   }
 
   private String buildCriteriaType(String dataType) {
-    // e.g "Encounter, Performed" becomes "EncounterPerformed"
-    return dataType.replace(",", "").replace(" ", "");
+    // e.g "Encounter, Performed" becomes "EncounterPerformed",
+    // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
+    return dataType.replace(",", "").replace(" ", "").replace("Not", "");
   }
 }
