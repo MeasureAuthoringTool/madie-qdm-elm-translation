@@ -102,7 +102,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     TranslatedLibrary translatedLibrary2 =
         TranslatedLibrary.builder().cql("cql 2").elmJson("elm json 2").elmXml("elm xml 2").build();
 
-    when(cqlConversionService.getElmForCql(anyString(), anyString()))
+    when(cqlConversionService.getTranslatedLibrariesForCql(anyString(), anyString()))
         .thenReturn(List.of(translatedLibrary1, translatedLibrary2));
     var result = cqlToolsController.getLibraryElms("test cql", "john");
     List<TranslatedLibrary> libraries = result.getBody();

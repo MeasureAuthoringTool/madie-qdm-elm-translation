@@ -79,7 +79,7 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     try {
       return ResponseEntity.status(HttpStatus.OK)
-          .body(cqlConversionService.getElmForCql(cql, accessToken));
+          .body(cqlConversionService.getTranslatedLibrariesForCql(cql, accessToken));
     } catch (IOException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

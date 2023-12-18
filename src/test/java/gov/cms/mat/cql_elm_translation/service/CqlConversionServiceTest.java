@@ -165,9 +165,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGetElmForCql() throws IOException {
+  void testGetTranslatedLibrariesForCqlForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
-    List<TranslatedLibrary> libraries = service.getElmForCql(cql, "token");
+    List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
     AtomicBoolean foundAMatch = new AtomicBoolean();
     libraries.forEach(
         library -> {
@@ -178,7 +178,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Test
   void testGetElmForBlankCql() throws IOException {
-    List<TranslatedLibrary> elms = service.getElmForCql(null, "token");
+    List<TranslatedLibrary> elms = service.getTranslatedLibrariesForCql(null, "token");
     assertThat(elms.size(), is(equalTo(0)));
   }
 }

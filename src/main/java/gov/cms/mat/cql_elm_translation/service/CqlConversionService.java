@@ -88,7 +88,8 @@ public class CqlConversionService extends CqlTooling {
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
   }
 
-  public List<TranslatedLibrary> getElmForCql(String cql, String accessToken) throws IOException {
+  public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
+      throws IOException {
     if (StringUtils.isBlank(cql)) {
       return Collections.emptyList();
     }
@@ -132,7 +133,7 @@ public class CqlConversionService extends CqlTooling {
     String name = identifier.getId();
     String version = identifier.getVersion();
     return TranslatedLibrary.builder()
-        .librayName(name)
+        .name(name)
         .version(version)
         .cql(cql)
         .elmJson(elmJson)
