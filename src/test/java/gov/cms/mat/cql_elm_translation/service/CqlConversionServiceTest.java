@@ -7,6 +7,11 @@ import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.dto.TranslatedLibrary;
+import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import org.cqframework.cql.cql2elm.LibraryContentType;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -18,6 +23,7 @@ import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -25,8 +31,12 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.spy;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
@@ -170,10 +180,51 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
     AtomicBoolean foundAMatch = new AtomicBoolean();
     libraries.forEach(
-        library -> {
-          foundAMatch.set(library.getElmJson().contains("DataCriteriaRetrivalTest"));
-        });
+        library -> foundAMatch.set(library.getElmJson().contains("DataCriteriaRetrivalTest")));
     assertThat(foundAMatch.get(), is(true));
+  }
+
+  @Test
+  void testBuildTranslatedLibrary() throws IOException {
+    Library library = new Library();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("test");
+    identifier.setVersion("0.0.000");
+    library.setIdentifier(identifier);
+    CompiledLibrary compiledLibrary = new CompiledLibrary();
+    compiledLibrary.setLibrary(library);
+    TranslatedLibrary translatedLibrary =
+        service.buildTranslatedLibrary(compiledLibrary, Map.of("test-0.0.000", "test cql"));
+    assertThat(translatedLibrary.getName(), is(equalTo(identifier.getId())));
+    assertThat(translatedLibrary.getVersion(), is(equalTo(identifier.getVersion())));
+    assertThat(translatedLibrary.getCql(), is(equalTo("test cql")));
+  }
+
+  @Test
+  void testBuildTranslatedLibraryWhenExceptionThrown() throws IOException {
+    Library library = new Library();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("test");
+    identifier.setVersion("0.0.000");
+    library.setIdentifier(identifier);
+    CompiledLibrary compiledLibrary = new CompiledLibrary();
+    compiledLibrary.setLibrary(library);
+    CqlConversionService conversionService = spy(service);
+    doThrow(new IOException("Failed to build the library"))
+        .when(conversionService)
+        .convertToJson(library, LibraryContentType.JSON);
+    assertThrows(
+        InternalServerException.class,
+        () ->
+            conversionService.buildTranslatedLibrary(
+                compiledLibrary, Map.of("test-0.0.000", "test cql")),
+        "An error occurred while building translated artifacts for library test");
+  }
+
+  @Test
+  void testBuildTranslatedLibraryWhenCompiledLibraryIsNull() {
+    TranslatedLibrary library = service.buildTranslatedLibrary(null, null);
+    assertNull(library);
   }
 
   @Test

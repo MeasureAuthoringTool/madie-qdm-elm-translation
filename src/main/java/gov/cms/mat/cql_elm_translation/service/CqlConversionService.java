@@ -13,6 +13,7 @@ import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcesso
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
@@ -96,34 +97,42 @@ public class CqlConversionService extends CqlTooling {
     CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService);
     TranslatedLibrary translatedMeasureLib =
         buildTranslatedLibrary(translator.getTranslatedLibrary().getLibrary(), cql);
-    Map<String, String> cqlMap =
-        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translator);
     Map<VersionedIdentifier, CompiledLibrary> includedLibraries =
         translator.getTranslatedLibraries();
+    List<TranslatedLibrary> libraries = new ArrayList<>();
+    libraries.add(translatedMeasureLib);
     // if no included libraries, return only measure library
-    if (includedLibraries == null) {
-      return List.of(translatedMeasureLib);
+    if (MapUtils.isEmpty(includedLibraries)) {
+      return libraries;
     }
+    // get the cql for included libraries
+    Map<String, String> cqlMap =
+        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translator);
+
+    // create TranslatedLibrary for each included library
     List<TranslatedLibrary> translatedIncludeLibs =
         includedLibraries.values().stream()
-            .map(
-                compiledLibrary -> {
-                  Library library = compiledLibrary.getLibrary();
-                  String name = library.getIdentifier().getId();
-                  String version = library.getIdentifier().getVersion();
-                  try {
-                    return buildTranslatedLibrary(library, cqlMap.get(name + "-" + version));
-                  } catch (IOException e) {
-                    log.error(
-                        "Error occurred while building the translated library details for: [{}]",
-                        name);
-                    throw new InternalServerException(e.getMessage());
-                  }
-                })
+            .map(compiledLibrary -> buildTranslatedLibrary(compiledLibrary, cqlMap))
             .toList();
-    List<TranslatedLibrary> libraries = new ArrayList<>(translatedIncludeLibs);
-    libraries.add(translatedMeasureLib);
+    libraries.addAll(translatedIncludeLibs);
     return libraries;
+  }
+
+  public TranslatedLibrary buildTranslatedLibrary(
+      CompiledLibrary compiledLibrary, Map<String, String> cqlMap) {
+    if (compiledLibrary == null) {
+      return null;
+    }
+    Library library = compiledLibrary.getLibrary();
+    String name = library.getIdentifier().getId();
+    String version = library.getIdentifier().getVersion();
+    try {
+      return buildTranslatedLibrary(library, cqlMap.get(name + "-" + version));
+    } catch (IOException e) {
+      log.error("Error occurred while building the translated library artifacts: ", e);
+      throw new InternalServerException(
+          "An error occurred while building translated artifacts for library " + name);
+    }
   }
 
   private TranslatedLibrary buildTranslatedLibrary(Library library, String cql) throws IOException {
@@ -141,8 +150,7 @@ public class CqlConversionService extends CqlTooling {
         .build();
   }
 
-  public static String convertToJson(Library library, LibraryContentType contentType)
-      throws IOException {
+  public String convertToJson(Library library, LibraryContentType contentType) throws IOException {
     StringWriter writer = new StringWriter();
     ElmLibraryWriterFactory.getWriter(contentType.mimeType()).write(library, writer);
     return writer.getBuffer().toString();

@@ -9,7 +9,6 @@ import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.CqlParserListener;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -85,7 +84,6 @@ public abstract class CqlTooling {
     return processCqlData(requestData);
   }
 
-  @SneakyThrows
   protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
