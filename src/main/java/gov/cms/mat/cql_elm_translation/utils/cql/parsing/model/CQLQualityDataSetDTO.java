@@ -10,6 +10,7 @@ public class CQLQualityDataSetDTO implements CQLExpression {
   private boolean hasModifiedAtVSAC;
 
   private boolean isUsed;
+
   /** QDM is not available in VSAC. */
   private boolean notFoundInVSAC;
 

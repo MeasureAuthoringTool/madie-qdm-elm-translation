@@ -16,7 +16,6 @@ import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @SpringBootTest
 public class CqlTranslatorExceptionFilterTest {

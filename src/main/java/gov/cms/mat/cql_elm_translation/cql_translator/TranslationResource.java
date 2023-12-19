@@ -103,6 +103,7 @@ public class TranslationResource {
     return buildTranslator(
         requestData.getCqlDataInputStream(), requestData.createMap(), requestData.getSourceInfo());
   }
+
   /*sets the options and calls cql-elm-translator using MatLibrarySourceProvider,
   which helps the translator to fetch the CQL of the included libraries from HAPI FHIR Server*/
   public CqlTranslator buildTranslator(
