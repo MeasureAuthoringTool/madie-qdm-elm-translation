@@ -2,7 +2,7 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import gov.cms.madie.models.common.TranslatedLibrary;
+import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
