@@ -1,5 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.mat.cql.elements.UsingProperties;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,8 +19,12 @@ import org.springframework.web.client.RestTemplate;
 import java.net.URI;
 import java.net.URISyntaxException;
 
+import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.when;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
 
 @ExtendWith(MockitoExtension.class)
 class CqlLibraryServiceTest {
@@ -90,5 +96,16 @@ class CqlLibraryServiceTest {
     String responseBody =
         cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
     assertNull(responseBody);
+  }
+
+  @Test
+  void testSetUpLibrarySourceProvider() {
+    String cql = "library QICoreCommon version '1.3.000'\n" + "using QICore version '4.1.1'";
+    cqlLibraryService.setUpLibrarySourceProvider(cql, "ACCESS_TOKEN");
+    assertThat(MadieLibrarySourceProvider.getAccessToken(), is(equalTo("ACCESS_TOKEN")));
+    UsingProperties usingProperties = MadieLibrarySourceProvider.getUsingProperties();
+    assertThat(usingProperties, is(notNullValue()));
+    assertThat(usingProperties.getLibraryType(), is(equalTo("QICore")));
+    assertThat(usingProperties.getVersion(), is(equalTo("4.1.1")));
   }
 }

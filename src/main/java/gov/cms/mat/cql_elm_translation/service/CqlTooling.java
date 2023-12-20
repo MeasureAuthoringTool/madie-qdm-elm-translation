@@ -1,6 +1,9 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.CqlParserListener;
@@ -18,12 +21,9 @@ import java.util.Map;
 
 @RequiredArgsConstructor
 public abstract class CqlTooling {
-  public CQLTools parseCql(
-      String cql, String accessToken, CqlConversionService cqlConversionService) {
+  protected CQLTools parseCql(String cql, String accessToken, CqlLibraryService cqlLibraryService) {
     // Run Translator to compile libraries
-    cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
-    CqlTranslator cqlTranslator = runTranslator(cql, cqlConversionService);
-
+    CqlTranslator cqlTranslator = runTranslator(cql, accessToken, cqlLibraryService);
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
     cqlTranslator
         .getTranslatedLibraries()
@@ -45,7 +45,7 @@ public abstract class CqlTooling {
     return cqlTools;
   }
 
-  private Map<String, String> getIncludedLibrariesCql(
+  protected Map<String, String> getIncludedLibrariesCql(
       MadieLibrarySourceProvider librarySourceProvider, CqlTranslator cqlTranslator) {
     Map<String, String> includedLibrariesCql = new HashMap<>();
     for (CompiledLibrary l : cqlTranslator.getTranslatedLibraries().values()) {
@@ -64,7 +64,9 @@ public abstract class CqlTooling {
     return includedLibrariesCql;
   }
 
-  private CqlTranslator runTranslator(String cql, CqlConversionService cqlConversionService) {
+  protected CqlTranslator runTranslator(
+      String cql, String accessToken, CqlLibraryService cqlLibraryService) {
+    cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
     RequestData requestData =
         RequestData.builder()
             .cqlData(cql)
@@ -79,7 +81,15 @@ public abstract class CqlTooling {
             .resultTypes(true)
             .build();
 
-    return cqlConversionService.processCqlData(requestData);
+    return processCqlData(requestData);
+  }
+
+  protected CqlTranslator processCqlData(RequestData requestData) {
+    CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
+    UsingProperties usingProperties = cqlTextParser.getUsing();
+    return TranslationResource.getInstance(
+            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
+        .buildTranslator(requestData);
   }
 
   private List<String> getParentExpressions(String cql) {

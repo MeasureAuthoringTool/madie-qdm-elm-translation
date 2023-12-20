@@ -1,54 +1,45 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibraryContentType;
-import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
-import org.hl7.elm.r1.Library;
-import org.springframework.stereotype.Service;
-
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-
-import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.madie.models.common.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
-import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
 import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
+import org.apache.commons.collections4.MapUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryContentType;
+import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
+import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.VersionedIdentifier;
+import org.springframework.stereotype.Service;
+
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Service
 @Slf4j
 @RequiredArgsConstructor
-public class CqlConversionService {
+public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
   private final CqlLibraryService cqlLibraryService;
-
-  /* MadieLibrarySourceProvider places version and service in thread local */
-  public void setUpLibrarySourceProvider(String cql, String accessToken) {
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    MadieLibrarySourceProvider.setAccessToken(accessToken);
-  }
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
@@ -98,56 +89,70 @@ public class CqlConversionService {
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
   }
 
-  @SneakyThrows
-  public CqlTranslator processCqlData(RequestData requestData) {
-    CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
-    UsingProperties usingProperties = cqlTextParser.getUsing();
-    return TranslationResource.getInstance(
-            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
-        .buildTranslator(requestData);
-  }
-
-  public List<String> getElmForCql(String cql, String accessToken) throws IOException {
+  public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
+      throws IOException {
     if (StringUtils.isBlank(cql)) {
       return Collections.emptyList();
     }
+    CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService);
+    TranslatedLibrary translatedMeasureLib =
+        buildTranslatedLibrary(translator.getTranslatedLibrary().getLibrary(), cql);
+    Map<VersionedIdentifier, CompiledLibrary> includedLibraries =
+        translator.getTranslatedLibraries();
+    List<TranslatedLibrary> libraries = new ArrayList<>();
+    libraries.add(translatedMeasureLib);
+    // if no included libraries, return only measure library
+    if (MapUtils.isEmpty(includedLibraries)) {
+      return libraries;
+    }
+    // get the cql for included libraries
+    Map<String, String> cqlMap =
+        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translator);
 
-    RequestData requestData =
-        RequestData.builder()
-            .cqlData(cql)
-            .showWarnings(false)
-            .signatures(LibraryBuilder.SignatureLevel.All)
-            .annotations(true)
-            .locators(true)
-            .disableListDemotion(true)
-            .disableListPromotion(true)
-            .disableMethodInvocation(false)
-            .validateUnits(true)
-            .resultTypes(true)
-            .build();
-
-    setUpLibrarySourceProvider(cql, accessToken);
-    CqlTranslator translator = processCqlData(requestData);
-    String library = translator.toJson();
-    List<String> libraries = new ArrayList<>();
-    translator
-        .getTranslatedLibraries()
-        .forEach(
-            (key, value) -> {
-              try {
-                libraries.add(convertToJson(value.getLibrary()));
-              } catch (IOException e) {
-                throw new InternalServerException(e.getMessage());
-              }
-            });
-
-    libraries.add(library);
+    // create TranslatedLibrary for each included library
+    List<TranslatedLibrary> translatedIncludeLibs =
+        includedLibraries.values().stream()
+            .map(compiledLibrary -> buildTranslatedLibrary(compiledLibrary, cqlMap))
+            .toList();
+    libraries.addAll(translatedIncludeLibs);
     return libraries;
   }
 
-  public static String convertToJson(Library library) throws IOException {
+  public TranslatedLibrary buildTranslatedLibrary(
+      CompiledLibrary compiledLibrary, Map<String, String> cqlMap) {
+    if (compiledLibrary == null) {
+      return null;
+    }
+    Library library = compiledLibrary.getLibrary();
+    String name = library.getIdentifier().getId();
+    String version = library.getIdentifier().getVersion();
+    try {
+      return buildTranslatedLibrary(library, cqlMap.get(name + "-" + version));
+    } catch (IOException e) {
+      log.error("Error occurred while building the translated library artifacts: ", e);
+      throw new InternalServerException(
+          "An error occurred while building translated artifacts for library " + name);
+    }
+  }
+
+  private TranslatedLibrary buildTranslatedLibrary(Library library, String cql) throws IOException {
+    VersionedIdentifier identifier = library.getIdentifier();
+    String elmJson = convertToJson(library, LibraryContentType.JSON);
+    String elmXml = convertToJson(library, LibraryContentType.XML);
+    String name = identifier.getId();
+    String version = identifier.getVersion();
+    return TranslatedLibrary.builder()
+        .name(name)
+        .version(version)
+        .cql(cql)
+        .elmJson(elmJson)
+        .elmXml(elmXml)
+        .build();
+  }
+
+  public String convertToJson(Library library, LibraryContentType contentType) throws IOException {
     StringWriter writer = new StringWriter();
-    ElmLibraryWriterFactory.getWriter(LibraryContentType.JSON.mimeType()).write(library, writer);
+    ElmLibraryWriterFactory.getWriter(contentType.mimeType()).write(library, writer);
     return writer.getBuffer().toString();
   }
 

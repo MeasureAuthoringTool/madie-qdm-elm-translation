@@ -3,11 +3,9 @@ package gov.cms.mat.cql_elm_translation;
 import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
 
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UncheckedIOException;
-import java.nio.file.Files;
 
 public interface ResourceFileUtil {
   default String getData(String resource) {

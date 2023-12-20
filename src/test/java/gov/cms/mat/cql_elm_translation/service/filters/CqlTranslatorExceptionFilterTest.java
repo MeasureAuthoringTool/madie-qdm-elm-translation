@@ -16,7 +16,6 @@ import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
-import com.fasterxml.jackson.core.JsonProcessingException;
 
 @SpringBootTest
 public class CqlTranslatorExceptionFilterTest {
@@ -27,7 +26,7 @@ public class CqlTranslatorExceptionFilterTest {
   private CqlCompilerException warning = null;
 
   @BeforeEach
-  void setUp() throws JsonProcessingException {
+  void setUp() {
     cqlData = StringUtils.EMPTY;
     File cqlFile = new File(this.getClass().getResource("/syntaxError.cql").getFile());
 

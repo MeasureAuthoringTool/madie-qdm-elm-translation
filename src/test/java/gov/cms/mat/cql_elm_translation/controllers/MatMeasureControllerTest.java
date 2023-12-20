@@ -7,9 +7,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
 import jakarta.servlet.http.HttpServletRequest;
 
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -25,7 +25,7 @@ import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 public class MatMeasureControllerTest implements ResourceFileUtil {
 
   @Mock private CqlConversionService cqlConversionService;
-  @Mock private CqlTranslator cqlTranslator;
+  @Mock private CqlLibraryService cqlLibraryService;
   @Mock private HttpServletRequest request;
   @InjectMocks private MatMeasureController matMeasureController;
 

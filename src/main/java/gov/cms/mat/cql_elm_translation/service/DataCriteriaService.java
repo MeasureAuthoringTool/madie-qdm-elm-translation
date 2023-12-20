@@ -22,10 +22,10 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class DataCriteriaService extends CqlTooling {
 
-  private final CqlConversionService cqlConversionService;
+  private final CqlLibraryService cqlLibraryService;
 
   public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
-    return parseCql(cql, accessToken, cqlConversionService).getDataCriteria();
+    return parseCql(cql, accessToken, cqlLibraryService).getDataCriteria();
   }
 
   public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
@@ -35,7 +35,7 @@ public class DataCriteriaService extends CqlTooling {
     }
     List<SourceDataCriteria> sourceDataCriteria =
         getSourceDataCriteria(measure.getCql(), accessToken);
-    CQLTools tools = parseCql(measure.getCql(), accessToken, cqlConversionService);
+    CQLTools tools = parseCql(measure.getCql(), accessToken, cqlLibraryService);
     Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
     // Combines explicitly called definitions with any in the tree
     Set<String> allUsedDefinitions = new HashSet<>();

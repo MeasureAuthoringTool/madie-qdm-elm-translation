@@ -32,8 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 public class EffectiveDataRequirementService {
   private final FhirContext fhirContext;
   private final FhirContext fhirContextForR5;
-
-  private final CqlConversionService cqlConversionService;
+  private final CqlLibraryService cqlLibraryService;
 
   public <T extends Resource> T createFhirResourceFromJson(String json, Class<T> clazz) {
     if (StringUtils.isEmpty(json)) {
@@ -95,7 +94,7 @@ public class EffectiveDataRequirementService {
     String cql = new String(attachment.getData());
 
     // setting up the librarySourceProvider to fetch included libraries
-    cqlConversionService.setUpLibrarySourceProvider(cql, accessToken);
+    cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
 
     var translationResource = TranslationResource.getInstance(true);
     RequestData requestData = createDefaultRequestData(library.getId(), cql);

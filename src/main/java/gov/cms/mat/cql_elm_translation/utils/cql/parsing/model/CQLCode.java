@@ -101,12 +101,16 @@ public class CQLCode implements CQLExpression {
     this.codeOID = codeOID;
   }
 
-  /** @return the displayName */
+  /**
+   * @return the displayName
+   */
   public String getDisplayName() {
     return displayName;
   }
 
-  /** @param displayName the displayName to set */
+  /**
+   * @param displayName the displayName to set
+   */
   public void setDisplayName(String displayName) {
     this.displayName = displayName;
   }

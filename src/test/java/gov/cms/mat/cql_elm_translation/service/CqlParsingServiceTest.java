@@ -3,10 +3,8 @@ package gov.cms.mat.cql_elm_translation.service;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
-import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -28,7 +26,6 @@ import static org.mockito.Mockito.*;
 
 @ExtendWith(MockitoExtension.class)
 public class CqlParsingServiceTest implements ResourceFileUtil {
-  @Mock private CqlConversionService cqlConversionService;
   @Mock private CqlLibraryService cqlLibraryService;
   @InjectMocks private CqlParsingService cqlParsingService;
 
@@ -57,10 +54,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
 
     doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
-    doNothing().when(cqlConversionService).setUpLibrarySourceProvider(anyString(), anyString());
-    CqlTranslator cqlTranslator =
-        TranslationResource.getInstance(true).buildTranslator(requestData);
-    when(cqlConversionService.processCqlData(any(RequestData.class))).thenReturn(cqlTranslator);
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
   }
 
   @Test

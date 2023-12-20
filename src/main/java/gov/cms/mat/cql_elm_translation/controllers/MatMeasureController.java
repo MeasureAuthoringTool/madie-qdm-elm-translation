@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
+import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
 import jakarta.servlet.http.HttpServletRequest;
 
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -29,6 +30,7 @@ import lombok.extern.slf4j.Slf4j;
 public class MatMeasureController {
 
   private final CqlConversionService cqlConversionService;
+  private final CqlLibraryService cqlLibraryService;
 
   @PutMapping(path = "/cqlToElm", consumes = "text/plain", produces = "application/elm+json")
   @PreAuthorize("#request.getHeader('api-key') == #apiKey")
@@ -72,7 +74,7 @@ public class MatMeasureController {
             .resultTypes(resultTypes)
             .build();
 
-    cqlConversionService.setUpLibrarySourceProvider(cqlData, apiKey.concat("-" + harpid));
+    cqlLibraryService.setUpLibrarySourceProvider(cqlData, apiKey.concat("-" + harpid));
 
     CqlConversionPayload cqlConversionPayload =
         cqlConversionService.processCqlDataWithErrors(requestData);
