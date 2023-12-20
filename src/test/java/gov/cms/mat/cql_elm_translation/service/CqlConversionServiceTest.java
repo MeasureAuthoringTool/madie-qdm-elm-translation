@@ -3,7 +3,7 @@ package gov.cms.mat.cql_elm_translation.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import gov.cms.madie.models.common.TranslatedLibrary;
+import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.data.RequestData;

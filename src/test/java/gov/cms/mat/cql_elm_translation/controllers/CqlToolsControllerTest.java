@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Objects;
 import java.util.TreeSet;
 
-import gov.cms.madie.models.common.TranslatedLibrary;
+import gov.cms.madie.models.dto.TranslatedLibrary;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;

@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.madie.models.common.TranslatedLibrary;
+import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
