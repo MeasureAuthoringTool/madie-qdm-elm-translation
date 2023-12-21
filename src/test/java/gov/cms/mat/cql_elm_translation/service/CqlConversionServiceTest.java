@@ -4,8 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.madie.models.dto.TranslatedLibrary;
+import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
+import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
 import org.cqframework.cql.cql2elm.LibraryContentType;
@@ -149,6 +151,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
     CqlConversionPayload payload = service.processCqlDataWithErrors(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
@@ -185,7 +190,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testBuildTranslatedLibrary() throws IOException {
+  void testBuildTranslatedLibrary() {
     Library library = new Library();
     VersionedIdentifier identifier = new VersionedIdentifier();
     identifier.setId("test");
