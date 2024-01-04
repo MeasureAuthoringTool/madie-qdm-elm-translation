@@ -21,6 +21,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UncheckedIOException;
+import java.util.Iterator;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/cql/translator")
@@ -107,9 +109,15 @@ public class CqlConversionController {
         }
 
         for (int i = 0; i < annotationNode.size(); i++) {
+          // remove translator options that are not the version
           if (annotationNode.get(i).has("translatorOptions")) {
-            ((ArrayNode) annotationNode).remove(i);
-            break;
+            Iterator<String> fieldNames = annotationNode.get(i).fieldNames();
+            while (fieldNames.hasNext()) {
+              fieldNames.next();
+              if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
+                fieldNames.remove();
+              }
+            }
           }
         }
 
