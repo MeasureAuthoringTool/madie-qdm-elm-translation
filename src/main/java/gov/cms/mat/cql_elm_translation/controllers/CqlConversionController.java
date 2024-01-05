@@ -3,7 +3,6 @@ package gov.cms.mat.cql_elm_translation.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
@@ -113,7 +112,6 @@ public class CqlConversionController {
           if (annotationNode.get(i).has("translatorOptions")) {
             Iterator<String> fieldNames = annotationNode.get(i).fieldNames();
             while (fieldNames.hasNext()) {
-              fieldNames.next();
               if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
                 fieldNames.remove();
               }
