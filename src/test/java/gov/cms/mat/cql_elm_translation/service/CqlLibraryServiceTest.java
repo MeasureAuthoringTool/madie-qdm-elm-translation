@@ -61,7 +61,10 @@ class CqlLibraryServiceTest {
 
   @Test
   void getLibraryCql() {
-    String cql = "library QICoreCommon version '1.3.000'\n" + "using QICore version '4.1.1'\n" + "Response Cql String";
+    String cql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QICore version '4.1.1'\n"
+            + "Response Cql String";
     cqlLibraryService.setUpLibrarySourceProvider(cql, "ACCESS_TOKEN");
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
@@ -73,14 +76,22 @@ class CqlLibraryServiceTest {
 
   @Test
   void getLibraryCqlThrowCqlIncludeException() {
-    String cql = "library QICoreCommon version '1.3.000'\n" + "using QICore version '4.1.1'\n" + "Response Cql String";
+    String cql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QICore version '4.1.1'\n"
+            + "Response Cql String";
     cqlLibraryService.setUpLibrarySourceProvider(cql, "ACCESS_TOKEN");
 
-    String wrongLibrarycql = "library QICoreCommon version '1.3.000'\n" + "using QDM version '5.6'\n" + "Response Cql String";
+    String wrongLibrarycql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QDM version '5.6'\n"
+            + "Response Cql String";
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
-            .thenReturn(new ResponseEntity<>(wrongLibrarycql, HttpStatus.OK));
-    assertThrows(CqlIncludeException.class, () -> cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken));
+        .thenReturn(new ResponseEntity<>(wrongLibrarycql, HttpStatus.OK));
+    assertThrows(
+        CqlIncludeException.class,
+        () -> cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken));
   }
 
   @Test

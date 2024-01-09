@@ -57,7 +57,8 @@ public class CqlLibraryService {
         log.error("Library model and version does not match the Measure model and version");
         throw new CqlIncludeException(
             String.format(
-                "Library model and version does not match the Measure model and version for name: %s, version: %s",
+                "Library model and version does not match the Measure model and version for" +
+                        " name: %s, version: %s",
                 name, version),
             null,
             name,
