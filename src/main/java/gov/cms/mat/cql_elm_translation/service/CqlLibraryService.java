@@ -4,6 +4,7 @@ import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
@@ -47,7 +48,21 @@ public class CqlLibraryService {
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       if (responseEntity.hasBody()) {
         log.debug("Retrieved a valid cqlPayload");
-        return responseEntity.getBody();
+        if (new CqlTextParser(responseEntity.getBody())
+            .getUsing()
+            .getLine()
+            .equals(MadieLibrarySourceProvider.getUsingProperties().getLine())) {
+          return responseEntity.getBody();
+        }
+        log.error("Library model and version does not match the Measure model and version");
+        throw new CqlIncludeException(
+            String.format(
+                "Library model and version does not match the Measure model and version for name: %s, version: %s",
+                name, version),
+            null,
+            name,
+            version);
+
       } else {
         log.error("Cannot find Cql payload in the response");
         return null;
