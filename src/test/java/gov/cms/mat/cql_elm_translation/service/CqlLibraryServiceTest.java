@@ -22,7 +22,6 @@ import java.net.URISyntaxException;
 
 import static org.hamcrest.CoreMatchers.notNullValue;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.Mockito.when;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.CoreMatchers.equalTo;
