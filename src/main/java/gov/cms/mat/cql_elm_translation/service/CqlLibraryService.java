@@ -48,18 +48,18 @@ public class CqlLibraryService {
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
-    List<String> supportedLibraries =
-        Arrays.stream(
-                MadieLibrarySourceProvider.getSupportedLibrariesMap()
-                    .get(
-                        MadieLibrarySourceProvider.getUsingProperties()
-                            .getLibraryType()
-                            .toUpperCase()))
-            .toList();
-
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       if (responseEntity.hasBody()) {
         log.debug("Retrieved a valid cqlPayload");
+        List<String> supportedLibraries =
+                Arrays.stream(
+                                MadieLibrarySourceProvider.getSupportedLibrariesMap()
+                                        .get(
+                                                MadieLibrarySourceProvider.getUsingProperties()
+                                                        .getLibraryType()
+                                                        .toUpperCase()))
+                        .toList();
+
         UsingProperties libraryUsing = new CqlTextParser(responseEntity.getBody()).getUsing();
         if (libraryUsing.getLine().equals(MadieLibrarySourceProvider.getUsingProperties().getLine())
             || supportedLibraries.contains(libraryUsing.getLibraryType())) {
