@@ -111,7 +111,6 @@ public class AnnotationErrorFilter implements CqlLibraryFinder, JsonHelpers {
       JsonNode copiedNode = jsonNode.deepCopy();
       Iterator<String> fieldNames = copiedNode.fieldNames();
       while (fieldNames.hasNext()) {
-        fieldNames.next();
         if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
           fieldNames.remove();
         }

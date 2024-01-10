@@ -76,7 +76,6 @@ class CqlConversionControllerTest implements ResourceFileUtil {
         new CqlConversionController.TranslatorOptionsRemover(json);
 
     String cleaned = translatorOptionsRemover.clean();
-
     assertFalse(cleaned.contains(translatorOptionsTag));
   }
 
