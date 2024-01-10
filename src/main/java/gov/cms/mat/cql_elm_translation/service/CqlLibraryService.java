@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 import java.net.URI;
+import java.util.Arrays;
+import java.util.List;
 
 @Service
 @Slf4j
@@ -45,20 +48,28 @@ public class CqlLibraryService {
     ResponseEntity<String> responseEntity =
         restTemplate.exchange(uri, HttpMethod.GET, new HttpEntity<>(headers), String.class);
 
+    List<String> supportedLibraries =
+        Arrays.stream(
+                MadieLibrarySourceProvider.getSupportedLibrariesMap()
+                    .get(
+                        MadieLibrarySourceProvider.getUsingProperties()
+                            .getLibraryType()
+                            .toUpperCase()))
+            .toList();
+
     if (responseEntity.getStatusCode().is2xxSuccessful()) {
       if (responseEntity.hasBody()) {
         log.debug("Retrieved a valid cqlPayload");
-        if (new CqlTextParser(responseEntity.getBody())
-            .getUsing()
-            .getLine()
-            .equals(MadieLibrarySourceProvider.getUsingProperties().getLine())) {
+        UsingProperties libraryUsing = new CqlTextParser(responseEntity.getBody()).getUsing();
+        if (libraryUsing.getLine().equals(MadieLibrarySourceProvider.getUsingProperties().getLine())
+            || supportedLibraries.contains(libraryUsing.getLibraryType())) {
           return responseEntity.getBody();
         }
         log.error("Library model and version does not match the Measure model and version");
         throw new CqlIncludeException(
             String.format(
-                "Library model and version does not match the Measure model and version for" +
-                        " name: %s, version: %s",
+                "Library model and version does not match the Measure model and version for"
+                    + " name: %s, version: %s",
                 name, version),
             null,
             name,
