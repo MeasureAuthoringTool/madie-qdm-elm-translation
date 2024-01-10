@@ -3,7 +3,6 @@ package gov.cms.mat.cql_elm_translation.controllers;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
@@ -21,6 +20,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.UncheckedIOException;
+import java.util.Iterator;
+import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/cql/translator")
@@ -107,9 +108,14 @@ public class CqlConversionController {
         }
 
         for (int i = 0; i < annotationNode.size(); i++) {
+          // remove translator options that are not the version
           if (annotationNode.get(i).has("translatorOptions")) {
-            ((ArrayNode) annotationNode).remove(i);
-            break;
+            Iterator<String> fieldNames = annotationNode.get(i).fieldNames();
+            while (fieldNames.hasNext()) {
+              if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
+                fieldNames.remove();
+              }
+            }
           }
         }
 

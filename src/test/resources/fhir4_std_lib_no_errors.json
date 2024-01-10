@@ -2,6 +2,7 @@
   "library": {
     "annotation": [
       {
+        "translatorVersion": "3.3.2",
         "translatorOptions": "DisableMethodInvocation,EnableLocators,DisableListPromotion,EnableDetailedErrors,EnableAnnotations,DisableListDemotion",
         "type": "CqlToElmInfo"
       }
