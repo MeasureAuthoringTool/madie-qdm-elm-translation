@@ -2,6 +2,7 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import org.cqframework.cql.cql2elm.CqlIncludeException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -60,12 +61,37 @@ class CqlLibraryServiceTest {
 
   @Test
   void getLibraryCql() {
+    String cql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QICore version '4.1.1'\n"
+            + "Response Cql String";
+    cqlLibraryService.setUpLibrarySourceProvider(cql, "ACCESS_TOKEN");
     when(restTemplate.exchange(
             libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
-        .thenReturn(new ResponseEntity<>("Response Cql String", HttpStatus.OK));
+        .thenReturn(new ResponseEntity<>(cql, HttpStatus.OK));
     String responseBody =
         cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken);
-    assertEquals(responseBody, "Response Cql String");
+    assertTrue(responseBody.contains("Response Cql String"));
+  }
+
+  @Test
+  void getLibraryCqlThrowCqlIncludeException() {
+    String cql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QICore version '4.1.1'\n"
+            + "Response Cql String";
+    cqlLibraryService.setUpLibrarySourceProvider(cql, "ACCESS_TOKEN");
+
+    String wrongLibrarycql =
+        "library QICoreCommon version '1.3.000'\n"
+            + "using QDM version '5.6'\n"
+            + "Response Cql String";
+    when(restTemplate.exchange(
+            libraryUri, HttpMethod.GET, new HttpEntity<>(httpHeaders), String.class))
+        .thenReturn(new ResponseEntity<>(wrongLibrarycql, HttpStatus.OK));
+    assertThrows(
+        CqlIncludeException.class,
+        () -> cqlLibraryService.getLibraryCql(cqlLibraryName, cqlLibraryVersion, accessToken));
   }
 
   @Test
