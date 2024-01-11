@@ -57,6 +57,10 @@ public class MadieLibrarySourceProvider implements LibrarySourceProvider {
     return name + "-" + qdmVersion + "-" + version;
   }
 
+  public static Map<String, String[]> getSupportedLibrariesMap() {
+    return supportedLibrariesMap;
+  }
+
   @Override
   @Cacheable("cqlLibraries")
   public InputStream getLibrarySource(VersionedIdentifier libraryIdentifier) {
