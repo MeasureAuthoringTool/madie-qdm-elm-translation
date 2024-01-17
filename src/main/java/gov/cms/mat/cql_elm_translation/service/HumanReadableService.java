@@ -94,6 +94,10 @@ public class HumanReadableService {
         .disclaimer(measure.getMeasureMetaData().getDisclaimer())
         .rationale(measure.getMeasureMetaData().getRationale())
         .clinicalRecommendationStatement(measure.getMeasureMetaData().getClinicalRecommendation())
+        .definitions(
+            measure.getMeasureMetaData() != null
+                ? measure.getMeasureMetaData().getMeasureDefinitions()
+                : null)
         .build();
   }
 
