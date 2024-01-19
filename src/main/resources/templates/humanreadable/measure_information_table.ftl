@@ -196,8 +196,6 @@
             			<#list model.measureInformation.definitions as definition>
                     			${definition.term!""} - ${definition.definition!""} </br>
             			</#list>
-        			<#else>
-                			${""}
         			</#if>
                 </div>
             </td>
