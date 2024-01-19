@@ -52,13 +52,13 @@ public class CqlLibraryService {
       if (responseEntity.hasBody()) {
         log.debug("Retrieved a valid cqlPayload");
         List<String> supportedLibraries =
-                Arrays.stream(
-                                MadieLibrarySourceProvider.getSupportedLibrariesMap()
-                                        .get(
-                                                MadieLibrarySourceProvider.getUsingProperties()
-                                                        .getLibraryType()
-                                                        .toUpperCase()))
-                        .toList();
+            Arrays.stream(
+                    MadieLibrarySourceProvider.getSupportedLibrariesMap()
+                        .get(
+                            MadieLibrarySourceProvider.getUsingProperties()
+                                .getLibraryType()
+                                .toUpperCase()))
+                .toList();
 
         UsingProperties libraryUsing = new CqlTextParser(responseEntity.getBody()).getUsing();
         if (libraryUsing.getLine().equals(MadieLibrarySourceProvider.getUsingProperties().getLine())

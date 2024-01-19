@@ -1,6 +1,8 @@
 package gov.cms.madie.qdm.humanreadable.model;
 
 import java.util.List;
+
+import gov.cms.madie.models.measure.MeasureDefinition;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -39,7 +41,7 @@ public class HumanReadableMeasureInformationModel {
   private String clinicalRecommendationStatement;
   private String improvementNotation;
 
-  private String definition;
+  private List<MeasureDefinition> definitions;
   private String guidance;
   private String transmissionFormat;
   private String initialPopulation;

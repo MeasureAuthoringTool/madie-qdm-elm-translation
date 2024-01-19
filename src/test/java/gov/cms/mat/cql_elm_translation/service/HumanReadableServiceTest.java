@@ -59,6 +59,13 @@ class HumanReadableServiceTest {
                             Organization.builder().name("org1").build(),
                             Organization.builder().name("org2").build()))
                     .steward(Organization.builder().name("stewardOrg").build())
+                    .measureDefinitions(
+                        List.of(
+                            MeasureDefinition.builder()
+                                .id("testMeasureDefinitionId")
+                                .term("test term")
+                                .definition("test definition")
+                                .build()))
                     .build())
             .groups(
                 List.of(
@@ -122,6 +129,18 @@ class HumanReadableServiceTest {
     assertThat(
         measureInfoModel.getClinicalRecommendationStatement(),
         equalTo(measure.getMeasureMetaData().getClinicalRecommendation()));
+    assertThat(
+        measureInfoModel.getDefinitions().size(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().size()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getId(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getId()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getTerm(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getTerm()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getDefinition(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
   }
 
   @Test
