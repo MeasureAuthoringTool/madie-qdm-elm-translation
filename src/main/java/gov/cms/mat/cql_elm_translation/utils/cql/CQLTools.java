@@ -224,10 +224,10 @@ public class CQLTools {
       CQLGraph graph, List<String> functions, String parentExpression) {
     for (String function : functions) {
       if (graph.isPath(parentExpression, function)) {
-        if (usedDefinitions.containsKey(function)) {
-          usedDefinitions.get(function).add(parentExpression);
+        if (usedFunctions.containsKey(function)) {
+          usedFunctions.get(function).add(parentExpression);
         } else {
-          usedDefinitions.putIfAbsent(
+          usedFunctions.putIfAbsent(
               function, new HashSet<>(Collections.singleton(parentExpression)));
         }
       }

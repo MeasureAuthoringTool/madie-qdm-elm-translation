@@ -1,6 +1,8 @@
 package gov.cms.madie.qdm.humanreadable.model;
 
 import java.util.List;
+
+import gov.cms.madie.models.measure.Reference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -16,7 +18,7 @@ public class HumanReadableMeasureInformationModel {
   private String ecqmTitle;
   private String ecqmIdentifier;
   private String ecqmVersionNumber;
-  private String nqfNumber;
+  private String cbeNumber;
   private String guid;
   private String measurementPeriod;
   private boolean calendarYear;
@@ -38,6 +40,7 @@ public class HumanReadableMeasureInformationModel {
   private String rationale;
   private String clinicalRecommendationStatement;
   private String improvementNotation;
+  private List<Reference> references;
 
   private String definition;
   private String guidance;
