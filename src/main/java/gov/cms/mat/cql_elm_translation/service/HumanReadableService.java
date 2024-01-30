@@ -7,6 +7,7 @@ import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.models.measure.PopulationType;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadable;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadableCodeModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationCriteriaModel;
@@ -16,6 +17,7 @@ import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableDateUtil;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableUtil;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,11 +28,13 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.CollectionUtils;
 
 import java.io.IOException;
+import java.text.Collator;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
@@ -46,6 +50,7 @@ public class HumanReadableService {
 
   private final DataCriteriaService dataCriteriaService;
   private final CqlParsingService cqlParsingService;
+  private final Collator collator = Collator.getInstance(Locale.US);
 
   /**
    * Generates the QDM Human Readable HTML from a MADiE Measure.
@@ -54,12 +59,14 @@ public class HumanReadableService {
    * @return QDM Human Readable HTML
    */
   public String generate(Measure measure, String accessToken) {
+    collator.setStrength(Collator.PRIMARY);
     if (measure == null) {
       throw new IllegalArgumentException("Measure cannot be null.");
     }
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(measure.getCql(), accessToken);
+    List<CQLCode> cqlCodes = dataCriteriaService.getCQLCodes(measure.getCql(), accessToken);
 
     HumanReadable hr =
         HumanReadable.builder()
@@ -67,13 +74,16 @@ public class HumanReadableService {
             .populationCriteria(buildPopCriteria(measure))
             .definitions(buildDefinitions(measure, accessToken))
             .functions(buildFunctions(measure, accessToken))
-            .valuesetTerminologyList(buildValuesetTerminologyList(sourceDataCriteria))
-            .codeTerminologyList(buildCodeTerminologyList(sourceDataCriteria))
+            .valuesetDataCriteriaList(
+                buildValuesetDataCriteriaList(sourceDataCriteria, measure, accessToken))
+            .codeDataCriteriaList(buildCodeDataCriteriaList(cqlCodes))
             .build();
     hr.setValuesetAndCodeDataCriteriaList(
         Stream.concat(
-                hr.getValuesetTerminologyList().stream(), hr.getCodeTerminologyList().stream())
+                hr.getCodeDataCriteriaList().stream(), hr.getValuesetDataCriteriaList().stream())
             .toList());
+    hr.setValuesetTerminologyList(buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
+    hr.setCodeTerminologyList(buildCodeTerminologyList(hr.getCodeDataCriteriaList()));
     hr.setSupplementalDataElements(buildSupplementalDataElements(measure, hr.getDefinitions()));
     hr.setRiskAdjustmentVariables(buildRiskAdjustmentVariables(measure, hr.getDefinitions()));
     return generate(hr);
@@ -262,11 +272,14 @@ public class HumanReadableService {
     return usedFunctions != null && !usedFunctions.isEmpty() && usedFunctions.containsKey(id);
   }
 
-  List<HumanReadableTerminologyModel> buildValuesetTerminologyList(
-      List<SourceDataCriteria> sourceDataCriteria) {
+  List<HumanReadableValuesetModel> buildValuesetDataCriteriaList(
+      List<SourceDataCriteria> sourceDataCriteria, Measure measure, String accessToken) {
     List<SourceDataCriteria> valuesetsSourceDataCriteria =
         sourceDataCriteria.stream()
-            .filter(valueset -> StringUtils.isBlank(valueset.getCodeId()))
+            .filter(
+                valueset ->
+                    StringUtils.isBlank(valueset.getCodeId())
+                        && findUsedValueset(measure, accessToken, valueset.getName()))
             .collect(Collectors.toList());
     Set<HumanReadableValuesetModel> valuesets =
         valuesetsSourceDataCriteria.stream()
@@ -278,29 +291,52 @@ public class HumanReadableService {
                         "",
                         criteria.getDescription().split(":")[0]))
             .collect(Collectors.toSet());
-    List<HumanReadableTerminologyModel> valuesetList = new ArrayList<>(valuesets);
-    valuesetList.sort(Comparator.comparing(HumanReadableTerminologyModel::getDataCriteriaDisplay));
+    List<HumanReadableValuesetModel> valuesetList = new ArrayList<>(valuesets);
+    valuesetList.sort(
+        Comparator.comparing(HumanReadableValuesetModel::getDataCriteriaDisplay, collator));
+    return valuesetList;
+  }
+
+  boolean findUsedValueset(Measure measure, String accessToken, String id) {
+    List<String> usedValuesets =
+        dataCriteriaService.getUsedValuesets(measure.getCql(), accessToken);
+    return usedValuesets != null && !usedValuesets.isEmpty() && usedValuesets.contains(id);
+  }
+
+  List<HumanReadableCodeModel> buildCodeDataCriteriaList(List<CQLCode> cqlCodes) {
+    if (!CollectionUtils.isEmpty(cqlCodes)) {
+      List<HumanReadableCodeModel> codeList =
+          cqlCodes.stream()
+              .map(
+                  cqlCode ->
+                      HumanReadableCodeModel.builder()
+                          .name(cqlCode.getCodeName())
+                          .oid(cqlCode.getCodeOID())
+                          .codesystemName(cqlCode.getCodeSystemName())
+                          .codesystemVersion(cqlCode.getCodeSystemVersion())
+                          .isCodesystemVersionIncluded(cqlCode.isIsCodeSystemVersionIncluded())
+                          .datatype(cqlCode.getCodeIdentifier()) // ???
+                          .build())
+              .collect(Collectors.toList());
+      codeList.sort(Comparator.comparing(HumanReadableCodeModel::getDataCriteriaDisplay, collator));
+      return codeList;
+    }
+    return new ArrayList<>();
+  }
+
+  List<HumanReadableTerminologyModel> buildValuesetTerminologyList(
+      List<HumanReadableValuesetModel> valuesetModel) {
+    List<HumanReadableTerminologyModel> valuesetList = new ArrayList<>(valuesetModel);
+    valuesetList.sort(
+        Comparator.comparing(HumanReadableTerminologyModel::getTerminologyDisplay, collator));
     return valuesetList;
   }
 
   List<HumanReadableTerminologyModel> buildCodeTerminologyList(
-      List<SourceDataCriteria> sourceDataCriteria) {
-    List<SourceDataCriteria> codeSourceDataCriteria =
-        sourceDataCriteria.stream()
-            .filter(valueset -> StringUtils.isNotBlank(valueset.getCodeId()))
-            .collect(Collectors.toList());
-    Set<HumanReadableValuesetModel> codes =
-        codeSourceDataCriteria.stream()
-            .map(
-                criteria ->
-                    new HumanReadableValuesetModel(
-                        criteria.getTitle(),
-                        criteria.getOid(),
-                        "",
-                        criteria.getDescription().split(":")[0]))
-            .collect(Collectors.toSet());
-    List<HumanReadableTerminologyModel> codeList = new ArrayList<>(codes);
-    codeList.sort(Comparator.comparing(HumanReadableTerminologyModel::getDataCriteriaDisplay));
+      List<HumanReadableCodeModel> codeModel) {
+    List<HumanReadableTerminologyModel> codeList = new ArrayList<>(codeModel);
+    codeList.sort(
+        Comparator.comparing(HumanReadableTerminologyModel::getTerminologyDisplay, collator));
     return codeList;
   }
 

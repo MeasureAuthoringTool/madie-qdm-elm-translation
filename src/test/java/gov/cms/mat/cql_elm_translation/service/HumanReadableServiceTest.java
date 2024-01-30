@@ -5,12 +5,14 @@ import gov.cms.madie.models.common.ModelType;
 import gov.cms.madie.models.common.Organization;
 import gov.cms.madie.models.common.Version;
 import gov.cms.madie.models.measure.*;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadableCodeModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationCriteriaModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
-import gov.cms.madie.qdm.humanreadable.model.HumanReadableTerminologyModel;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 import org.junit.jupiter.api.BeforeEach;
@@ -20,6 +22,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.text.Collator;
 import java.text.DateFormat;
 import java.util.Arrays;
 import java.util.Date;
@@ -47,6 +50,7 @@ class HumanReadableServiceTest {
 
   @Mock DataCriteriaService dataCriteriaService;
   @Mock CqlParsingService cqlParsingService;
+  @Mock Collator collator;
 
   private QdmMeasure measure;
   private final Date now = new Date();
@@ -361,27 +365,57 @@ class HumanReadableServiceTest {
   }
 
   @Test
-  public void testBuildValuesetTerminologyList() {
-    List<HumanReadableTerminologyModel> valueSetList =
-        humanReadableService.buildValuesetTerminologyList(
+  public void testBuildValuesetDataCriteriaList() {
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
+        .thenReturn(List.of("Opioid Antagonist", "Encounter Inpatient", "Ethnicity"));
+
+    List<HumanReadableValuesetModel> result =
+        humanReadableService.buildValuesetDataCriteriaList(
             List.of(
-                sourceDataCriteria1,
-                sourceDataCriteria2,
-                sourceDataCriteria3,
-                sourceDataCriteria4));
-    assertThat(valueSetList.size(), is(equalTo(3)));
+                sourceDataCriteria1, sourceDataCriteria2, sourceDataCriteria3, sourceDataCriteria4),
+            measure,
+            "accessToken");
+    assertThat(result.size(), is(equalTo(3)));
   }
 
   @Test
-  public void testBuildCodeTerminologyList() {
-    List<HumanReadableTerminologyModel> valueSetList =
-        humanReadableService.buildCodeTerminologyList(
+  public void testBuildValuesetDataCriteriaListNullUsedValuesets() {
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString())).thenReturn(null);
+
+    List<HumanReadableValuesetModel> result =
+        humanReadableService.buildValuesetDataCriteriaList(
             List.of(
-                sourceDataCriteria1,
-                sourceDataCriteria2,
-                sourceDataCriteria3,
-                sourceDataCriteria4));
-    assertThat(valueSetList.size(), is(equalTo(1)));
+                sourceDataCriteria1, sourceDataCriteria2, sourceDataCriteria3, sourceDataCriteria4),
+            measure,
+            "accessToken");
+    assertThat(result.size(), is(equalTo(0)));
+  }
+
+  @Test
+  public void testBuildValuesetDataCriteriaListEmptyUsedValuesets() {
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString())).thenReturn(List.of());
+
+    List<HumanReadableValuesetModel> result =
+        humanReadableService.buildValuesetDataCriteriaList(
+            List.of(
+                sourceDataCriteria1, sourceDataCriteria2, sourceDataCriteria3, sourceDataCriteria4),
+            measure,
+            "accessToken");
+    assertThat(result.size(), is(equalTo(0)));
+  }
+
+  @Test
+  public void testBuildValuesetDataCriteriaListNotFound() {
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
+        .thenReturn(List.of("different value set"));
+
+    List<HumanReadableValuesetModel> result =
+        humanReadableService.buildValuesetDataCriteriaList(
+            List.of(
+                sourceDataCriteria1, sourceDataCriteria2, sourceDataCriteria3, sourceDataCriteria4),
+            measure,
+            "accessToken");
+    assertThat(result.size(), is(equalTo(0)));
   }
 
   @Test
@@ -444,5 +478,19 @@ class HumanReadableServiceTest {
         humanReadableService.findUsedFunction(measure, "accessToken", "another testId");
 
     assertFalse(result);
+  }
+
+  @Test
+  public void testBuildCodeDataCriteriaList() {
+    CQLCode cqlCode = CQLCode.builder().build();
+    List<HumanReadableCodeModel> result =
+        humanReadableService.buildCodeDataCriteriaList(List.of(cqlCode));
+    assertThat(result.size(), is(equalTo(1)));
+  }
+
+  @Test
+  public void testBuildCodeDataCriteriaListNull() {
+    List<HumanReadableCodeModel> result = humanReadableService.buildCodeDataCriteriaList(List.of());
+    assertThat(result.size(), is(equalTo(0)));
   }
 }

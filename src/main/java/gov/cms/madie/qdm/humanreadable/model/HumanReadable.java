@@ -17,7 +17,7 @@ public class HumanReadable {
   private List<HumanReadableExpressionModel> riskAdjustmentVariables;
   private List<HumanReadableTerminologyModel> codeTerminologyList;
   private List<HumanReadableTerminologyModel> valuesetTerminologyList;
-  // private List<HumanReadableCodeModel> codeDataCriteriaList;
+  private List<HumanReadableCodeModel> codeDataCriteriaList;
   private List<HumanReadableValuesetModel> valuesetDataCriteriaList;
   private List<HumanReadableTerminologyModel> valuesetAndCodeDataCriteriaList;
   private List<HumanReadableExpressionModel> definitions;
