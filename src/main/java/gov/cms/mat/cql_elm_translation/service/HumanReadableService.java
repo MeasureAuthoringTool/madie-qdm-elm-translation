@@ -103,17 +103,23 @@ public class HumanReadableService {
                 ? measure.getMeasureMetaData().getMeasureDefinitions()
                 : null)
         .references(
-            measure.getMeasureMetaData().getReferences().stream()
-                .map(
-                    reference ->
-                        new Reference()
-                            .toBuilder()
-                                .id(reference.getId())
-                                .referenceText(escapeStr(reference.getReferenceText()))
-                                .referenceType(reference.getReferenceType())
-                                .build())
-                .collect(Collectors.toList()))
+            measure.getMeasureMetaData().getReferences() != null
+                ? buildReferences(measure.getMeasureMetaData().getReferences())
+                : null)
         .build();
+  }
+
+  private List<Reference> buildReferences(List<Reference> references) {
+    return references.stream()
+        .map(
+            reference ->
+                new Reference()
+                    .toBuilder()
+                        .id(reference.getId())
+                        .referenceText(htmlEscape(reference.getReferenceText()))
+                        .referenceType(reference.getReferenceType())
+                        .build())
+        .collect(Collectors.toList());
   }
 
   List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
@@ -144,12 +150,5 @@ public class HumanReadableService {
 
   List<HumanReadableExpressionModel> buildDefinitions(Measure measure) {
     return List.of(new HumanReadableExpressionModel());
-  }
-
-  private String escapeStr(String val) {
-    if (val != null && !val.isEmpty()) {
-      return htmlEscape(val);
-    }
-    return val;
   }
 }
