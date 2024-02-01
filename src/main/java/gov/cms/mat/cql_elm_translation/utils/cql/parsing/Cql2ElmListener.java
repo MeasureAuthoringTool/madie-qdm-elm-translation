@@ -304,7 +304,7 @@ public class Cql2ElmListener extends cqlBaseListener {
       valueSetOids.putIfAbsent(
           formattedIdentifier, ((ValueSetDef) element).getId().substring("urn:oid:".length()));
 
-    } else if (element instanceof CodeDef) {
+    } else if (element instanceof CodeDef codeDef) {
       Map<String, Set<String>> current = codeDataTypeMap.get(currentContext);
       if (current == null) {
         codeDataTypeMap.put(currentContext, new HashMap<>());
@@ -321,9 +321,9 @@ public class Cql2ElmListener extends cqlBaseListener {
       drcs.putIfAbsent(
           formattedIdentifier,
           CQLCode.builder()
-              .id(((CodeDef) element).getId())
+              .id(codeDef.getId())
               .codeName(formattedIdentifier)
-              .codeSystemName(((CodeDef) element).getCodeSystem().getName())
+              .codeSystemName(codeDef.getCodeSystem().getName())
               .build());
     }
   }
@@ -467,8 +467,7 @@ public class Cql2ElmListener extends cqlBaseListener {
         null; // we've done all we need to do with the accessor, so set it equal to null so it can
     // be
     // updated again if need be.
-    if (element instanceof IncludeDef) {
-      IncludeDef def = (IncludeDef) element;
+    if (element instanceof IncludeDef def) {
       graph.addEdge(
           currentContext, def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
       libraryAccessor = def;
@@ -481,7 +480,7 @@ public class Cql2ElmListener extends cqlBaseListener {
           e.printStackTrace();
         }
       }
-    } else if (element instanceof CodeDef) {
+    } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
       graph.addEdge(currentContext, formattedIdentifier);
     } else if (element instanceof CodeSystemDef) {
