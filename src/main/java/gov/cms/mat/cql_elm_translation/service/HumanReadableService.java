@@ -4,6 +4,7 @@ import freemarker.template.Template;
 import freemarker.template.TemplateException;
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.Reference;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadable;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
@@ -21,6 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import static org.springframework.web.util.HtmlUtils.htmlEscape;
 
 @Component
 @AllArgsConstructor
@@ -74,6 +77,7 @@ public class HumanReadableService {
   }
 
   HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
+
     // TODO Needs safety checks
     return HumanReadableMeasureInformationModel.builder()
         .qdmVersion(5.6) // TODO Replace hardcode
@@ -98,7 +102,24 @@ public class HumanReadableService {
             measure.getMeasureMetaData() != null
                 ? measure.getMeasureMetaData().getMeasureDefinitions()
                 : null)
+        .references(
+            measure.getMeasureMetaData().getReferences() != null
+                ? buildReferences(measure.getMeasureMetaData().getReferences())
+                : null)
         .build();
+  }
+
+  private List<Reference> buildReferences(List<Reference> references) {
+    return references.stream()
+        .map(
+            reference ->
+                new Reference()
+                    .toBuilder()
+                        .id(reference.getId())
+                        .referenceText(htmlEscape(reference.getReferenceText()))
+                        .referenceType(reference.getReferenceType())
+                        .build())
+        .collect(Collectors.toList());
   }
 
   List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {

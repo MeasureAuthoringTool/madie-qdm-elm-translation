@@ -21,8 +21,7 @@ import java.util.List;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(MockitoExtension.class)
 class HumanReadableServiceTest {
@@ -58,6 +57,18 @@ class HumanReadableServiceTest {
                         List.of(
                             Organization.builder().name("org1").build(),
                             Organization.builder().name("org2").build()))
+                    .references(
+                        List.of(
+                            Reference.builder()
+                                .id("ref-123")
+                                .referenceType("Citation")
+                                .referenceText("Example Citation Reference Text")
+                                .build(),
+                            Reference.builder()
+                                .id("ref-xyz")
+                                .referenceType("Justification")
+                                .referenceText("Example < Justification Reference Text")
+                                .build()))
                     .steward(Organization.builder().name("stewardOrg").build())
                     .measureDefinitions(
                         List.of(
@@ -141,6 +152,29 @@ class HumanReadableServiceTest {
     assertThat(
         measureInfoModel.getDefinitions().get(0).getDefinition(),
         equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
+    assertEquals(
+        measure.getMeasureMetaData().getReferences().get(0),
+        measureInfoModel.getReferences().get(0));
+    // assertNotEquals as the "<" will be escaped and replaced by &lt
+    assertNotEquals(
+        measure.getMeasureMetaData().getReferences().get(1),
+        measureInfoModel.getReferences().get(1));
+  }
+
+  @Test
+  public void testBuildMeasureInfoWhenReferenceIsNull() {
+    measure.getMeasureMetaData().setReferences(null);
+    HumanReadableMeasureInformationModel measureInfoModel =
+        humanReadableService.buildMeasureInfo(measure);
+    assertNull(measureInfoModel.getReferences());
+  }
+
+  @Test
+  public void testBuildMeasureInfoWhenReferenceTextIsEmpty() {
+    measure.getMeasureMetaData().getReferences().get(0).setReferenceText("");
+    HumanReadableMeasureInformationModel measureInfoModel =
+        humanReadableService.buildMeasureInfo(measure);
+    assertEquals("", measureInfoModel.getReferences().get(0).getReferenceText());
   }
 
   @Test
