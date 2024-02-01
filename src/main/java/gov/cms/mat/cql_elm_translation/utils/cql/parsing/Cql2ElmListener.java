@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -79,6 +80,9 @@ public class Cql2ElmListener extends cqlBaseListener {
   @Getter private final Map<String, Map<String, Set<String>>> valueSetDataTypeMap = new HashMap<>();
   @Getter private final Map<String, Map<String, Set<String>>> codeDataTypeMap = new HashMap<>();
 
+  @Getter private final Map<String, CQLCodeSystem> codeSystemMap = new HashMap<>();
+  @Getter private final Set<CQLCode> declaredCodes = new HashSet<>();
+
   private final Stack<String> namespace = new Stack<>();
 
   @Getter private final CQLGraph graph;
@@ -116,6 +120,20 @@ public class Cql2ElmListener extends cqlBaseListener {
     }
 
     return this.library;
+  }
+
+  @Override
+  public void enterCodesystemDefinition(cqlParser.CodesystemDefinitionContext ctx) {
+    String identifier = parseString(ctx.identifier().getText());
+
+    if (library.resolve(identifier) instanceof CodeSystemDef csDef) {
+      CQLCodeSystem codeSystem = new CQLCodeSystem();
+      codeSystem.setId(csDef.getId());
+      codeSystem.setOID(csDef.getId());
+      codeSystem.setCodeSystemName(csDef.getName());
+
+      codeSystemMap.putIfAbsent(identifier, codeSystem);
+    }
   }
 
   @Override
