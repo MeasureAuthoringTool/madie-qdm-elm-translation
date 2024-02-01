@@ -482,6 +482,14 @@ public class Cql2ElmListener extends cqlBaseListener {
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
+      CQLCode declaredCode =
+          CQLCode.builder()
+              .id(codeDef.getId())
+              .codeName(codeDef.getDisplay())
+              .codeSystemName(codeDef.getCodeSystem().getName())
+              .codeSystemOID(codeSystemMap.get(codeDef.getCodeSystem().getName()).getOID())
+              .build();
+      declaredCodes.add(declaredCode);
       graph.addEdge(currentContext, formattedIdentifier);
     } else if (element instanceof CodeSystemDef) {
       codesystems.add(identifier);
