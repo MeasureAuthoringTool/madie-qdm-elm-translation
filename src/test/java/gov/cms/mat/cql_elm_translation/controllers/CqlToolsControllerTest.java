@@ -56,12 +56,11 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   @Mock private CqlParsingService cqlParsingService;
   @Mock private CqlFormatterVisitor cqlFormatterVisitor;
 
-  private CQLDefinition definition1;
   private Set<CQLDefinition> allDefinitions;
 
   @BeforeEach
   void setUp() {
-    definition1 =
+    CQLDefinition definition1 =
         CQLDefinition.builder()
             .id("Initial Population")
             .definitionName("Initial Population")

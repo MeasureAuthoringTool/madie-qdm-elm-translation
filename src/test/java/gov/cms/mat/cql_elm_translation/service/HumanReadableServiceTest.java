@@ -57,9 +57,6 @@ class HumanReadableServiceTest {
   private QdmMeasure measure;
   private final Date now = new Date();
   private Set<CQLDefinition> allDefinitions;
-  private CQLDefinition definition1;
-  private CQLDefinition definition2;
-  private CQLDefinition definition3;
   private CQLDefinition function;
   private Set<String> usedFunctionIds;
 
@@ -164,7 +161,7 @@ class HumanReadableServiceTest {
                         .build()))
             .build();
 
-    definition1 =
+    CQLDefinition definition1 =
         CQLDefinition.builder()
             .id("Initial Population")
             .definitionName("Initial Population")
@@ -172,7 +169,7 @@ class HumanReadableServiceTest {
             .definitionLogic(
                 "define \"Initial Population\":\n  \"Encounter with Opioid Administration Outside of Operating Room\"")
             .build();
-    definition2 =
+    CQLDefinition definition2 =
         CQLDefinition.builder()
             .id("Opioid Administration")
             .definitionName("Opioid Administration")
@@ -180,7 +177,7 @@ class HumanReadableServiceTest {
                 "define \"Opioid Administration\":\n  [\"Medication, Administered\": \"Opioids, All\"]")
             .parentLibrary(null)
             .build();
-    definition3 =
+    CQLDefinition definition3 =
         CQLDefinition.builder()
             .id("SDE Ethnicity")
             .definitionName("SDE Ethnicity")

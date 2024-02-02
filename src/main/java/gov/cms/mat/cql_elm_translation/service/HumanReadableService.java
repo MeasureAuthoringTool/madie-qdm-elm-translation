@@ -243,7 +243,7 @@ public class HumanReadableService {
         allDefinitions.stream()
             .filter(
                 definition ->
-                    definition.isFunction() == true
+                    definition.isFunction()
                         && findUsedFunction(measure, accessToken, definition.getId()))
             .collect(Collectors.toList());
 
