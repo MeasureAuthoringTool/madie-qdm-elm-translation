@@ -1,21 +1,8 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-
-import org.hl7.fhir.r4.model.Bundle.BundleEntryComponent;
-import org.hl7.fhir.r4.model.Resource;
-import org.junit.jupiter.api.BeforeEach;
+import gov.cms.mat.cql_elm_translation.dto.CqlLibraryDetails;
+import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
+import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,9 +13,18 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
-import ca.uhn.fhir.context.FhirContext;
-import ca.uhn.fhir.parser.JsonParser;
-import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({EffectiveDataRequirementController.class})
 class EffectiveDataRequirementControllerMVCTest {
@@ -39,146 +35,45 @@ class EffectiveDataRequirementControllerMVCTest {
 
   @MockBean EffectiveDataRequirementService effectiveDataRequirementService;
 
-  @MockBean private FhirContext fhirContextForR5;
-
-  @Mock JsonParser jsonParser;
-
   @Mock org.hl7.fhir.r5.model.Library r5Libray;
 
-  @Mock org.hl7.fhir.r4.model.Bundle bundle;
-  @Mock BundleEntryComponent entryComponent;
-  @Mock BundleEntryComponent measureEntryComponent;
-  @Mock Resource measureResource;
-  @Mock BundleEntryComponent libraryEntryComponent;
-  @Mock org.hl7.fhir.r4.model.Library library;
-  @Mock org.hl7.fhir.r5.model.Measure r5Measure;
-  private List<BundleEntryComponent> entries = new ArrayList<>();
-
-  @BeforeEach
-  void setUp() {
-
-    when(fhirContextForR5.newJsonParser()).thenReturn(jsonParser);
-
-    entries.add(measureEntryComponent);
-    entries.add(libraryEntryComponent);
-  }
-
   @Test
-  public void testGetEffectiveDataRequirementsThrowsExceptionWhenBundleIsNull() throws Exception {
-    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
-        .thenReturn(null);
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.put("/effective-data-requirements")
-                .with(user(TEST_USER_ID))
-                .with(csrf())
-                .header(HttpHeaders.AUTHORIZATION, "test-okta")
-                .content("testBundleStr")
-                .param("libraryName", "CMS104")
-                .param("measureId", "CMS104")
-                .contentType(MediaType.TEXT_PLAIN_VALUE))
-        .andExpect(status().is4xxClientError());
-    verify(effectiveDataRequirementService, times(1))
-        .createFhirResourceFromJson(anyString(), any());
-  }
-
-  @Test
-  public void testGetEffectiveDataRequirementsThrowsExceptionWhenBundleEntryIsNull()
+  public void testGetEffectiveDataRequirementsThrowsExceptionWhenLibraryDetailsIsnull()
       throws Exception {
-    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
-        .thenReturn(bundle);
-    when(bundle.getEntry()).thenReturn(new ArrayList<>());
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.put("/effective-data-requirements")
-                .with(user(TEST_USER_ID))
-                .with(csrf())
-                .header(HttpHeaders.AUTHORIZATION, "test-okta")
-                .content("testBundleStr")
-                .param("libraryName", "CMS104")
-                .param("measureId", "CMS104")
-                .contentType(MediaType.TEXT_PLAIN_VALUE))
-        .andExpect(status().is4xxClientError());
-    verify(effectiveDataRequirementService, times(1))
-        .createFhirResourceFromJson(anyString(), any());
+    var results =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.put("/effective-data-requirements")
+                    .with(user(TEST_USER_ID))
+                    .with(csrf())
+                    .header(HttpHeaders.AUTHORIZATION, "test-okta")
+                    .param("recursive", "true")
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+    assertThat(results.getResponse().getStatus(), is(equalTo(HttpStatus.SC_BAD_REQUEST)));
   }
 
   @Test
-  public void testGetEffectiveDataRequirementsThrowsExceptionWhenMeasureEntryIsNull()
-      throws Exception {
-    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
-        .thenReturn(bundle);
-    when(bundle.getEntry()).thenReturn(entries);
-    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
-        .thenReturn(Optional.empty());
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.put("/effective-data-requirements")
-                .with(user(TEST_USER_ID))
-                .with(csrf())
-                .header(HttpHeaders.AUTHORIZATION, "test-okta")
-                .content("testBundleStr")
-                .param("libraryName", "CMS104")
-                .param("measureId", "CMS104")
-                .contentType(MediaType.TEXT_PLAIN_VALUE))
-        .andExpect(status().is4xxClientError());
-    verify(effectiveDataRequirementService, times(1))
-        .createFhirResourceFromJson(anyString(), any());
-    verify(effectiveDataRequirementService, times(1))
-        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
-  }
-
-  @Test
-  public void testGetEffectiveDataRequirementsThrowsExceptionWhenLibraryEntryIsNull()
-      throws Exception {
-    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
-        .thenReturn(bundle);
-    when(bundle.getEntry()).thenReturn(entries);
-    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
-        .thenReturn(Optional.of(measureEntryComponent));
-    when(measureEntryComponent.getResource()).thenReturn(measureResource);
-    when(effectiveDataRequirementService.getMeasureLibraryEntry(
-            any(org.hl7.fhir.r4.model.Bundle.class), anyString()))
-        .thenReturn(Optional.empty());
-
-    mockMvc
-        .perform(
-            MockMvcRequestBuilders.put("/effective-data-requirements")
-                .with(user(TEST_USER_ID))
-                .with(csrf())
-                .header(HttpHeaders.AUTHORIZATION, "test-okta")
-                .content("testBundleStr")
-                .param("libraryName", "CMS104")
-                .param("measureId", "CMS104")
-                .contentType(MediaType.TEXT_PLAIN_VALUE))
-        .andExpect(status().is4xxClientError());
-    verify(effectiveDataRequirementService, times(1))
-        .createFhirResourceFromJson(anyString(), any());
-    verify(effectiveDataRequirementService, times(1))
-        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
-    verify(effectiveDataRequirementService, times(1))
-        .getMeasureLibraryEntry(any(org.hl7.fhir.r4.model.Bundle.class), anyString());
+  public void testGetEffectiveDataRequirementsThrowsExceptionWhenCqlIsNull() throws Exception {
+    var results =
+        mockMvc
+            .perform(
+                MockMvcRequestBuilders.put("/effective-data-requirements")
+                    .with(user(TEST_USER_ID))
+                    .with(csrf())
+                    .header(HttpHeaders.AUTHORIZATION, "test-okta")
+                    .content("{\"cql\": null, \"libraryName\": \"Test\", \"expressions\": []}")
+                    .contentType(MediaType.APPLICATION_JSON_VALUE))
+            .andExpect(status().is4xxClientError())
+            .andReturn();
+    assertThat(results.getResponse().getStatus(), is(equalTo(HttpStatus.SC_BAD_REQUEST)));
   }
 
   @Test
   public void testGetEffectiveDataRequirementsSuccess() throws Exception {
-
-    when(effectiveDataRequirementService.createFhirResourceFromJson(anyString(), any()))
-        .thenReturn(bundle);
-    when(bundle.getEntry()).thenReturn(entries);
-    when(effectiveDataRequirementService.getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class)))
-        .thenReturn(Optional.of(measureEntryComponent));
-    when(measureEntryComponent.getResource()).thenReturn(measureResource);
-    when(effectiveDataRequirementService.getMeasureLibraryEntry(
-            any(org.hl7.fhir.r4.model.Bundle.class), anyString()))
-        .thenReturn(Optional.of(libraryEntryComponent));
-    when(libraryEntryComponent.getResource()).thenReturn(library);
-    when(effectiveDataRequirementService.getR5MeasureFromR4MeasureResource(any(Resource.class)))
-        .thenReturn(r5Measure);
     when(effectiveDataRequirementService.getEffectiveDataRequirements(
-            any(org.hl7.fhir.r5.model.Measure.class),
-            any(org.hl7.fhir.r4.model.Library.class),
-            anyString()))
+            any(CqlLibraryDetails.class), anyBoolean(), anyString()))
         .thenReturn(r5Libray);
     when(effectiveDataRequirementService.getEffectiveDataRequirementsStr(
             any(org.hl7.fhir.r5.model.Library.class)))
@@ -189,19 +84,12 @@ class EffectiveDataRequirementControllerMVCTest {
                 .with(user(TEST_USER_ID))
                 .with(csrf())
                 .header(HttpHeaders.AUTHORIZATION, "test-okta")
-                .content("testBundleStr")
-                .param("libraryName", "testLibraryName")
-                .param("measureId", "testMeasureId")
-                .contentType(MediaType.TEXT_PLAIN_VALUE))
+                .content("{\"cql\": \"Test CQL\", \"libraryName\": \"Test\", \"expressions\": []}")
+                .contentType(MediaType.APPLICATION_JSON_VALUE))
         .andExpect(status().isOk());
     verify(effectiveDataRequirementService, times(1))
-        .getMeasureEntry(any(org.hl7.fhir.r4.model.Bundle.class));
+        .getEffectiveDataRequirements(any(CqlLibraryDetails.class), anyBoolean(), anyString());
     verify(effectiveDataRequirementService, times(1))
-        .getMeasureLibraryEntry(any(org.hl7.fhir.r4.model.Bundle.class), anyString());
-    verify(effectiveDataRequirementService, times(1))
-        .getEffectiveDataRequirements(
-            any(org.hl7.fhir.r5.model.Measure.class),
-            any(org.hl7.fhir.r4.model.Library.class),
-            anyString());
+        .getEffectiveDataRequirementsStr(any(org.hl7.fhir.r5.model.Library.class));
   }
 }

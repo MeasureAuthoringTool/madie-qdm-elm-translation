@@ -182,6 +182,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Test
   void testGetTranslatedLibrariesForCqlForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
     List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
     AtomicBoolean foundAMatch = new AtomicBoolean();
     libraries.forEach(
