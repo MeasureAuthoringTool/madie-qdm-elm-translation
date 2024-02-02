@@ -258,51 +258,17 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
   @Test
   void testGetUsedValuesets() {
-    String cql =
-        "library DRCTest version '0.0.000'\n"
-            + "using QDM version '5.6'\n"
-            + "codesystem \"LOINC\": 'urn:oid:2.16.840.1.113883.6.1'\n"
-            + "valueset \"Palliative Care Encounter\": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1090'\n"
-            + "code \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\": '71007-9' from \"LOINC\" display 'Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)'\n"
-            + "parameter \"Measurement Period\" Interval<DateTime>\n"
-            + "context Patient\n"
-            + "define \"Palliative Care in the Measurement Period\":\n"
-            + "( [\"Encounter, Performed\": \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\"]\n"
-            + ")";
-
-    RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
-
     Mockito.doNothing()
         .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
 
     List<String> valuesets = dataCriteriaService.getUsedValuesets(cql, token);
 
-    assertThat(valuesets.size(), is(equalTo(1)));
+    assertThat(valuesets.size(), is(equalTo(2)));
   }
 
   @Test
   void testGetCQLCodes() {
-    String cql =
-        "library DRCTest version '0.0.000'\n"
-            + "using QDM version '5.6'\n"
-            + "codesystem \"LOINC\": 'urn:oid:2.16.840.1.113883.6.1'\n"
-            + "valueset \"Palliative Care Encounter\": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1090'\n"
-            + "code \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\": '71007-9' from \"LOINC\" display 'Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)'\n"
-            + "parameter \"Measurement Period\" Interval<DateTime>\n"
-            + "context Patient\n"
-            + "define \"Palliative Care in the Measurement Period\":\n"
-            + "( [\"Encounter, Performed\": \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\"]\n"
-            + ")";
-
-    RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
-
     Mockito.doNothing()
         .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());

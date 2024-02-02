@@ -79,9 +79,7 @@ public class HumanReadableService {
             .codeDataCriteriaList(buildCodeDataCriteriaList(cqlCodes))
             .build();
     hr.setValuesetAndCodeDataCriteriaList(
-        Stream.concat(
-                hr.getCodeDataCriteriaList().stream(), hr.getValuesetDataCriteriaList().stream())
-            .toList());
+        buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
     hr.setValuesetTerminologyList(buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
     hr.setCodeTerminologyList(buildCodeTerminologyList(hr.getCodeDataCriteriaList()));
     hr.setSupplementalDataElements(buildSupplementalDataElements(measure, hr.getDefinitions()));
@@ -144,8 +142,6 @@ public class HumanReadableService {
         .supplementalDataElements(measure.getSupplementalDataDescription())
         .rateAggregation(((QdmMeasure) measure).getRateAggregation())
         .improvementNotation(((QdmMeasure) measure).getImprovementNotation())
-        .references(measure.getMeasureMetaData().getReferences())
-        .definition(HumanReadableUtil.getDefinitions(measure))
         .guidance(measure.getMeasureMetaData().getGuidance())
         .transmissionFormat(measure.getMeasureMetaData().getTransmissionFormat())
         .initialPopulation(
@@ -164,6 +160,8 @@ public class HumanReadableService {
         .denominatorExceptions(
             HumanReadableUtil.getPopulationDescription(
                 measure, PopulationType.DENOMINATOR_EXCEPTION.name()))
+        .definitions(HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData()))
+        .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
         .build();
   }
 
@@ -311,7 +309,7 @@ public class HumanReadableService {
                   cqlCode ->
                       HumanReadableCodeModel.builder()
                           .name(cqlCode.getCodeName())
-                          .oid(cqlCode.getCodeOID())
+                          .oid(cqlCode.getId())
                           .codesystemName(cqlCode.getCodeSystemName())
                           .codesystemVersion(cqlCode.getCodeSystemVersion())
                           .isCodesystemVersionIncluded(cqlCode.isIsCodeSystemVersionIncluded())

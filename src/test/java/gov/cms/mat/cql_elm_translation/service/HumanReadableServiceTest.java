@@ -35,7 +35,9 @@ import java.util.Set;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -69,7 +71,6 @@ class HumanReadableServiceTest {
   @BeforeEach
   void setUp() {
     measure =
-        //        Measure.builder()
         QdmMeasure.builder()
             .id("1234")
             .model(ModelType.QDM_5_6.getValue())
@@ -94,16 +95,26 @@ class HumanReadableServiceTest {
                         List.of(
                             Organization.builder().name("org1").build(),
                             Organization.builder().name("org2").build()))
-                    .steward(Organization.builder().name("stewardOrg").build())
                     .references(
                         List.of(
                             Reference.builder()
-                                .id("test reference id")
-                                .referenceType("CITATION")
-                                .referenceText("test reference citation")
+                                .id("ref-123")
+                                .referenceType("Citation")
+                                .referenceText("Example Citation Reference Text")
+                                .build(),
+                            Reference.builder()
+                                .id("ref-xyz")
+                                .referenceType("Justification")
+                                .referenceText("Example < Justification Reference Text")
                                 .build()))
+                    .steward(Organization.builder().name("stewardOrg").build())
                     .measureDefinitions(
-                        List.of(MeasureDefinition.builder().definition("test definition").build()))
+                        List.of(
+                            MeasureDefinition.builder()
+                                .id("testMeasureDefinitionId")
+                                .term("test term")
+                                .definition("test definition")
+                                .build()))
                     .endorsements(
                         List.of(
                             Endorsement.builder()
@@ -290,7 +301,7 @@ class HumanReadableServiceTest {
         measureInfoModel.getReferences().size(),
         equalTo(measure.getMeasureMetaData().getReferences().size()));
     assertThat(
-        measureInfoModel.getDefinition(),
+        measureInfoModel.getDefinitions().get(0).getDefinition(),
         equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
     assertThat(measureInfoModel.getGuidance(), equalTo(measure.getMeasureMetaData().getGuidance()));
     assertThat(
@@ -304,13 +315,47 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildMeasureInfoSomeMeasureMetaDataNull() {
     measure.getMeasureMetaData().setSteward(null);
-    measure.getMeasureMetaData().setReferences(null);
     measure.getMeasureMetaData().setGuidance(null);
     HumanReadableMeasureInformationModel measureInfoModel =
         humanReadableService.buildMeasureInfo(measure);
     assertNull(measureInfoModel.getMeasureSteward());
-    assertNull(measureInfoModel.getReferences());
     assertNull(measureInfoModel.getGuidance());
+
+    assertThat(
+        measureInfoModel.getDefinitions().size(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().size()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getId(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getId()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getTerm(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getTerm()));
+    assertThat(
+        measureInfoModel.getDefinitions().get(0).getDefinition(),
+        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
+    assertEquals(
+        measure.getMeasureMetaData().getReferences().get(0),
+        measureInfoModel.getReferences().get(0));
+    // assertNotEquals as the "<" will be escaped and replaced by &lt
+    assertNotEquals(
+        measure.getMeasureMetaData().getReferences().get(1),
+        measureInfoModel.getReferences().get(1));
+  }
+
+  @Test
+  public void testBuildMeasureInfoWhenReferenceIsNull() {
+    measure.getMeasureMetaData().setReferences(null);
+    HumanReadableMeasureInformationModel measureInfoModel =
+        humanReadableService.buildMeasureInfo(measure);
+    assertNull(measureInfoModel.getReferences());
+  }
+
+  @Test
+  public void testBuildMeasureInfoWhenReferenceTextIsEmpty() {
+    measure.getMeasureMetaData().getReferences().get(0).setReferenceText("");
+    HumanReadableMeasureInformationModel measureInfoModel =
+        humanReadableService.buildMeasureInfo(measure);
+    assertEquals("", measureInfoModel.getReferences().get(0).getReferenceText());
   }
 
   @Test

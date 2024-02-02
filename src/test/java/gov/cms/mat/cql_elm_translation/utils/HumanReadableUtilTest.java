@@ -87,16 +87,30 @@ public class HumanReadableUtilTest {
   }
 
   @Test
-  void testGetDefinitionsMetaDataNull() {
+  void testBuildMeasureDefinitionsMetaDataNull() {
     measure.setMeasureMetaData(null);
-    var result = HumanReadableUtil.getDefinitions(measure);
+    var result = HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData());
     assertNull(result);
   }
 
   @Test
-  void testGetDefinitionsDefinitionsNull() {
+  void testBuildMeasureDefinitionsMeasureDefinitionsNull() {
     measure.setMeasureMetaData(MeasureMetaData.builder().build());
-    var result = HumanReadableUtil.getDefinitions(measure);
+    var result = HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData());
+    assertNull(result);
+  }
+
+  @Test
+  void testBuildReferencesMetaDataNull() {
+    measure.setMeasureMetaData(null);
+    var result = HumanReadableUtil.buildReferences(measure.getMeasureMetaData());
+    assertNull(result);
+  }
+
+  @Test
+  void testBuildReferencesMeasureDefinitionsNull() {
+    measure.setMeasureMetaData(MeasureMetaData.builder().build());
+    var result = HumanReadableUtil.buildReferences(measure.getMeasureMetaData());
     assertNull(result);
   }
 

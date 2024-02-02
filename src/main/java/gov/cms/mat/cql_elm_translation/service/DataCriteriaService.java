@@ -225,7 +225,7 @@ public class DataCriteriaService extends CqlTooling {
 
     List<CQLCode> cqlCodes = new ArrayList<>();
     // TODO
-    // cqlCodes = tools.getUsedCqlCodes();
+    // cqlCodes = tools.getUsedCodes();
 
     return cqlCodes;
   }

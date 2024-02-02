@@ -1,5 +1,7 @@
 package gov.cms.mat.cql_elm_translation.utils;
 
+import static org.springframework.web.util.HtmlUtils.htmlEscape;
+
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -9,7 +11,10 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.madie.models.measure.MeasureDefinition;
+import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.QdmMeasure;
+import gov.cms.madie.models.measure.Reference;
 
 public class HumanReadableUtil {
 
@@ -66,12 +71,34 @@ public class HumanReadableUtil {
     return null;
   }
 
-  public static String getDefinitions(Measure measure) {
-    if (measure.getMeasureMetaData() != null
-        && CollectionUtils.isNotEmpty(measure.getMeasureMetaData().getMeasureDefinitions())) {
-      return measure.getMeasureMetaData().getMeasureDefinitions().stream()
-          .map(definition -> definition.getDefinition())
-          .collect(Collectors.joining("\n"));
+  public static List<MeasureDefinition> buildMeasureDefinitions(MeasureMetaData measureMetaData) {
+    if (measureMetaData != null
+        && CollectionUtils.isNotEmpty(measureMetaData.getMeasureDefinitions())) {
+      return measureMetaData.getMeasureDefinitions().stream()
+          .map(
+              definition ->
+                  MeasureDefinition.builder()
+                      .id(definition.getId())
+                      .term(htmlEscape(definition.getTerm()))
+                      .definition(htmlEscape(definition.getDefinition()))
+                      .build())
+          .collect(Collectors.toList());
+    }
+    return null;
+  }
+
+  public static List<Reference> buildReferences(MeasureMetaData measureMetaData) {
+    if (measureMetaData != null && CollectionUtils.isNotEmpty(measureMetaData.getReferences())) {
+      return measureMetaData.getReferences().stream()
+          .map(
+              reference ->
+                  new Reference()
+                      .toBuilder()
+                          .id(reference.getId())
+                          .referenceText(htmlEscape(reference.getReferenceText()))
+                          .referenceType(reference.getReferenceType())
+                          .build())
+          .collect(Collectors.toList());
     }
     return null;
   }
