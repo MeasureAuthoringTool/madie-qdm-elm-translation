@@ -71,7 +71,7 @@ public class CQLTools {
 
   // used expression sets
   Set<String> usedLibraries = new HashSet<>();
-  Set<String> usedCodes = new HashSet<>();
+  Set<CQLCode> usedCodes = new HashSet<>();
   Set<String> usedValuesets = new HashSet<>();
   Set<String> usedParameters = new HashSet<>();
   Map<String, Set<String>> usedDefinitions = new HashMap<>();
@@ -147,6 +147,7 @@ public class CQLTools {
     Map<String, Map<String, Set<String>>> codeMap = new HashMap<>(listener.getCodeDataTypeMap());
     Map<String, String> valueSetOids = new HashMap<>(listener.getValueSetOids());
     Map<String, CQLCode> drcs = new HashMap<>(listener.getDrcs());
+    Set<CQLCode> declaredCodes = new HashSet<>(listener.getDeclaredCodes());
 
     collectUsedExpressions(
         graph,
@@ -156,7 +157,8 @@ public class CQLTools {
         codesystemsSet,
         parametersSet,
         definitionsSet,
-        functionsSet);
+        functionsSet,
+        declaredCodes);
     collectValueSetCodeDataType(valuesetMap, codeMap);
     collectReturnTypeMap();
     collectDataCriteria(valueSetOids, drcs);
@@ -190,7 +192,8 @@ public class CQLTools {
       Set<String> codesystemsSet,
       Set<String> parametersSet,
       Set<String> definitionsSet,
-      Set<String> functionsSet) {
+      Set<String> functionsSet,
+      Set<CQLCode> declaredCodes) {
     List<String> libraries = new ArrayList<>(librariesSet);
     List<String> valuesets = new ArrayList<>(valuesetsSet);
     List<String> codes = new ArrayList<>(codesSet);
@@ -202,7 +205,7 @@ public class CQLTools {
     for (String parentExpression : parentExpressions) {
       collectUsedLibraries(graph, libraries, parentExpression);
       collectUsedValuesets(graph, valuesets, parentExpression);
-      collectUsedCodes(graph, codes, parentExpression);
+      collectUsedCodes(graph, codes, parentExpression, declaredCodes);
       collectUsedCodeSystems(graph, codesystems, parentExpression);
       collectUsedParameters(graph, parameters, parentExpression);
       collectUsedDefinitions(graph, definitions, parentExpression);
@@ -285,10 +288,12 @@ public class CQLTools {
    * @param codes the code references from the listener
    * @param parentExpression the parent expression to check
    */
-  private void collectUsedCodes(CQLGraph graph, List<String> codes, String parentExpression) {
+  private void collectUsedCodes(
+      CQLGraph graph, List<String> codes, String parentExpression, Set<CQLCode> declaredCodes) {
     for (String code : codes) {
       if (graph.isPath(parentExpression, code)) {
-        usedCodes.add(code);
+        usedCodes.add(
+            declaredCodes.stream().filter(c -> c.getCodeName().equals(code)).findFirst().get());
       }
     }
   }
@@ -498,7 +503,7 @@ public class CQLTools {
     return new ArrayList<>(usedLibraryFormatted);
   }
 
-  public List<String> getUsedCodes() {
+  public List<CQLCode> getUsedCodes() {
     return new ArrayList<>(usedCodes);
   }
 

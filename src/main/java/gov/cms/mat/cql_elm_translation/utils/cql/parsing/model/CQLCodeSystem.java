@@ -1,9 +1,11 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 // TODO: Auto-generated Javadoc
 @Data
+@NoArgsConstructor
 public class CQLCodeSystem {
 
   /** The id. */
@@ -18,8 +20,8 @@ public class CQLCodeSystem {
   /** The code system version. */
   private String codeSystemVersion;
 
-  /** The value set OID. */
-  private String valueSetOID;
+  /** The code system OID. */
+  private String OID;
 
   /**
    * stores off the version uri. example: codesystem "SNOMEDCT:2017-09":
