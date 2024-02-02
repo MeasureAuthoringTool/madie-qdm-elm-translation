@@ -275,6 +275,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
     List<CQLCode> cqlCode = dataCriteriaService.getCQLCodes(cql, token);
 
-    assertThat(cqlCode.size(), is(equalTo(0)));
+    assertThat(cqlCode.size(), is(equalTo(1)));
   }
 }

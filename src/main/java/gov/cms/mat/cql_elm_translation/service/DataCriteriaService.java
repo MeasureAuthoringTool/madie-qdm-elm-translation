@@ -216,17 +216,11 @@ public class DataCriteriaService extends CqlTooling {
 
   public List<String> getUsedValuesets(String cql, String accessToken) {
     CQLTools tools = parseCql(cql, accessToken, cqlLibraryService);
-    List<String> usedValuesets = tools.getUsedValuesets();
-    return usedValuesets;
+    return tools.getUsedValuesets();
   }
 
   public List<CQLCode> getCQLCodes(String cql, String accessToken) {
     CQLTools tools = parseCql(cql, accessToken, cqlLibraryService);
-
-    List<CQLCode> cqlCodes = new ArrayList<>();
-    // TODO
-    // cqlCodes = tools.getUsedCodes();
-
-    return cqlCodes;
+    return tools.getUsedCodes();
   }
 }
