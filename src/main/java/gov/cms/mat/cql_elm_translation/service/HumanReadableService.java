@@ -19,6 +19,7 @@ import gov.cms.mat.cql_elm_translation.utils.HumanReadableDateUtil;
 import gov.cms.mat.cql_elm_translation.utils.HumanReadableUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -67,12 +68,14 @@ public class HumanReadableService {
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(measure.getCql(), accessToken);
     List<CQLCode> cqlCodes = dataCriteriaService.getCQLCodes(measure.getCql(), accessToken);
+    Set<CQLDefinition> allDefinitions =
+        cqlParsingService.getAllDefinitions(measure.getCql(), accessToken);
 
     HumanReadable hr =
         HumanReadable.builder()
             .measureInformation(buildMeasureInfo(measure))
-            .populationCriteria(buildPopCriteria(measure))
-            .definitions(buildDefinitions(measure, accessToken))
+            .populationCriteria(buildPopCriteria(measure, allDefinitions))
+            .definitions(buildDefinitions(allDefinitions))
             .functions(buildFunctions(measure, accessToken))
             .valuesetDataCriteriaList(
                 buildValuesetDataCriteriaList(sourceDataCriteria, measure, accessToken))
@@ -80,7 +83,9 @@ public class HumanReadableService {
             .build();
     hr.setValuesetAndCodeDataCriteriaList(
         new ArrayList<HumanReadableTerminologyModel>(hr.getValuesetDataCriteriaList()));
-    hr.setValuesetTerminologyList(buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
+    hr.setValuesetTerminologyList(
+        buildValuesetTerminologyList(
+            hr.getValuesetDataCriteriaList(), measure, accessToken, sourceDataCriteria));
     hr.setCodeTerminologyList(buildCodeTerminologyList(hr.getCodeDataCriteriaList()));
     hr.setSupplementalDataElements(buildSupplementalDataElements(measure, hr.getDefinitions()));
     hr.setRiskAdjustmentVariables(buildRiskAdjustmentVariables(measure, hr.getDefinitions()));
@@ -165,7 +170,8 @@ public class HumanReadableService {
         .build();
   }
 
-  List<HumanReadablePopulationCriteriaModel> buildPopCriteria(Measure measure) {
+  List<HumanReadablePopulationCriteriaModel> buildPopCriteria(
+      Measure measure, Set<CQLDefinition> allDefinitions) {
     return measure.getGroups().stream()
         .map(
             group ->
@@ -174,14 +180,15 @@ public class HumanReadableService {
                     .name(group.getGroupDescription())
                     .populations(
                         Stream.concat(
-                                buildPopulations(group).stream(),
-                                buildStratification(group).stream())
+                                buildPopulations(group, allDefinitions).stream(),
+                                buildStratification(group, allDefinitions).stream())
                             .toList())
                     .build())
         .collect(Collectors.toList());
   }
 
-  List<HumanReadablePopulationModel> buildPopulations(Group group) {
+  List<HumanReadablePopulationModel> buildPopulations(
+      Group group, Set<CQLDefinition> allDefinitions) {
     return group.getPopulations().stream()
         .map(
             population ->
@@ -189,14 +196,26 @@ public class HumanReadableService {
                     .name(population.getName().name())
                     .id(population.getId())
                     .display(population.getName().getDisplay())
-                    .logic(population.getDefinition())
+                    .logic(getCQLDefinitionLogic(population.getDefinition(), allDefinitions))
                     .expressionName(population.getDefinition())
                     .inGroup(StringUtils.isBlank(population.getDefinition()) ? false : true)
                     .build())
         .collect(Collectors.toList());
   }
 
-  List<HumanReadablePopulationModel> buildStratification(Group group) {
+  String getCQLDefinitionLogic(String id, Set<CQLDefinition> allDefinitions) {
+    CQLDefinition cqlDefinition =
+        allDefinitions.stream()
+            .filter(definition -> id != null && id.equalsIgnoreCase(definition.getId()))
+            .findFirst()
+            .orElse(null);
+    return cqlDefinition != null
+        ? cqlDefinition.getLogic().substring(cqlDefinition.getLogic().indexOf('\n') + 1)
+        : "";
+  }
+
+  List<HumanReadablePopulationModel> buildStratification(
+      Group group, Set<CQLDefinition> allDefinitions) {
     return group.getStratifications().stream()
         .map(
             stratification ->
@@ -204,16 +223,14 @@ public class HumanReadableService {
                     .name("Stratification")
                     .id(stratification.getId())
                     .display("Stratification")
-                    .logic(stratification.getCqlDefinition())
+                    .logic(getCQLDefinitionLogic(stratification.getCqlDefinition(), allDefinitions))
                     .expressionName(stratification.getCqlDefinition())
                     .inGroup(StringUtils.isBlank(stratification.getCqlDefinition()) ? false : true)
                     .build())
         .collect(Collectors.toList());
   }
 
-  List<HumanReadableExpressionModel> buildDefinitions(Measure measure, String accessToken) {
-    Set<CQLDefinition> allDefinitions =
-        cqlParsingService.getAllDefinitions(measure.getCql(), accessToken);
+  List<HumanReadableExpressionModel> buildDefinitions(Set<CQLDefinition> allDefinitions) {
     List<CQLDefinition> definitions =
         allDefinitions.stream()
             .filter(definition -> definition.getParentLibrary() == null)
@@ -323,11 +340,48 @@ public class HumanReadableService {
   }
 
   List<HumanReadableTerminologyModel> buildValuesetTerminologyList(
-      List<HumanReadableValuesetModel> valuesetModel) {
+      List<HumanReadableValuesetModel> valuesetModel,
+      Measure measure,
+      String accessToken,
+      List<SourceDataCriteria> sourceDataCriteria) {
     List<HumanReadableTerminologyModel> valuesetList = new ArrayList<>(valuesetModel);
+
+    Set<HumanReadableValuesetModel> usedValueSets =
+        findUsedCQLValueSet(measure, accessToken, sourceDataCriteria);
+    if (!usedValueSets.isEmpty()) {
+      valuesetList.addAll(usedValueSets);
+    }
+
     valuesetList.sort(
         Comparator.comparing(HumanReadableTerminologyModel::getTerminologyDisplay, collator));
     return valuesetList;
+  }
+
+  Set<HumanReadableValuesetModel> findUsedCQLValueSet(
+      Measure measure, String accessToken, List<SourceDataCriteria> sourceDataCriteria) {
+    List<CQLValueSet> usedValuesets =
+        dataCriteriaService.getUsedCQLValuesets(measure.getCql(), accessToken);
+    List<CQLValueSet> otherValueSets = new ArrayList<>();
+    if (!CollectionUtils.isEmpty(usedValuesets)) {
+      for (CQLValueSet cqlValueSet : usedValuesets) {
+        if (findNotExistInSourceDataCriteria(cqlValueSet.getOid(), sourceDataCriteria) == null) {
+          otherValueSets.add(cqlValueSet);
+        }
+      }
+    }
+    Set<HumanReadableValuesetModel> valuesets =
+        otherValueSets.stream()
+            .map(vs -> new HumanReadableValuesetModel(vs.getName(), vs.getOid(), "", vs.getName()))
+            .collect(Collectors.toSet());
+    return valuesets;
+  }
+
+  SourceDataCriteria findNotExistInSourceDataCriteria(
+      String oid, List<SourceDataCriteria> sourceDataCriteria) {
+    return sourceDataCriteria.stream()
+        .filter(sdc -> oid.equalsIgnoreCase(sdc.getOid()))
+        .findFirst()
+        .orElse(null);
   }
 
   List<HumanReadableTerminologyModel> buildCodeTerminologyList(

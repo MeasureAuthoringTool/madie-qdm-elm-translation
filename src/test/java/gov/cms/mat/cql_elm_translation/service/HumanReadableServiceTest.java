@@ -10,10 +10,12 @@ import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableMeasureInformationModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationCriteriaModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadablePopulationModel;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadableTerminologyModel;
 import gov.cms.madie.qdm.humanreadable.model.HumanReadableValuesetModel;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -129,7 +131,7 @@ class HumanReadableServiceTest {
                                 Population.builder()
                                     .id("p1")
                                     .name(PopulationType.INITIAL_POPULATION)
-                                    .definition("define ipp: true")
+                                    .definition("Initial Population")
                                     .build(),
                                 Population.builder()
                                     .id("p2")
@@ -138,9 +140,13 @@ class HumanReadableServiceTest {
                         .stratifications(
                             List.of(
                                 Stratification.builder()
+                                    .id("testStrat1Id")
                                     .cqlDefinition(PopulationType.INITIAL_POPULATION.name())
                                     .build(),
-                                Stratification.builder().cqlDefinition("").build()))
+                                Stratification.builder()
+                                    .id("testStrat2Id")
+                                    .cqlDefinition("")
+                                    .build()))
                         .build()))
             .baseConfigurationTypes(List.of(BaseConfigurationTypes.OUTCOME))
             .riskAdjustmentDescription("test risk adjustment")
@@ -357,8 +363,9 @@ class HumanReadableServiceTest {
 
   @Test
   public void canBuildPopulationCriteriaModelFromMeasure() {
+
     List<HumanReadablePopulationCriteriaModel> populationCriteriaModels =
-        humanReadableService.buildPopCriteria(measure);
+        humanReadableService.buildPopCriteria(measure, allDefinitions);
     assertThat(populationCriteriaModels.size(), is(equalTo(1)));
 
     Group group = measure.getGroups().get(0);
@@ -371,16 +378,16 @@ class HumanReadableServiceTest {
     Population measurePopulation = group.getPopulations().get(0);
     HumanReadablePopulationModel populationModel = popCriteriaModel.getPopulations().get(0);
     assertThat(populationModel.getDisplay(), is(measurePopulation.getName().getDisplay()));
-    assertThat(populationModel.getLogic(), is(equalTo(measurePopulation.getDefinition())));
+    assertThat(
+        populationModel.getLogic(),
+        is(equalTo("  \"Encounter with Opioid Administration Outside of Operating Room\"")));
     assertThat(populationModel.getExpressionName(), is(equalTo(measurePopulation.getDefinition())));
   }
 
   @Test
   public void testBuildDefinitions() {
-    when(cqlParsingService.getAllDefinitions(anyString(), anyString())).thenReturn(allDefinitions);
-
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(measure, "accessToken");
+        humanReadableService.buildDefinitions(allDefinitions);
     assertThat(definitions.size(), is(equalTo(3)));
   }
 
@@ -462,10 +469,8 @@ class HumanReadableServiceTest {
 
   @Test
   public void testBuildSupplementalDataElements() {
-    when(cqlParsingService.getAllDefinitions(anyString(), anyString())).thenReturn(allDefinitions);
-
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(measure, "accessToken");
+        humanReadableService.buildDefinitions(allDefinitions);
     List<HumanReadableExpressionModel> supplementalData =
         humanReadableService.buildSupplementalDataElements(measure, definitions);
     assertThat(supplementalData.size(), is(equalTo(1)));
@@ -473,10 +478,8 @@ class HumanReadableServiceTest {
 
   @Test
   public void testBuildSupplementalDataElementsNull() {
-    when(cqlParsingService.getAllDefinitions(anyString(), anyString())).thenReturn(allDefinitions);
-
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(measure, "accessToken");
+        humanReadableService.buildDefinitions(allDefinitions);
     measure.setSupplementalData(null);
     List<HumanReadableExpressionModel> supplementalData =
         humanReadableService.buildSupplementalDataElements(measure, definitions);
@@ -485,10 +488,8 @@ class HumanReadableServiceTest {
 
   @Test
   public void testBuildRiskAdjustmentVariablesNull() {
-    when(cqlParsingService.getAllDefinitions(anyString(), anyString())).thenReturn(allDefinitions);
-
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(measure, "accessToken");
+        humanReadableService.buildDefinitions(allDefinitions);
     measure.setRiskAdjustments(null);
     List<HumanReadableExpressionModel> riskAdjustment =
         humanReadableService.buildRiskAdjustmentVariables(measure, definitions);
@@ -534,5 +535,121 @@ class HumanReadableServiceTest {
   public void testBuildCodeDataCriteriaListNull() {
     List<HumanReadableCodeModel> result = humanReadableService.buildCodeDataCriteriaList(List.of());
     assertThat(result.size(), is(equalTo(0)));
+  }
+
+  @Test
+  public void testFindNotExistInSourceDataCriteria() {
+    SourceDataCriteria result =
+        humanReadableService.findNotExistInSourceDataCriteria(
+            "2.16.840.1.113762.1.4.1248.119",
+            List.of(
+                sourceDataCriteria1,
+                sourceDataCriteria2,
+                sourceDataCriteria3,
+                sourceDataCriteria4));
+    assertNotNull(result);
+  }
+
+  @Test
+  public void testFindNotExistInSourceDataCriteriaReturnsNull() {
+    SourceDataCriteria result =
+        humanReadableService.findNotExistInSourceDataCriteria(
+            "testOid",
+            List.of(
+                sourceDataCriteria1,
+                sourceDataCriteria2,
+                sourceDataCriteria3,
+                sourceDataCriteria4));
+    assertNull(result);
+  }
+
+  @Test
+  public void testFindUsedCQLValueSet() {
+    CQLValueSet cqlValueSet =
+        CQLValueSet.builder()
+            .name("Routes of Administration for Opioid Antagonists")
+            .oid("2.16.840.1.113762.1.4.1248.187")
+            .build();
+    when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
+        .thenReturn(List.of(cqlValueSet));
+
+    Set<HumanReadableValuesetModel> result =
+        humanReadableService.findUsedCQLValueSet(
+            measure,
+            "accessToken",
+            List.of(
+                sourceDataCriteria1,
+                sourceDataCriteria2,
+                sourceDataCriteria3,
+                sourceDataCriteria4));
+    assertThat(result.size(), is(equalTo(1)));
+    assertThat(result.iterator().next().getName(), is(equalTo(cqlValueSet.getName())));
+  }
+
+  @Test
+  public void testFindUsedCQLValueSetNoOtherValueSet() {
+    CQLValueSet cqlValueSet =
+        CQLValueSet.builder()
+            .name("Encounter Inpatient")
+            .oid("2.16.840.1.113883.3.666.5.307")
+            .build();
+    when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
+        .thenReturn(List.of(cqlValueSet));
+
+    Set<HumanReadableValuesetModel> result =
+        humanReadableService.findUsedCQLValueSet(
+            measure,
+            "accessToken",
+            List.of(
+                sourceDataCriteria1,
+                sourceDataCriteria2,
+                sourceDataCriteria3,
+                sourceDataCriteria4));
+    assertThat(result.size(), is(equalTo(0)));
+  }
+
+  @Test
+  public void testBuildValuesetTerminologyList() {
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
+        .thenReturn(
+            List.of("Opioid Antagonist", "Routes of Administration for Opioid Antagonists"));
+
+    List<HumanReadableValuesetModel> valuesetModels =
+        humanReadableService.buildValuesetDataCriteriaList(
+            List.of(
+                sourceDataCriteria1, sourceDataCriteria2, sourceDataCriteria3, sourceDataCriteria4),
+            measure,
+            "accessToken");
+    System.out.println(
+        "valuesetModels = " + (valuesetModels != null ? valuesetModels.toString() : " null"));
+
+    CQLValueSet cqlValueSet1 =
+        CQLValueSet.builder()
+            .name("Opioid Antagonist")
+            .oid("2.16.840.1.113762.1.4.1248.119")
+            .build();
+    CQLValueSet cqlValueSet2 =
+        CQLValueSet.builder()
+            .name("Routes of Administration for Opioid Antagonists")
+            .oid("2.16.840.1.113762.1.4.1248.187")
+            .build();
+    when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
+        .thenReturn(List.of(cqlValueSet1, cqlValueSet2));
+
+    List<HumanReadableTerminologyModel> terminologyModels =
+        humanReadableService.buildValuesetTerminologyList(
+            valuesetModels,
+            measure,
+            "accessToken",
+            List.of(
+                sourceDataCriteria1,
+                sourceDataCriteria2,
+                sourceDataCriteria3,
+                sourceDataCriteria4));
+    assertThat(terminologyModels.size(), is(equalTo(2)));
+    assertThat(terminologyModels.get(0).getName(), is(equalTo("Opioid Antagonist")));
+    assertThat(
+        terminologyModels.get(1).getName(),
+        is(equalTo("Routes of Administration for Opioid Antagonists")));
   }
 }

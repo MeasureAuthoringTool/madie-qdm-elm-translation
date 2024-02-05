@@ -12,6 +12,7 @@ import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -276,5 +277,16 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     List<CQLCode> cqlCode = dataCriteriaService.getCQLCodes(cql, token);
 
     assertThat(cqlCode.size(), is(equalTo(1)));
+  }
+
+  @Test
+  void testGetUsedCQLValuesets() {
+    Mockito.doNothing()
+        .when(cqlLibraryService)
+        .setUpLibrarySourceProvider(anyString(), anyString());
+
+    List<CQLValueSet> valuesets = dataCriteriaService.getUsedCQLValuesets(cql, token);
+
+    assertThat(valuesets.size(), is(equalTo(2)));
   }
 }

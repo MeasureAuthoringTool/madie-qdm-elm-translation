@@ -73,6 +73,7 @@ public class CQLTools {
   Set<String> usedLibraries = new HashSet<>();
   Set<CQLCode> usedCodes = new HashSet<>();
   Set<String> usedValuesets = new HashSet<>();
+  Set<CQLValueSet> usedCQLValuesets = new HashSet<>();
   Set<String> usedParameters = new HashSet<>();
   Map<String, Set<String>> usedDefinitions = new HashMap<>();
   Map<String, Set<String>> usedFunctions = new HashMap<>();
@@ -137,6 +138,7 @@ public class CQLTools {
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
+    Set<CQLValueSet> cqlValuesetsSet = new HashSet<>(listener.getCqlValuesets());
     Set<String> codesSet = new HashSet<>(listener.getCodes());
     Set<String> codesystemsSet = new HashSet<>(listener.getCodesystems());
     Set<String> parametersSet = new HashSet<>(listener.getParameters());
@@ -153,6 +155,7 @@ public class CQLTools {
         graph,
         librariesSet,
         valuesetsSet,
+        cqlValuesetsSet,
         codesSet,
         codesystemsSet,
         parametersSet,
@@ -188,6 +191,7 @@ public class CQLTools {
       CQLGraph graph,
       Set<String> librariesSet,
       Set<String> valuesetsSet,
+      Set<CQLValueSet> cqlValuesetsSet,
       Set<String> codesSet,
       Set<String> codesystemsSet,
       Set<String> parametersSet,
@@ -196,6 +200,7 @@ public class CQLTools {
       Set<CQLCode> declaredCodes) {
     List<String> libraries = new ArrayList<>(librariesSet);
     List<String> valuesets = new ArrayList<>(valuesetsSet);
+    List<CQLValueSet> cqlValuesets = new ArrayList<>(cqlValuesetsSet);
     List<String> codes = new ArrayList<>(codesSet);
     List<String> codesystems = new ArrayList<>(codesystemsSet);
     List<String> parameters = new ArrayList<>(parametersSet);
@@ -204,7 +209,7 @@ public class CQLTools {
 
     for (String parentExpression : parentExpressions) {
       collectUsedLibraries(graph, libraries, parentExpression);
-      collectUsedValuesets(graph, valuesets, parentExpression);
+      collectUsedValuesets(graph, valuesets, cqlValuesets, parentExpression);
       collectUsedCodes(graph, codes, parentExpression, declaredCodes);
       collectUsedCodeSystems(graph, codesystems, parentExpression);
       collectUsedParameters(graph, parameters, parentExpression);
@@ -326,10 +331,19 @@ public class CQLTools {
    * @param parentExpression the parent expression to check
    */
   private void collectUsedValuesets(
-      CQLGraph graph, List<String> valuesets, String parentExpression) {
+      CQLGraph graph,
+      List<String> valuesets,
+      List<CQLValueSet> cqlValuesets,
+      String parentExpression) {
     for (String valueset : valuesets) {
       if (graph.isPath(parentExpression, valueset)) {
         usedValuesets.add(valueset);
+      }
+    }
+
+    for (CQLValueSet valueset : cqlValuesets) {
+      if (graph.isPath(parentExpression, valueset.getName())) {
+        usedCQLValuesets.add(valueset);
       }
     }
   }
@@ -513,6 +527,10 @@ public class CQLTools {
 
   public List<String> getUsedValuesets() {
     return new ArrayList<>(usedValuesets);
+  }
+
+  public List<CQLValueSet> getUsedCQLValuesets() {
+    return new ArrayList<>(usedCQLValuesets);
   }
 
   public List<String> getUsedParameters() {
