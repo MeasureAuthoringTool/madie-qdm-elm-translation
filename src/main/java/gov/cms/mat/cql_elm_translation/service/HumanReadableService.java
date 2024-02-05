@@ -79,7 +79,7 @@ public class HumanReadableService {
             .codeDataCriteriaList(buildCodeDataCriteriaList(cqlCodes))
             .build();
     hr.setValuesetAndCodeDataCriteriaList(
-        buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
+        new ArrayList<HumanReadableTerminologyModel>(hr.getValuesetDataCriteriaList()));
     hr.setValuesetTerminologyList(buildValuesetTerminologyList(hr.getValuesetDataCriteriaList()));
     hr.setCodeTerminologyList(buildCodeTerminologyList(hr.getCodeDataCriteriaList()));
     hr.setSupplementalDataElements(buildSupplementalDataElements(measure, hr.getDefinitions()));
