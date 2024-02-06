@@ -28,13 +28,13 @@ class HumanReadableDateUtilTest {
   @Test
   void testYearEndingWith0000() {
     var result = HumanReadableDateUtil.getFormattedMeasurementPeriod(false, "00000101", "20231231");
-    assertEquals("January 1, 20XX through December 31, 2023", result);
+    assertEquals("January 1, 0000 through December 31, 2023", result);
   }
 
   @Test
   void testWhenEndYearIsNull() {
     var result = HumanReadableDateUtil.getFormattedMeasurementPeriod(false, "00000101", "");
-    assertEquals("January 1, 20XX ", result);
+    assertEquals("January 1, 0000 ", result);
   }
 
   @Test
