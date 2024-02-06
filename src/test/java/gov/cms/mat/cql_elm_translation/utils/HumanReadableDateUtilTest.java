@@ -16,7 +16,7 @@ class HumanReadableDateUtilTest {
   void getFormattedMeasurementPeriod2() {
     var result =
         HumanReadableDateUtil.getFormattedMeasurementPeriod(false, "Jan 20, 2024", "Dec 20, 2024");
-    assertEquals("Jan 20, 20XX through Dec 20, 20XX", result);
+    assertEquals("Jan 20, 2024 through Dec 20, 2024", result);
   }
 
   @Test

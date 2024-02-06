@@ -52,7 +52,7 @@ public class HumanReadableDateUtil {
       returnDate = month + day + ", " + year;
     } // Jan 1, 2024 or Dec 31, 2024
     else if (date.length() == 11 || date.length() == 12) {
-      returnDate = date.replaceFirst(".{2}$", "XX");
+      returnDate = date;
     }
     return returnDate;
   }
