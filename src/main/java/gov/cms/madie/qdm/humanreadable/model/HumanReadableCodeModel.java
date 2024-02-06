@@ -38,40 +38,6 @@ public class HumanReadableCodeModel implements HumanReadableTerminologyModel {
     createTerminologyDisplay();
   }
 
-  @Override
-  public String getName() {
-    return name;
-  }
-
-  @Override
-  public void setName(String name) {
-    this.name = name;
-  }
-
-  public String getOid() {
-    return oid;
-  }
-
-  public void setOid(String oid) {
-    this.oid = oid;
-  }
-
-  public String getCodesystemName() {
-    return codesystemName;
-  }
-
-  public void setCodesystemName(String taxonomy) {
-    this.codesystemName = taxonomy;
-  }
-
-  public boolean getIsCodesystemVersionIncluded() {
-    return isCodesystemVersionIncluded;
-  }
-
-  public void setIsCodesystemVersionIncluded(boolean isCodeSystemIncluded) {
-    this.isCodesystemVersionIncluded = isCodeSystemIncluded;
-  }
-
   public String getTerminologyDisplay() {
     createTerminologyDisplay();
     return this.terminologyDisplay;
@@ -86,27 +52,6 @@ public class HumanReadableCodeModel implements HumanReadableTerminologyModel {
     String codeOutput =
         "code \"" + name + "\" (\"" + codesystemName + codeSystemVersion + " Code (" + oid + ")\")";
     this.terminologyDisplay = codeOutput;
-  }
-
-  @Override
-  public void setTerminologyDisplay(String display) {
-    this.terminologyDisplay = display;
-  }
-
-  public String getCodesystemVersion() {
-    return codesystemVersion;
-  }
-
-  public void setCodesystemVersion(String codesystemVersion) {
-    this.codesystemVersion = codesystemVersion;
-  }
-
-  public String getDatatype() {
-    return datatype;
-  }
-
-  public void setDatatype(String datatype) {
-    this.datatype = datatype;
   }
 
   private void createDataCriteriaDisplay() {

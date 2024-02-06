@@ -497,28 +497,26 @@ class HumanReadableServiceTest {
   }
 
   @Test
-  public void testFindUsedFunctionNull() {
+  public void testIsUsedFunctionNull() {
     when(cqlParsingService.getUsedFunctions(anyString(), anyString())).thenReturn(null);
-    boolean result = humanReadableService.findUsedFunction(measure, "accessToken", "testId");
+    boolean result = humanReadableService.isUsedFunction(measure, "accessToken", "testId");
     assertFalse(result);
   }
 
   @Test
-  public void testFindUsedFunctionEmpty() {
+  public void testIsUsedFunctionEmpty() {
     when(cqlParsingService.getUsedFunctions(anyString(), anyString())).thenReturn(new HashMap<>());
-    boolean result =
-        humanReadableService.findUsedFunction(measure, "accessToken", "another testId");
+    boolean result = humanReadableService.isUsedFunction(measure, "accessToken", "another testId");
     assertFalse(result);
   }
 
   @Test
-  public void testFindUsedFunctionNotFound() {
+  public void testIsUsedFunctionNotFound() {
     Map<String, Set<String>> usedFunctions = new HashMap<>();
     usedFunctions.put("testId", new HashSet<>(Arrays.asList("testId")));
     when(cqlParsingService.getUsedFunctions(anyString(), anyString())).thenReturn(usedFunctions);
 
-    boolean result =
-        humanReadableService.findUsedFunction(measure, "accessToken", "another testId");
+    boolean result = humanReadableService.isUsedFunction(measure, "accessToken", "another testId");
 
     assertFalse(result);
   }
@@ -535,32 +533,6 @@ class HumanReadableServiceTest {
   public void testBuildCodeDataCriteriaListNull() {
     List<HumanReadableCodeModel> result = humanReadableService.buildCodeDataCriteriaList(List.of());
     assertThat(result.size(), is(equalTo(0)));
-  }
-
-  @Test
-  public void testFindNotExistInSourceDataCriteria() {
-    SourceDataCriteria result =
-        humanReadableService.findNotExistInSourceDataCriteria(
-            "2.16.840.1.113762.1.4.1248.119",
-            List.of(
-                sourceDataCriteria1,
-                sourceDataCriteria2,
-                sourceDataCriteria3,
-                sourceDataCriteria4));
-    assertNotNull(result);
-  }
-
-  @Test
-  public void testFindNotExistInSourceDataCriteriaReturnsNull() {
-    SourceDataCriteria result =
-        humanReadableService.findNotExistInSourceDataCriteria(
-            "testOid",
-            List.of(
-                sourceDataCriteria1,
-                sourceDataCriteria2,
-                sourceDataCriteria3,
-                sourceDataCriteria4));
-    assertNull(result);
   }
 
   @Test

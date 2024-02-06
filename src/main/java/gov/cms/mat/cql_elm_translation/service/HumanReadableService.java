@@ -67,7 +67,7 @@ public class HumanReadableService {
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(measure.getCql(), accessToken);
-    List<CQLCode> cqlCodes = dataCriteriaService.getCQLCodes(measure.getCql(), accessToken);
+    List<CQLCode> cqlCodes = dataCriteriaService.getUsedCQLCodes(measure.getCql(), accessToken);
     Set<CQLDefinition> allDefinitions =
         cqlParsingService.getAllDefinitions(measure.getCql(), accessToken);
 
@@ -198,7 +198,7 @@ public class HumanReadableService {
                     .display(population.getName().getDisplay())
                     .logic(getCQLDefinitionLogic(population.getDefinition(), allDefinitions))
                     .expressionName(population.getDefinition())
-                    .inGroup(StringUtils.isBlank(population.getDefinition()) ? false : true)
+                    .inGroup(!StringUtils.isBlank(population.getDefinition()))
                     .build())
         .collect(Collectors.toList());
   }
@@ -225,7 +225,7 @@ public class HumanReadableService {
                     .display("Stratification")
                     .logic(getCQLDefinitionLogic(stratification.getCqlDefinition(), allDefinitions))
                     .expressionName(stratification.getCqlDefinition())
-                    .inGroup(StringUtils.isBlank(stratification.getCqlDefinition()) ? false : true)
+                    .inGroup(!StringUtils.isBlank(stratification.getCqlDefinition()))
                     .build())
         .collect(Collectors.toList());
   }
@@ -261,7 +261,7 @@ public class HumanReadableService {
             .filter(
                 definition ->
                     definition.isFunction()
-                        && findUsedFunction(measure, accessToken, definition.getId()))
+                        && isUsedFunction(measure, accessToken, definition.getId()))
             .collect(Collectors.toList());
 
     List<HumanReadableExpressionModel> expressions =
@@ -281,7 +281,7 @@ public class HumanReadableService {
     return expressions;
   }
 
-  boolean findUsedFunction(Measure measure, String accessToken, String id) {
+  boolean isUsedFunction(Measure measure, String accessToken, String id) {
     Map<String, Set<String>> usedFunctions =
         cqlParsingService.getUsedFunctions(measure.getCql(), accessToken);
     return usedFunctions != null && !usedFunctions.isEmpty() && usedFunctions.containsKey(id);
@@ -361,27 +361,19 @@ public class HumanReadableService {
       Measure measure, String accessToken, List<SourceDataCriteria> sourceDataCriteria) {
     List<CQLValueSet> usedValuesets =
         dataCriteriaService.getUsedCQLValuesets(measure.getCql(), accessToken);
-    List<CQLValueSet> otherValueSets = new ArrayList<>();
-    if (!CollectionUtils.isEmpty(usedValuesets)) {
-      for (CQLValueSet cqlValueSet : usedValuesets) {
-        if (findNotExistInSourceDataCriteria(cqlValueSet.getOid(), sourceDataCriteria) == null) {
-          otherValueSets.add(cqlValueSet);
-        }
-      }
-    }
+
+    List<CQLValueSet> otherValueSets =
+        usedValuesets.stream()
+            .filter(
+                vs ->
+                    sourceDataCriteria.stream()
+                        .noneMatch(sdc -> sdc.getOid().equalsIgnoreCase(vs.getOid())))
+            .toList();
     Set<HumanReadableValuesetModel> valuesets =
         otherValueSets.stream()
             .map(vs -> new HumanReadableValuesetModel(vs.getName(), vs.getOid(), "", vs.getName()))
             .collect(Collectors.toSet());
     return valuesets;
-  }
-
-  SourceDataCriteria findNotExistInSourceDataCriteria(
-      String oid, List<SourceDataCriteria> sourceDataCriteria) {
-    return sourceDataCriteria.stream()
-        .filter(sdc -> oid.equalsIgnoreCase(sdc.getOid()))
-        .findFirst()
-        .orElse(null);
   }
 
   List<HumanReadableTerminologyModel> buildCodeTerminologyList(
