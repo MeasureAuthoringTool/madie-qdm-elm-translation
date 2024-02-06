@@ -37,6 +37,9 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.nullable;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
@@ -182,11 +185,20 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Test
   void testGetTranslatedLibrariesForCqlForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
+    String matGlobal = getData("/mat_global_common_functions.cql");
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(matGlobal)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
+
     List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
     AtomicBoolean foundAMatch = new AtomicBoolean();
-    libraries.forEach(
-        library -> foundAMatch.set(library.getElmJson().contains("DataCriteriaRetrivalTest")));
-    assertThat(foundAMatch.get(), is(true));
+    var matchingLib =
+        libraries.stream()
+            .filter(library -> library.getElmJson().contains("DataCriteriaRetrivalTest"))
+            .findFirst();
+    assertThat(matchingLib.get().getName(), is(equalTo("DataCriteriaRetrivalTest")));
   }
 
   @Test
