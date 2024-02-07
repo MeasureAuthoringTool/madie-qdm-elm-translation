@@ -81,11 +81,6 @@ public class HumanReadableCodeModel implements HumanReadableTerminologyModel {
   }
 
   @Override
-  public void setDataCriteriaDisplay(String dataCriteriaDisplay) {
-    this.dataCriteriaDisplay = dataCriteriaDisplay;
-  }
-
-  @Override
   public int hashCode() {
     return Objects.hash(name, oid, codesystemName, codesystemVersion, datatype);
   }
