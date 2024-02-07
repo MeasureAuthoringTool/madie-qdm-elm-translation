@@ -330,7 +330,6 @@ public class HumanReadableService {
                           .codesystemName(cqlCode.getCodeSystemName())
                           .codesystemVersion(cqlCode.getCodeSystemVersion())
                           .isCodesystemVersionIncluded(cqlCode.isIsCodeSystemVersionIncluded())
-                          .datatype(cqlCode.getCodeIdentifier()) // ???
                           .build())
               .collect(Collectors.toList());
       codeList.sort(Comparator.comparing(HumanReadableCodeModel::getDataCriteriaDisplay, collator));
