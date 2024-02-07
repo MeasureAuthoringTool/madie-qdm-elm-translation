@@ -39,6 +39,7 @@ import org.hl7.elm.r1.*;
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.Getter;
 
 public class Cql2ElmListener extends cqlBaseListener {
@@ -69,6 +70,7 @@ public class Cql2ElmListener extends cqlBaseListener {
 
   @Getter private final Set<String> libraries = new HashSet<>();
   @Getter private final Set<String> valuesets = new HashSet<>();
+  @Getter private final Set<CQLValueSet> cqlValuesets = new HashSet<>();
   @Getter private final Set<String> codes = new HashSet<>();
   @Getter private final Set<String> codesystems = new HashSet<>();
   @Getter private final Set<String> parameters = new HashSet<>();
@@ -494,9 +496,18 @@ public class Cql2ElmListener extends cqlBaseListener {
     } else if (element instanceof CodeSystemDef) {
       codesystems.add(identifier);
       graph.addEdge(currentContext, formattedIdentifier);
-    } else if (element instanceof ValueSetDef) {
+    } else if (element instanceof ValueSetDef vsDef) {
       valuesets.add(formattedIdentifier);
       graph.addEdge(currentContext, formattedIdentifier);
+
+      CQLValueSet declaredValueSet =
+          CQLValueSet.builder()
+              .oid(vsDef.getId().replace("urn:oid:", ""))
+              .name(vsDef.getName())
+              .version(vsDef.getVersion())
+              .build();
+      cqlValuesets.add(declaredValueSet);
+
     } else if (element instanceof ParameterDef) {
       parameters.add(formattedIdentifier);
       graph.addEdge(currentContext, formattedIdentifier);

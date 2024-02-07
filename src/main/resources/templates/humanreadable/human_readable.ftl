@@ -10,12 +10,12 @@
         <#include "table_of_contents.ftl"/>
         <#include "divider.ftl" />
         <#include "population_criteria_section.ftl" />
-<#--TODO        <#include "definition_section.ftl" />-->
-<#--TODO        <#include "function_section.ftl" />-->
-<#--TODO        <#include "terminology_section.ftl" />-->
-<#--TODO        <#include "data_criteria_section.ftl" />-->
-<#--TODO        <#include "supplemental_data_elements_section.ftl" />-->
-<#--TODO        <#include "risk_adjustment_variables_section.ftl" />-->
+		<#include "definition_section.ftl" />
+		<#include "function_section.ftl" />
+		<#include "terminology_section.ftl" />
+		<#include "data_criteria_section.ftl" />
+		<#include "supplemental_data_elements_section.ftl" />
+		<#include "risk_adjustment_variables_section.ftl" />
         <#include "measure_set_table.ftl" />
     </body>
 </html>

@@ -115,4 +115,14 @@ public class CqlParsingService extends CqlTooling {
     definition.setFunction(definition.getDefinitionLogic().startsWith("define function"));
     return definition;
   }
+
+  public Map<String, Set<String>> getUsedDefinitions(String cql, String accessToken) {
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
+    return cqlTools.getUsedDefinitions();
+  }
+
+  public Map<String, Set<String>> getUsedFunctions(String cql, String accessToken) {
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
+    return cqlTools.getUsedFunctions();
+  }
 }

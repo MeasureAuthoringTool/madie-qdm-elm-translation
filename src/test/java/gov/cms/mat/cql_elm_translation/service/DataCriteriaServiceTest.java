@@ -11,6 +11,8 @@ import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
+
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -252,5 +254,27 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     Set<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getRelevantElements(measure, token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetUsedValuesets() {
+    Mockito.doNothing()
+        .when(cqlLibraryService)
+        .setUpLibrarySourceProvider(anyString(), anyString());
+
+    List<String> valuesets = dataCriteriaService.getUsedValuesets(cql, token);
+
+    assertThat(valuesets.size(), is(equalTo(2)));
+  }
+
+  @Test
+  void testGetUsedCQLValuesets() {
+    Mockito.doNothing()
+        .when(cqlLibraryService)
+        .setUpLibrarySourceProvider(anyString(), anyString());
+
+    List<CQLValueSet> valuesets = dataCriteriaService.getUsedCQLValuesets(cql, token);
+
+    assertThat(valuesets.size(), is(equalTo(2)));
   }
 }

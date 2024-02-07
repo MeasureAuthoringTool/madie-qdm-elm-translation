@@ -6,16 +6,16 @@
             <td style="width:80%" colspan="3"><h1 style="font-size:10px">${model.measureInformation.ecqmTitle}</h1></td>
         </tr>
         <tr>
-            <th scope="row" class="row-header"><span class="td_label">eCQM Identifier (Measure Authoring Tool)</span></th>
+            <th scope="row" class="row-header"><span class="td_label">eCQM Identifier</span></th>
             <td style="width:30%">${model.measureInformation.ecqmIdentifier!""}</td>
 
             <th scope="row" class="row-header"><span class="td_label">eCQM Version Number</span></th>
             <td style="width:30%">${model.measureInformation.ecqmVersionNumber}</td>
         </tr>
         <tr>
-            <th scope="row" class="row-header"><span class="td_label">NQF Number</span></th>
+            <th scope="row" class="row-header"><span class="td_label">CBE Number</span></th>
             <#-- Default to "Not Applicable" if there is no value -->
-            <td style="width:30%">${model.measureInformation.nqfNumber!"Not Applicable"}</td>
+            <td style="width:30%">${model.measureInformation.cbeNumber!"Not Applicable"}</td>
 
             <th scope="row" class="row-header"><span class="td_label">GUID</span></th>
             <td style="width:30%">${model.measureInformation.guid}</td>
@@ -177,7 +177,9 @@
                         <div style="width:660px;">
                             <pre>Reference Type: ${reference.referenceType!""}</pre>
                             <br/>
-                            <pre>Reference Text: '${reference.referenceText!""}'</pre>
+                            <#noautoesc>
+                            	<pre>Reference Text: '${reference.referenceText!""}'</pre>
+                            </#noautoesc>
                         </div>
                     </td>
                 </tr>
@@ -193,9 +195,11 @@
             <td style="width:80%" colspan="3">
                 <div style="width:660px;">
                     <#if model.measureInformation.definitions??>
-            			<#list model.measureInformation.definitions as definition>
+                    	<#noautoesc>
+            				<#list model.measureInformation.definitions as definition>
                     			${definition.term!""} - ${definition.definition!""} </br>
-            			</#list>
+            				</#list>
+            			</#noautoesc>
         			</#if>
                 </div>
             </td>
