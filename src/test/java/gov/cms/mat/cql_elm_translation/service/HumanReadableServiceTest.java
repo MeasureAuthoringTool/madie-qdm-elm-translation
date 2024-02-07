@@ -201,7 +201,6 @@ class HumanReadableServiceTest {
             .isFunction(true)
             .build();
     allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3));
-    //    usedFunctions = new HashSet<>(Arrays.asList(function));
     usedFunctionIds = new HashSet<>(Arrays.asList(function.getId()));
 
     sourceDataCriteria1 =
