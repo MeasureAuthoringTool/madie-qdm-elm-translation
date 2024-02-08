@@ -5,7 +5,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
-import java.util.List;
 
 import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
@@ -15,10 +14,13 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorElmCommonVisitor;
+import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorVisitor;
 import org.cqframework.cql.gen.cqlLexer;
 import org.cqframework.cql.gen.cqlParser;
-import org.hl7.elm.r1.*;
+import org.hl7.elm.r1.ExpressionDef;
+import org.hl7.elm.r1.IncludeDef;
+import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.ParameterDef;
 
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
@@ -123,10 +125,9 @@ public class CQLTools {
         TranslationResource.getInstance(
             usingProperties.getLibraryType() == "FHIR"); // <-- BADDDDD!!!! Defaults to fhir
 
-    CqlPreprocessorElmCommonVisitor preprocessor =
-        new CqlPreprocessorElmCommonVisitor(
-            new LibraryBuilder(translationResource.getLibraryManager(), new ObjectFactory()),
-            tokens);
+    CqlPreprocessorVisitor preprocessor =
+        new CqlPreprocessorVisitor(
+            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
 
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
