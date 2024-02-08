@@ -20,7 +20,7 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorElmCommonVisitor;
+import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorVisitor;
 import org.cqframework.cql.gen.cqlBaseListener;
 import org.cqframework.cql.gen.cqlLexer;
 import org.cqframework.cql.gen.cqlParser;
@@ -34,7 +34,13 @@ import org.cqframework.cql.gen.cqlParser.SortClauseContext;
 import org.cqframework.cql.gen.cqlParser.WhereClauseContext;
 import org.cqframework.cql.gen.cqlParser.WithClauseContext;
 import org.cqframework.cql.gen.cqlParser.WithoutClauseContext;
-import org.hl7.elm.r1.*;
+import org.hl7.elm.r1.CodeDef;
+import org.hl7.elm.r1.CodeSystemDef;
+import org.hl7.elm.r1.Element;
+import org.hl7.elm.r1.ExpressionDef;
+import org.hl7.elm.r1.IncludeDef;
+import org.hl7.elm.r1.ParameterDef;
+import org.hl7.elm.r1.ValueSetDef;
 
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
@@ -544,10 +550,9 @@ public class Cql2ElmListener extends cqlBaseListener {
     TranslationResource translationResource =
         TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
 
-    CqlPreprocessorElmCommonVisitor preprocessor =
-        new CqlPreprocessorElmCommonVisitor(
-            new LibraryBuilder(translationResource.getLibraryManager(), new ObjectFactory()),
-            tokens);
+    CqlPreprocessorVisitor preprocessor =
+        new CqlPreprocessorVisitor(
+            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
 
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
