@@ -15,7 +15,9 @@ import gov.cms.madie.models.measure.MeasureDefinition;
 import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
+import lombok.extern.slf4j.Slf4j;
 
+@Slf4j
 public class HumanReadableUtil {
 
   public static List<String> getMeasureDevelopers(Measure measure) {
@@ -72,6 +74,13 @@ public class HumanReadableUtil {
   }
 
   public static List<MeasureDefinition> buildMeasureDefinitions(MeasureMetaData measureMetaData) {
+    // temp
+    log.info(
+        "buildMeasureDefinitions: definitions: "
+            + (measureMetaData != null
+                    && CollectionUtils.isNotEmpty(measureMetaData.getMeasureDefinitions())
+                ? measureMetaData.getMeasureDefinitions().size()
+                : " null"));
     if (measureMetaData != null
         && CollectionUtils.isNotEmpty(measureMetaData.getMeasureDefinitions())) {
       return measureMetaData.getMeasureDefinitions().stream()
