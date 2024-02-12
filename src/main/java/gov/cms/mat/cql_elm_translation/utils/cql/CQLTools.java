@@ -298,8 +298,11 @@ public class CQLTools {
       CQLGraph graph, List<String> codes, String parentExpression, Set<CQLCode> declaredCodes) {
     for (String code : codes) {
       if (graph.isPath(parentExpression, code)) {
-        usedCodes.add(
-            declaredCodes.stream().filter(c -> c.getCodeName().equals(code)).findFirst().get());
+        Optional<CQLCode> used =
+            declaredCodes.stream().filter(c -> c.getCodeName().equals(code)).findFirst();
+        if (used.isPresent()) {
+          usedCodes.add(used.get());
+        }
       }
     }
   }
