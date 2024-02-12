@@ -19,7 +19,7 @@ public class HumanReadableMeasureInformationModel {
   private String ecqmTitle;
   private String ecqmIdentifier;
   private String ecqmVersionNumber;
-  private String nqfNumber;
+  private String cbeNumber;
   private String guid;
   private String measurementPeriod;
   private boolean calendarYear;
@@ -42,6 +42,7 @@ public class HumanReadableMeasureInformationModel {
   private String clinicalRecommendationStatement;
   private String improvementNotation;
   private List<Reference> references;
+
   private List<MeasureDefinition> definitions;
   private String guidance;
   private String transmissionFormat;

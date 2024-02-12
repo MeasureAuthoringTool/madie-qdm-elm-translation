@@ -41,15 +41,15 @@ public class HumanReadableDateUtil {
       String day = date.substring(6, 8);
       // Get the string version of the month
       month = getMonth(month);
-      // if the year equals 0000 we display 20xx
-      if ("0000".equals(year)) {
-        year = "20XX";
-      }
+
       // if the day starts with a zero only display the second digit
       if (day.charAt(0) == '0') {
         day = day.substring(1, 2);
       }
       returnDate = month + day + ", " + year;
+    } // Jan 1, 2024 or Dec 31, 2024
+    else if (date.length() == 11 || date.length() == 12) {
+      returnDate = date;
     }
     return returnDate;
   }
