@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -13,25 +14,36 @@ import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.security.Principal;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.TreeSet;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
+
+import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 @ExtendWith(MockitoExtension.class)
 class CqlToolsControllerTest implements ResourceFileUtil {
@@ -41,6 +53,23 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   @Mock private CqlConversionService cqlConversionService;
 
   @Mock private HumanReadableService humanReadableService;
+  @Mock private CqlParsingService cqlParsingService;
+  @Mock private CqlFormatterVisitor cqlFormatterVisitor;
+
+  private Set<CQLDefinition> allDefinitions;
+
+  @BeforeEach
+  void setUp() {
+    CQLDefinition definition1 =
+        CQLDefinition.builder()
+            .id("Initial Population")
+            .definitionName("Initial Population")
+            .parentLibrary(null)
+            .definitionLogic(
+                "define \"Initial Population\":\n  \"Encounter with Opioid Administration Outside of Operating Room\"")
+            .build();
+    allDefinitions = new HashSet<>(Arrays.asList(definition1));
+  }
 
   @Test
   void formatCql() {
@@ -116,11 +145,20 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   }
 
   @Test
+  void testGetLibraryElmsThrowsException() throws IOException {
+    when(cqlConversionService.getTranslatedLibrariesForCql(anyString(), anyString()))
+        .thenThrow(IOException.class);
+    var result = cqlToolsController.getLibraryElms("test cql", "john");
+    List<TranslatedLibrary> libraries = result.getBody();
+    assertNull(libraries);
+  }
+
+  @Test
   void testGenerateHumanReadable() {
     Principal principal = mock(Principal.class);
     when(principal.getName()).thenReturn("test.user");
-    when(humanReadableService.generate(any())).thenReturn("test human Readable");
-    var result = cqlToolsController.generateHumanReadable(new Measure(), principal);
+    when(humanReadableService.generate(any(), anyString())).thenReturn("test human Readable");
+    var result = cqlToolsController.generateHumanReadable(new Measure(), principal, "accessToken");
     assertEquals(result.getBody(), "test human Readable");
     assertEquals(result.getStatusCode(), HttpStatus.OK);
   }
@@ -147,5 +185,28 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     return input
         .replaceAll("[\\s\\u0000\\u00a0]", "")
         .equals(output.replaceAll("[\\s\\u0000\\u00a0]", ""));
+  }
+
+  @Test
+  void testGetAllDefinitions() {
+
+    when(cqlParsingService.getAllDefinitions(any(), anyString())).thenReturn(allDefinitions);
+    ResponseEntity<Set<CQLDefinition>> result =
+        cqlToolsController.getAllDefinitions("test cql", "accessToken");
+    Set<CQLDefinition> defintions = result.getBody();
+    assertThat(defintions.size(), is(equalTo(1)));
+  }
+
+  @Test
+  void testGetDefinitionCallstack() {
+    Map<String, Set<CQLDefinition>> definitionCallstacks = new HashMap<>();
+    definitionCallstacks.put("test", allDefinitions);
+    when(cqlParsingService.getDefinitionCallstacks(anyString(), anyString()))
+        .thenReturn(definitionCallstacks);
+
+    ResponseEntity<Map<String, Set<CQLDefinition>>> result =
+        cqlToolsController.getDefinitionCallstack("test cql", "accessToken");
+    Set<CQLDefinition> defintions = result.getBody().get("test");
+    assertThat(defintions.size(), is(equalTo(1)));
   }
 }
