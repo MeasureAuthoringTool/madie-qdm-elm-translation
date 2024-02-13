@@ -32,7 +32,7 @@ public class CqlToolsController {
   private final HumanReadableService humanReadableService;
   private final CqlParsingService cqlParsingService;
 
-  @PutMapping("/cql/format")
+  @PutMapping(value = "/cql/format", produces = {MediaType.TEXT_PLAIN_VALUE})
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
     try (var cqlDataStream = new ByteArrayInputStream(cqlData.getBytes())) {
       CqlFormatterVisitor.FormatResult formatResult =
@@ -43,7 +43,9 @@ public class CqlToolsController {
             "Unable to format CQL, because one or more Syntax errors are identified");
       }
       log.info("User [{}] successfully formatted the CQL", principal.getName());
-      return ResponseEntity.ok(formatResult.getOutput());
+      return ResponseEntity.ok()
+          .contentType(MediaType.TEXT_PLAIN)
+          .body(formatResult.getOutput());
     } catch (IOException e) {
       log.info("User [{}] is unable to format the CQL", principal.getName());
       throw new CqlFormatException(e.getMessage());
