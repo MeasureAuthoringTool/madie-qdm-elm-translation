@@ -1,5 +1,8 @@
 package gov.cms.mat.cql_elm_translation.utils;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -87,17 +90,17 @@ public class HumanReadableUtilTest {
   }
 
   @Test
-  void testBuildMeasureDefinitionsMetaDataNull() {
+  void testEscapeHtmlNullString() {
     measure.setMeasureMetaData(null);
-    var result = HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData());
+    var result = HumanReadableUtil.escapeHtmlString(null);
     assertNull(result);
   }
 
   @Test
-  void testBuildMeasureDefinitionsMeasureDefinitionsNull() {
+  void testEscapeHtmlString() {
     measure.setMeasureMetaData(MeasureMetaData.builder().build());
-    var result = HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData());
-    assertNull(result);
+    var result = HumanReadableUtil.escapeHtmlString("this is <html> string");
+    assertThat(result, is(equalTo("this is &lt;html&gt; string")));
   }
 
   @Test

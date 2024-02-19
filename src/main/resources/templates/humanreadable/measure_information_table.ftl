@@ -194,13 +194,7 @@
             <th scope="row" class="row-header"><span class="td_label">Definition</span></th>
             <td style="width:80%" colspan="3">
                 <div style="width:660px;">
-                    <#if model.measureInformation.definitions??>
-                    	<#noautoesc>
-            				<#list model.measureInformation.definitions as definition>
-                    			${definition.term!""} - ${definition.definition!""} </br>
-            				</#list>
-            			</#noautoesc>
-        			</#if>
+                    <pre>${model.measureInformation.definition!""}</pre>
                 </div>
             </td>
         </tr>
