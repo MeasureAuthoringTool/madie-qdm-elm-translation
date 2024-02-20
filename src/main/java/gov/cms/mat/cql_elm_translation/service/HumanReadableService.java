@@ -32,6 +32,7 @@ import java.io.IOException;
 import java.text.Collator;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
@@ -180,8 +181,10 @@ public class HumanReadableService {
                     .name(group.getGroupDescription())
                     .populations(
                         Stream.concat(
-                                buildPopulations(group, allDefinitions).stream(),
-                                buildStratification(group, allDefinitions).stream())
+                                Stream.concat(
+                                    buildPopulations(group, allDefinitions).stream(),
+                                    buildStratification(group, allDefinitions).stream()),
+                                buildMeasureObservation(group, allDefinitions).stream())
                             .toList())
                     .build())
         .collect(Collectors.toList());
@@ -216,18 +219,42 @@ public class HumanReadableService {
 
   List<HumanReadablePopulationModel> buildStratification(
       Group group, Set<CQLDefinition> allDefinitions) {
-    return group.getStratifications().stream()
-        .map(
-            stratification ->
-                HumanReadablePopulationModel.builder()
-                    .name("Stratification")
-                    .id(stratification.getId())
-                    .display("Stratification")
-                    .logic(getCQLDefinitionLogic(stratification.getCqlDefinition(), allDefinitions))
-                    .expressionName(stratification.getCqlDefinition())
-                    .inGroup(!StringUtils.isBlank(stratification.getCqlDefinition()))
-                    .build())
-        .collect(Collectors.toList());
+    if (!CollectionUtils.isEmpty(group.getStratifications())) {
+      return group.getStratifications().stream()
+          .map(
+              stratification ->
+                  HumanReadablePopulationModel.builder()
+                      .name("Stratification")
+                      .id(stratification.getId())
+                      .display("Stratification")
+                      .logic(
+                          getCQLDefinitionLogic(stratification.getCqlDefinition(), allDefinitions))
+                      .expressionName(stratification.getCqlDefinition())
+                      .inGroup(!StringUtils.isBlank(stratification.getCqlDefinition()))
+                      .build())
+          .collect(Collectors.toList());
+    }
+    return Collections.emptyList();
+  }
+
+  List<HumanReadablePopulationModel> buildMeasureObservation(
+      Group group, Set<CQLDefinition> allDefinitions) {
+    if (!CollectionUtils.isEmpty(group.getMeasureObservations())) {
+      return group.getMeasureObservations().stream()
+          .map(
+              measureObservation ->
+                  HumanReadablePopulationModel.builder()
+                      .name(measureObservation.getDefinition())
+                      .id(measureObservation.getId())
+                      .display(measureObservation.getDefinition())
+                      .logic(
+                          getCQLDefinitionLogic(measureObservation.getDefinition(), allDefinitions))
+                      .expressionName(measureObservation.getDefinition())
+                      .inGroup(!StringUtils.isBlank(measureObservation.getDefinition()))
+                      .build())
+          .collect(Collectors.toList());
+    }
+    return Collections.emptyList();
   }
 
   List<HumanReadableExpressionModel> buildDefinitions(Set<CQLDefinition> allDefinitions) {
