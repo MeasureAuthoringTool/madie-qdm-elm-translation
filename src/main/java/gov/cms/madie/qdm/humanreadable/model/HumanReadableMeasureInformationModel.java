@@ -36,6 +36,7 @@ public class HumanReadableMeasureInformationModel {
   private List<String> measureTypes;
   private List<HumanReadableComponentMeasureModel> componentMeasures;
   private String stratification;
+  private String stratificationDescription;
   private String riskAdjustment;
   private String rateAggregation;
   private String rationale;

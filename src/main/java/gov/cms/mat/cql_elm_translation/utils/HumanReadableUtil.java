@@ -71,6 +71,17 @@ public class HumanReadableUtil {
     return null;
   }
 
+  public static String getStratificationDescription(Measure measure) {
+    if (CollectionUtils.isNotEmpty(measure.getGroups())) {
+      for (Group group : measure.getGroups()) {
+        if (CollectionUtils.isNotEmpty(group.getStratifications())) {
+          return group.getStratifications().get(0).getDescription();
+        }
+      }
+    }
+    return null;
+  }
+
   public static List<MeasureDefinition> buildMeasureDefinitions(MeasureMetaData measureMetaData) {
     if (measureMetaData != null
         && CollectionUtils.isNotEmpty(measureMetaData.getMeasureDefinitions())) {
