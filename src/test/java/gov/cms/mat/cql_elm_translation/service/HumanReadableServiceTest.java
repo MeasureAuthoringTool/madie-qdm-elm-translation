@@ -109,13 +109,7 @@ class HumanReadableServiceTest {
                                 .referenceText("Example < Justification Reference Text")
                                 .build()))
                     .steward(Organization.builder().name("stewardOrg").build())
-                    .measureDefinitions(
-                        List.of(
-                            MeasureDefinition.builder()
-                                .id("testMeasureDefinitionId")
-                                .term("test term")
-                                .definition("test definition")
-                                .build()))
+                    .definition("test definition")
                     .endorsements(
                         List.of(
                             Endorsement.builder()
@@ -311,8 +305,7 @@ class HumanReadableServiceTest {
         measureInfoModel.getReferences().size(),
         equalTo(measure.getMeasureMetaData().getReferences().size()));
     assertThat(
-        measureInfoModel.getDefinitions().get(0).getDefinition(),
-        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
+        measureInfoModel.getDefinition(), equalTo(measure.getMeasureMetaData().getDefinition()));
     assertThat(measureInfoModel.getGuidance(), equalTo(measure.getMeasureMetaData().getGuidance()));
     assertThat(
         measureInfoModel.getCbeNumber(),
@@ -332,17 +325,7 @@ class HumanReadableServiceTest {
     assertNull(measureInfoModel.getGuidance());
 
     assertThat(
-        measureInfoModel.getDefinitions().size(),
-        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().size()));
-    assertThat(
-        measureInfoModel.getDefinitions().get(0).getId(),
-        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getId()));
-    assertThat(
-        measureInfoModel.getDefinitions().get(0).getTerm(),
-        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getTerm()));
-    assertThat(
-        measureInfoModel.getDefinitions().get(0).getDefinition(),
-        equalTo(measure.getMeasureMetaData().getMeasureDefinitions().get(0).getDefinition()));
+        measureInfoModel.getDefinition(), equalTo(measure.getMeasureMetaData().getDefinition()));
     assertEquals(
         measure.getMeasureMetaData().getReferences().get(0),
         measureInfoModel.getReferences().get(0));

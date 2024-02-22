@@ -166,7 +166,8 @@ public class HumanReadableService {
         .denominatorExceptions(
             HumanReadableUtil.getPopulationDescription(
                 measure, PopulationType.DENOMINATOR_EXCEPTION.name()))
-        .definitions(HumanReadableUtil.buildMeasureDefinitions(measure.getMeasureMetaData()))
+        .definition(
+            HumanReadableUtil.escapeHtmlString(measure.getMeasureMetaData().getDefinition()))
         .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
         .build();
   }
