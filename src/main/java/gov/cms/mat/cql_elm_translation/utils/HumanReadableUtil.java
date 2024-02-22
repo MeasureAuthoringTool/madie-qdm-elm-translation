@@ -11,7 +11,6 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
-import gov.cms.madie.models.measure.MeasureDefinition;
 import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
@@ -71,20 +70,11 @@ public class HumanReadableUtil {
     return null;
   }
 
-  public static List<MeasureDefinition> buildMeasureDefinitions(MeasureMetaData measureMetaData) {
-    if (measureMetaData != null
-        && CollectionUtils.isNotEmpty(measureMetaData.getMeasureDefinitions())) {
-      return measureMetaData.getMeasureDefinitions().stream()
-          .map(
-              definition ->
-                  MeasureDefinition.builder()
-                      .id(definition.getId())
-                      .term(htmlEscape(definition.getTerm()))
-                      .definition(htmlEscape(definition.getDefinition()))
-                      .build())
-          .collect(Collectors.toList());
+  public static String escapeHtmlString(String str) {
+    if (StringUtils.isBlank(str)) {
+      return str;
     }
-    return null;
+    return htmlEscape(str);
   }
 
   public static List<Reference> buildReferences(MeasureMetaData measureMetaData) {
@@ -95,7 +85,7 @@ public class HumanReadableUtil {
                   new Reference()
                       .toBuilder()
                           .id(reference.getId())
-                          .referenceText(htmlEscape(reference.getReferenceText()))
+                          .referenceText(escapeHtmlString(reference.getReferenceText()))
                           .referenceType(reference.getReferenceType())
                           .build())
           .collect(Collectors.toList());

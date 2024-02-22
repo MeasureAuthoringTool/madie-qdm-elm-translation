@@ -2,7 +2,6 @@ package gov.cms.madie.qdm.humanreadable.model;
 
 import java.util.List;
 
-import gov.cms.madie.models.measure.MeasureDefinition;
 import gov.cms.madie.models.measure.Reference;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -43,7 +42,7 @@ public class HumanReadableMeasureInformationModel {
   private String improvementNotation;
   private List<Reference> references;
 
-  private List<MeasureDefinition> definitions;
+  private String definition;
   private String guidance;
   private String transmissionFormat;
   private String initialPopulation;
