@@ -59,24 +59,23 @@ public class HumanReadableUtil {
   }
 
   public static String getStratification(Measure measure) {
+    // Collects and returns all stratification descriptions for display
     if (CollectionUtils.isNotEmpty(measure.getGroups())) {
+      String allDescriptions = "";
       for (Group group : measure.getGroups()) {
+        if (allDescriptions.length() > 0
+            && CollectionUtils.isNotEmpty(group.getStratifications())) {
+          allDescriptions += "\n";
+        }
         if (CollectionUtils.isNotEmpty(group.getStratifications())) {
-          return group.getStratifications().stream()
-              .map(strat -> strat.getCqlDefinition())
-              .collect(Collectors.joining("\n"));
+          allDescriptions +=
+              group.getStratifications().stream()
+                  .map(strat -> strat.getDescription())
+                  .collect(Collectors.joining("\n"));
         }
       }
-    }
-    return null;
-  }
-
-  public static String getStratificationDescription(Measure measure) {
-    if (CollectionUtils.isNotEmpty(measure.getGroups())) {
-      for (Group group : measure.getGroups()) {
-        if (CollectionUtils.isNotEmpty(group.getStratifications())) {
-          return group.getStratifications().get(0).getDescription();
-        }
+      if (allDescriptions.length() > 0) {
+        return allDescriptions;
       }
     }
     return null;
