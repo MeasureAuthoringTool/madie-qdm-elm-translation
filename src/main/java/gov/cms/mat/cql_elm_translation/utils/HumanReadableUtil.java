@@ -60,21 +60,20 @@ public class HumanReadableUtil {
   public static String getStratification(Measure measure) {
     // Collects and returns all stratification descriptions for display
     if (CollectionUtils.isNotEmpty(measure.getGroups())) {
-      String allDescriptions = "";
+
+      StringBuilder allDescriptions = new StringBuilder();
       for (Group group : measure.getGroups()) {
-        if (!allDescriptions.isEmpty()
-            && CollectionUtils.isNotEmpty(group.getStratifications())) {
-          allDescriptions += "\n";
-        }
         if (CollectionUtils.isNotEmpty(group.getStratifications())) {
-          allDescriptions +=
-              group.getStratifications().stream()
-                  .map(strat -> strat.getDescription())
-                  .collect(Collectors.joining("\n"));
+          allDescriptions
+              .append(
+                  group.getStratifications().stream()
+                      .map(strat -> strat.getDescription())
+                      .collect(Collectors.joining("\n")))
+              .append("\n");
         }
       }
-      if (allDescriptions.length() > 0) {
-        return allDescriptions;
+      if (!allDescriptions.isEmpty()) {
+        return allDescriptions.toString().trim();
       }
     }
     return null;

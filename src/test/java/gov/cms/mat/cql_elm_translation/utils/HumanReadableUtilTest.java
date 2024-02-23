@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.utils;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -16,6 +17,7 @@ import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.Population;
 import gov.cms.madie.models.measure.PopulationType;
 import gov.cms.madie.models.measure.QdmMeasure;
+import gov.cms.madie.models.measure.Stratification;
 
 public class HumanReadableUtilTest {
 
@@ -142,5 +144,17 @@ public class HumanReadableUtilTest {
         HumanReadableUtil.getPopulationDescription(
             measure, PopulationType.INITIAL_POPULATION.name());
     assertTrue(StringUtils.isBlank(result));
+  }
+
+  @Test
+  void test() {
+    Stratification s1 = Stratification.builder().description("G1S1").build();
+    Group g1 = Group.builder().stratifications(List.of(s1)).build();
+    Stratification s2 = Stratification.builder().description("G2S2").build();
+    Group g2 = Group.builder().stratifications(List.of(s2)).build();
+    QdmMeasure testMeasure = QdmMeasure.builder().groups(List.of(g1, g2)).build();
+
+    String humanreadabledescription = HumanReadableUtil.getStratification(testMeasure);
+    assertEquals("G1S1\nG2S2", humanreadabledescription);
   }
 }
