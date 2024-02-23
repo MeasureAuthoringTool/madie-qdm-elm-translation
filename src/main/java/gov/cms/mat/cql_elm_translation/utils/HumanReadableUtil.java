@@ -62,7 +62,7 @@ public class HumanReadableUtil {
     if (CollectionUtils.isNotEmpty(measure.getGroups())) {
       String allDescriptions = "";
       for (Group group : measure.getGroups()) {
-        if (allDescriptions.length() > 0
+        if (!allDescriptions.isEmpty()
             && CollectionUtils.isNotEmpty(group.getStratifications())) {
           allDescriptions += "\n";
         }
