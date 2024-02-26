@@ -14,6 +14,7 @@ import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
+import gov.cms.madie.models.measure.Stratification;
 
 public class HumanReadableUtil {
 
@@ -73,7 +74,7 @@ public class HumanReadableUtil {
               .append("\n");
         }
       }
-     return HumanReadableUtil.escapeHtmlString(allDescriptions.toString());
+      return HumanReadableUtil.escapeHtmlString(allDescriptions.toString());
     }
     return null;
   }
