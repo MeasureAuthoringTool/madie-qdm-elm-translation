@@ -72,9 +72,7 @@ public class HumanReadableUtil {
               .append("\n");
         }
       }
-      if (!allDescriptions.isEmpty()) {
-        return allDescriptions.toString().trim();
-      }
+     return HumanReadableUtil.escapeHtmlString(allDescriptions.toString());
     }
     return null;
   }
