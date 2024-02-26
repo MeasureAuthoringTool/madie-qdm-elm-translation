@@ -14,6 +14,7 @@ import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.models.measure.MeasureMetaData;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
+import gov.cms.madie.models.measure.Stratification;
 
 public class HumanReadableUtil {
 
@@ -58,13 +59,23 @@ public class HumanReadableUtil {
   }
 
   public static String getStratification(Measure measure) {
+    // Collects and returns all stratification descriptions for display
     if (CollectionUtils.isNotEmpty(measure.getGroups())) {
+
+      StringBuilder allDescriptions = new StringBuilder();
       for (Group group : measure.getGroups()) {
         if (CollectionUtils.isNotEmpty(group.getStratifications())) {
-          return group.getStratifications().stream()
-              .map(strat -> strat.getCqlDefinition())
-              .collect(Collectors.joining("\n"));
+          allDescriptions
+              .append(
+                  group.getStratifications().stream()
+                      .map(Stratification::getDescription)
+                      .filter(StringUtils::isNotBlank)
+                      .collect(Collectors.joining("\n")))
+              .append("\n");
         }
+      }
+      if (!allDescriptions.isEmpty()) {
+        return HumanReadableUtil.escapeHtmlString(allDescriptions.toString().trim());
       }
     }
     return null;
