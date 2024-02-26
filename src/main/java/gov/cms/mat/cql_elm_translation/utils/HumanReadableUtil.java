@@ -67,7 +67,8 @@ public class HumanReadableUtil {
           allDescriptions
               .append(
                   group.getStratifications().stream()
-                      .map(strat -> strat.getDescription())
+                      .map(Stratification::getDescription)
+                      .filter(StringUtils::isNotBlank)
                       .collect(Collectors.joining("\n")))
               .append("\n");
         }
