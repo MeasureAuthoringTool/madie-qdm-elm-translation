@@ -17,6 +17,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -43,6 +44,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
@@ -141,6 +143,12 @@ class HumanReadableServiceTest {
                                     .id("testStrat2Id")
                                     .cqlDefinition("")
                                     .build()))
+                        .measureObservations(
+                            List.of(
+                                MeasureObservation.builder()
+                                    .definition(PopulationType.INITIAL_POPULATION.name())
+                                    .build(),
+                                MeasureObservation.builder().build()))
                         .build()))
             .baseConfigurationTypes(List.of(BaseConfigurationTypes.OUTCOME))
             .riskAdjustmentDescription("test risk adjustment")
@@ -355,7 +363,10 @@ class HumanReadableServiceTest {
     assertThat(popCriteriaModel.getName(), is(equalTo(group.getGroupDescription())));
     assertThat(
         popCriteriaModel.getPopulations().size(),
-        is(group.getPopulations().size() + group.getStratifications().size()));
+        is(
+            group.getPopulations().size()
+                + group.getStratifications().size()
+                + group.getMeasureObservations().size()));
 
     Population measurePopulation = group.getPopulations().get(0);
     HumanReadablePopulationModel populationModel = popCriteriaModel.getPopulations().get(0);
@@ -605,5 +616,23 @@ class HumanReadableServiceTest {
     assertThat(
         terminologyModels.get(1).getName(),
         is(equalTo("Routes of Administration for Opioid Antagonists")));
+  }
+
+  @Test
+  public void testbuildStratificationWithNoStratifications() {
+    Group group = measure.getGroups().get(0);
+    group.setStratifications(null);
+    List<HumanReadablePopulationModel> model =
+        humanReadableService.buildStratification(group, allDefinitions);
+    assertTrue(CollectionUtils.isEmpty(model));
+  }
+
+  @Test
+  public void testBuildMeasureObservationWithoutMeasureObservations() {
+    Group group = measure.getGroups().get(0);
+    group.setMeasureObservations(null);
+    List<HumanReadablePopulationModel> model =
+        humanReadableService.buildMeasureObservation(group, allDefinitions);
+    assertTrue(CollectionUtils.isEmpty(model));
   }
 }
