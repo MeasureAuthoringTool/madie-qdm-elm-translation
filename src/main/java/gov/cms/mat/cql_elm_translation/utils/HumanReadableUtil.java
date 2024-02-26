@@ -74,7 +74,9 @@ public class HumanReadableUtil {
               .append("\n");
         }
       }
-      return HumanReadableUtil.escapeHtmlString(allDescriptions.toString());
+      if (!allDescriptions.isEmpty()) {
+        return HumanReadableUtil.escapeHtmlString(allDescriptions.toString().trim());
+      }
     }
     return null;
   }
