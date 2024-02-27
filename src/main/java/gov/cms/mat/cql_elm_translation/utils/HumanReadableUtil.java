@@ -12,6 +12,7 @@ import com.nimbusds.oauth2.sdk.util.CollectionUtils;
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.models.measure.MeasureMetaData;
+import gov.cms.madie.models.measure.MeasureObservation;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
 import gov.cms.madie.models.measure.Stratification;
@@ -123,5 +124,28 @@ public class HumanReadableUtil {
               });
     }
     return sb.toString();
+  }
+
+  public static String getMeasureObservation(Measure measure) {
+    // Collects and returns all stratification descriptions for display
+    if (CollectionUtils.isNotEmpty(measure.getGroups())) {
+
+      StringBuilder allDescriptions = new StringBuilder();
+      for (Group group : measure.getGroups()) {
+        if (CollectionUtils.isNotEmpty(group.getMeasureObservations())) {
+          allDescriptions
+              .append(
+                  group.getMeasureObservations().stream()
+                      .map(MeasureObservation::getDescription)
+                      .filter(StringUtils::isNotBlank)
+                      .collect(Collectors.joining("\n")))
+              .append("\n");
+        }
+      }
+      if (!allDescriptions.isEmpty()) {
+        return HumanReadableUtil.escapeHtmlString(allDescriptions.toString().trim());
+      }
+    }
+    return null;
   }
 }

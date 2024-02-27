@@ -27,7 +27,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Component;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.CollectionUtils;
-
 import java.io.IOException;
 import java.text.Collator;
 import java.text.DateFormat;
@@ -116,60 +115,75 @@ public class HumanReadableService {
 
   HumanReadableMeasureInformationModel buildMeasureInfo(Measure measure) {
     // TODO Needs safety checks
-    return HumanReadableMeasureInformationModel.builder()
-        .qdmVersion(5.6) // TODO Replace hardcode
-        .ecqmTitle(measure.getEcqmTitle())
-        .ecqmVersionNumber(measure.getVersion().toString())
-        .calendarYear(false) // Unsupported MAT feature, default to false
-        .guid(measure.getMeasureSetId())
-        .cbeNumber(HumanReadableUtil.getCbeNumber(measure))
-        .endorsedBy(HumanReadableUtil.getEndorsedBy(measure))
-        // TODO needs safety check
-        .patientBased(measure.getGroups().get(0).getPopulationBasis().equals("boolean"))
-        .measurementPeriodStartDate(
-            DateFormat.getDateInstance().format(measure.getMeasurementPeriodStart()))
-        .measurementPeriodEndDate(
-            DateFormat.getDateInstance().format(measure.getMeasurementPeriodEnd()))
-        .measureScoring(
-            measure.getGroups().get(0).getScoring()) // All groups expected to have same scoring
-        .description(measure.getMeasureMetaData().getDescription())
-        .copyright(measure.getMeasureMetaData().getCopyright())
-        .disclaimer(measure.getMeasureMetaData().getDisclaimer())
-        .rationale(measure.getMeasureMetaData().getRationale())
-        .clinicalRecommendationStatement(measure.getMeasureMetaData().getClinicalRecommendation())
-        .measureDevelopers(HumanReadableUtil.getMeasureDevelopers(measure))
-        .measureSteward(
-            measure.getMeasureMetaData().getSteward() != null
-                ? measure.getMeasureMetaData().getSteward().getName()
-                : null)
-        .measureTypes(HumanReadableUtil.getMeasureTypes(measure))
-        .stratification(HumanReadableUtil.getStratification(measure))
-        .riskAdjustment(measure.getRiskAdjustmentDescription())
-        .supplementalDataElements(measure.getSupplementalDataDescription())
-        .rateAggregation(((QdmMeasure) measure).getRateAggregation())
-        .improvementNotation(((QdmMeasure) measure).getImprovementNotation())
-        .guidance(measure.getMeasureMetaData().getGuidance())
-        .transmissionFormat(measure.getMeasureMetaData().getTransmissionFormat())
-        .initialPopulation(
-            HumanReadableUtil.getPopulationDescription(
-                measure, PopulationType.INITIAL_POPULATION.name()))
-        .denominator(
-            HumanReadableUtil.getPopulationDescription(measure, PopulationType.DENOMINATOR.name()))
-        .denominatorExceptions(
-            HumanReadableUtil.getPopulationDescription(
-                measure, PopulationType.DENOMINATOR_EXCLUSION.name()))
-        .numerator(
-            HumanReadableUtil.getPopulationDescription(measure, PopulationType.NUMERATOR.name()))
-        .numeratorExclusions(
-            HumanReadableUtil.getPopulationDescription(
-                measure, PopulationType.NUMERATOR_EXCLUSION.name()))
-        .denominatorExceptions(
-            HumanReadableUtil.getPopulationDescription(
-                measure, PopulationType.DENOMINATOR_EXCEPTION.name()))
-        .definition(
-            HumanReadableUtil.escapeHtmlString(measure.getMeasureMetaData().getDefinition()))
-        .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
-        .build();
+    HumanReadableMeasureInformationModel modelTemp =
+        HumanReadableMeasureInformationModel.builder()
+            .qdmVersion(5.6) // TODO Replace hardcode
+            .ecqmTitle(measure.getEcqmTitle())
+            .ecqmVersionNumber(measure.getVersion().toString())
+            .calendarYear(false) // Unsupported MAT feature, default to false
+            .guid(measure.getMeasureSetId())
+            .cbeNumber(HumanReadableUtil.getCbeNumber(measure))
+            .endorsedBy(HumanReadableUtil.getEndorsedBy(measure))
+            // TODO needs safety check
+            .patientBased(measure.getGroups().get(0).getPopulationBasis().equals("boolean"))
+            .measurementPeriodStartDate(
+                DateFormat.getDateInstance().format(measure.getMeasurementPeriodStart()))
+            .measurementPeriodEndDate(
+                DateFormat.getDateInstance().format(measure.getMeasurementPeriodEnd()))
+            .measureScoring(
+                measure.getGroups().get(0).getScoring()) // All groups expected to have same scoring
+            .description(measure.getMeasureMetaData().getDescription())
+            .copyright(measure.getMeasureMetaData().getCopyright())
+            .disclaimer(measure.getMeasureMetaData().getDisclaimer())
+            .rationale(measure.getMeasureMetaData().getRationale())
+            .clinicalRecommendationStatement(
+                measure.getMeasureMetaData().getClinicalRecommendation())
+            .measureDevelopers(HumanReadableUtil.getMeasureDevelopers(measure))
+            .measureSteward(
+                measure.getMeasureMetaData().getSteward() != null
+                    ? measure.getMeasureMetaData().getSteward().getName()
+                    : null)
+            .measureTypes(HumanReadableUtil.getMeasureTypes(measure))
+            .stratification(HumanReadableUtil.getStratification(measure))
+            .measureObservations(HumanReadableUtil.getMeasureObservation(measure))
+            .riskAdjustment(measure.getRiskAdjustmentDescription())
+            .supplementalDataElements(measure.getSupplementalDataDescription())
+            .rateAggregation(((QdmMeasure) measure).getRateAggregation())
+            .improvementNotation(((QdmMeasure) measure).getImprovementNotation())
+            .guidance(measure.getMeasureMetaData().getGuidance())
+            .transmissionFormat(measure.getMeasureMetaData().getTransmissionFormat())
+            .definition(
+                HumanReadableUtil.escapeHtmlString(measure.getMeasureMetaData().getDefinition()))
+            .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
+            .build();
+    generatePopulatiosn(measure, modelTemp);
+    return modelTemp;
+  }
+
+  private void generatePopulatiosn(
+      Measure measure, HumanReadableMeasureInformationModel modelTemp) {
+    modelTemp.setInitialPopulation(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.INITIAL_POPULATION.name()));
+    modelTemp.setDenominator(
+        HumanReadableUtil.getPopulationDescription(measure, PopulationType.DENOMINATOR.name()));
+    modelTemp.setDenominatorExclusions(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.DENOMINATOR_EXCLUSION.name()));
+    modelTemp.setNumerator(
+        HumanReadableUtil.getPopulationDescription(measure, PopulationType.NUMERATOR.name()));
+    modelTemp.setNumeratorExclusions(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.NUMERATOR_EXCLUSION.name()));
+    modelTemp.setDenominatorExceptions(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.DENOMINATOR_EXCEPTION.name()));
+    modelTemp.setMeasurePopulation(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.MEASURE_POPULATION.name()));
+    modelTemp.setMeasurePopulationExclusions(
+        HumanReadableUtil.getPopulationDescription(
+            measure, PopulationType.MEASURE_POPULATION_EXCLUSION.name()));
   }
 
   List<HumanReadablePopulationCriteriaModel> buildPopCriteria(
@@ -200,22 +214,13 @@ public class HumanReadableService {
                     .name(population.getName().name())
                     .id(population.getId())
                     .display(population.getName().getDisplay())
-                    .logic(getCQLDefinitionLogic(population.getDefinition(), allDefinitions))
+                    .logic(
+                        HumanReadableServiceUtil.getCQLDefinitionLogic(
+                            population.getDefinition(), allDefinitions))
                     .expressionName(population.getDefinition())
                     .inGroup(!StringUtils.isBlank(population.getDefinition()))
                     .build())
         .collect(Collectors.toList());
-  }
-
-  String getCQLDefinitionLogic(String id, Set<CQLDefinition> allDefinitions) {
-    CQLDefinition cqlDefinition =
-        allDefinitions.stream()
-            .filter(definition -> id != null && id.equalsIgnoreCase(definition.getId()))
-            .findFirst()
-            .orElse(null);
-    return cqlDefinition != null
-        ? cqlDefinition.getLogic().substring(cqlDefinition.getLogic().indexOf('\n') + 1)
-        : "";
   }
 
   List<HumanReadablePopulationModel> buildStratification(
@@ -229,7 +234,8 @@ public class HumanReadableService {
                       .id(stratification.getId())
                       .display("Stratification")
                       .logic(
-                          getCQLDefinitionLogic(stratification.getCqlDefinition(), allDefinitions))
+                          HumanReadableServiceUtil.getCQLDefinitionLogic(
+                              stratification.getCqlDefinition(), allDefinitions))
                       .expressionName(stratification.getCqlDefinition())
                       .inGroup(!StringUtils.isBlank(stratification.getCqlDefinition()))
                       .build())
@@ -249,7 +255,8 @@ public class HumanReadableService {
                       .id(measureObservation.getId())
                       .display(measureObservation.getDefinition())
                       .logic(
-                          getCQLDefinitionLogic(measureObservation.getDefinition(), allDefinitions))
+                          HumanReadableServiceUtil.getCQLDefinitionLogic(
+                              measureObservation.getDefinition(), allDefinitions))
                       .expressionName(measureObservation.getDefinition())
                       .inGroup(!StringUtils.isBlank(measureObservation.getDefinition()))
                       .build())
@@ -420,7 +427,9 @@ public class HumanReadableService {
                   HumanReadableExpressionModel.builder()
                       .id(UUID.randomUUID().toString())
                       .name(supplementalData.getDefinition())
-                      .logic(getLogic(supplementalData.getDefinition(), definitions))
+                      .logic(
+                          HumanReadableServiceUtil.getLogic(
+                              supplementalData.getDefinition(), definitions))
                       .build())
           .collect(Collectors.toList());
     }
@@ -437,19 +446,14 @@ public class HumanReadableService {
                       .id(UUID.randomUUID().toString())
                       .name(riskAdjustment.getDefinition())
                       .logic(
-                          "[" + getLogic(riskAdjustment.getDefinition(), definitions).trim() + "]")
+                          "["
+                              + HumanReadableServiceUtil.getLogic(
+                                      riskAdjustment.getDefinition(), definitions)
+                                  .trim()
+                              + "]")
                       .build())
           .collect(Collectors.toList());
     }
     return null;
-  }
-
-  String getLogic(String definition, List<HumanReadableExpressionModel> definitions) {
-    for (HumanReadableExpressionModel humanReadableDefinition : definitions) {
-      if (definition.equalsIgnoreCase(humanReadableDefinition.getName())) {
-        return humanReadableDefinition.getLogic();
-      }
-    }
-    return "";
   }
 }
