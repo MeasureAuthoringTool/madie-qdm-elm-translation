@@ -51,6 +51,13 @@ public class HumanReadableUtilTest {
   }
 
   @Test
+  void testGetMeasureObservationNull() {
+    measure.setMeasureMetaData(MeasureMetaData.builder().build());
+    var result = HumanReadableUtil.getMeasureObservation(measure);
+    assertNull(result);
+  }
+
+  @Test
   void testGetEndorsedByMetaDataNull() {
     measure.setMeasureMetaData(null);
     var result = HumanReadableUtil.getEndorsedBy(measure);
