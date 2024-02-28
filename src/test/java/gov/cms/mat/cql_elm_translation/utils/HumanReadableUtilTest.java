@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 
 import gov.cms.madie.models.measure.Group;
 import gov.cms.madie.models.measure.MeasureMetaData;
+import gov.cms.madie.models.measure.MeasureObservation;
 import gov.cms.madie.models.measure.Population;
 import gov.cms.madie.models.measure.PopulationType;
 import gov.cms.madie.models.measure.QdmMeasure;
@@ -53,7 +54,7 @@ public class HumanReadableUtilTest {
   @Test
   void testGetMeasureObservationNull() {
     measure.setMeasureMetaData(MeasureMetaData.builder().build());
-    var result = HumanReadableUtil.getMeasureObservation(measure);
+    var result = HumanReadableUtil.getMeasureObservationDescriptions(measure);
     assertNull(result);
   }
 
@@ -154,7 +155,7 @@ public class HumanReadableUtilTest {
   }
 
   @Test
-  void test() {
+  void testStratificationDescriptionOutput() {
     Stratification s1 = Stratification.builder().description("G1S1").build();
     Group g1 = Group.builder().stratifications(List.of(s1)).build();
     Stratification s2 = Stratification.builder().description("G2S2").build();
@@ -163,5 +164,18 @@ public class HumanReadableUtilTest {
 
     String humanreadabledescription = HumanReadableUtil.getStratification(testMeasure);
     assertEquals("G1S1\nG2S2", humanreadabledescription);
+  }
+
+  @Test
+  void testMeasureObservationDescriptionOutput() {
+    MeasureObservation s1 = MeasureObservation.builder().description("G1M1").build();
+    Group g1 = Group.builder().measureObservations(List.of(s1)).build();
+    MeasureObservation s2 = MeasureObservation.builder().description("G2M2").build();
+    Group g2 = Group.builder().measureObservations(List.of(s2)).build();
+    QdmMeasure testMeasure = QdmMeasure.builder().groups(List.of(g1, g2)).build();
+
+    String humanreadabledescription =
+        HumanReadableUtil.getMeasureObservationDescriptions(testMeasure);
+    assertEquals("G1M1\nG2M2", humanreadabledescription);
   }
 }

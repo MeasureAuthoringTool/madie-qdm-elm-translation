@@ -129,7 +129,7 @@ public class HumanReadableUtil {
     return sb.toString();
   }
 
-  public static String getMeasureObservation(Measure measure) {
+  public static String getMeasureObservationDescriptions(Measure measure) {
     // Collects and returns all stratification descriptions for display
     if (CollectionUtils.isNotEmpty(measure.getGroups())) {
 

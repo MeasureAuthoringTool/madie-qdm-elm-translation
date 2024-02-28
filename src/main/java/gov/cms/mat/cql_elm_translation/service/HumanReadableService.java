@@ -145,7 +145,7 @@ public class HumanReadableService {
                     : null)
             .measureTypes(HumanReadableUtil.getMeasureTypes(measure))
             .stratification(HumanReadableUtil.getStratification(measure))
-            .measureObservations(HumanReadableUtil.getMeasureObservation(measure))
+            .measureObservations(HumanReadableUtil.getMeasureObservationDescriptions(measure))
             .riskAdjustment(measure.getRiskAdjustmentDescription())
             .supplementalDataElements(measure.getSupplementalDataDescription())
             .rateAggregation(((QdmMeasure) measure).getRateAggregation())
@@ -156,11 +156,11 @@ public class HumanReadableService {
                 HumanReadableUtil.escapeHtmlString(measure.getMeasureMetaData().getDefinition()))
             .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
             .build();
-    generatePopulatiosn(measure, modelTemp);
+    generatePopulations(measure, modelTemp);
     return modelTemp;
   }
 
-  private void generatePopulatiosn(
+  private void generatePopulations(
       Measure measure, HumanReadableMeasureInformationModel modelTemp) {
     modelTemp.setInitialPopulation(
         HumanReadableUtil.getPopulationDescription(
