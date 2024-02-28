@@ -215,7 +215,7 @@ public class HumanReadableService {
                     .id(population.getId())
                     .display(population.getName().getDisplay())
                     .logic(
-                        HumanReadableServiceUtil.getCQLDefinitionLogic(
+                        HumanReadableUtil.getCQLDefinitionLogic(
                             population.getDefinition(), allDefinitions))
                     .expressionName(population.getDefinition())
                     .inGroup(!StringUtils.isBlank(population.getDefinition()))
@@ -234,7 +234,7 @@ public class HumanReadableService {
                       .id(stratification.getId())
                       .display("Stratification")
                       .logic(
-                          HumanReadableServiceUtil.getCQLDefinitionLogic(
+                          HumanReadableUtil.getCQLDefinitionLogic(
                               stratification.getCqlDefinition(), allDefinitions))
                       .expressionName(stratification.getCqlDefinition())
                       .inGroup(!StringUtils.isBlank(stratification.getCqlDefinition()))
@@ -255,7 +255,7 @@ public class HumanReadableService {
                       .id(measureObservation.getId())
                       .display(measureObservation.getDefinition())
                       .logic(
-                          HumanReadableServiceUtil.getCQLDefinitionLogic(
+                          HumanReadableUtil.getCQLDefinitionLogic(
                               measureObservation.getDefinition(), allDefinitions))
                       .expressionName(measureObservation.getDefinition())
                       .inGroup(!StringUtils.isBlank(measureObservation.getDefinition()))
@@ -428,8 +428,7 @@ public class HumanReadableService {
                       .id(UUID.randomUUID().toString())
                       .name(supplementalData.getDefinition())
                       .logic(
-                          HumanReadableServiceUtil.getLogic(
-                              supplementalData.getDefinition(), definitions))
+                          HumanReadableUtil.getLogic(supplementalData.getDefinition(), definitions))
                       .build())
           .collect(Collectors.toList());
     }
@@ -447,7 +446,7 @@ public class HumanReadableService {
                       .name(riskAdjustment.getDefinition())
                       .logic(
                           "["
-                              + HumanReadableServiceUtil.getLogic(
+                              + HumanReadableUtil.getLogic(
                                       riskAdjustment.getDefinition(), definitions)
                                   .trim()
                               + "]")

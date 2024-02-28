@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.utils;
 import static org.springframework.web.util.HtmlUtils.htmlEscape;
 
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang3.StringUtils;
@@ -16,6 +17,8 @@ import gov.cms.madie.models.measure.MeasureObservation;
 import gov.cms.madie.models.measure.QdmMeasure;
 import gov.cms.madie.models.measure.Reference;
 import gov.cms.madie.models.measure.Stratification;
+import gov.cms.madie.qdm.humanreadable.model.HumanReadableExpressionModel;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 public class HumanReadableUtil {
 
@@ -147,5 +150,25 @@ public class HumanReadableUtil {
       }
     }
     return null;
+  }
+
+  public static String getLogic(String definition, List<HumanReadableExpressionModel> definitions) {
+    for (HumanReadableExpressionModel humanReadableDefinition : definitions) {
+      if (definition.equalsIgnoreCase(humanReadableDefinition.getName())) {
+        return humanReadableDefinition.getLogic();
+      }
+    }
+    return "";
+  }
+
+  public static String getCQLDefinitionLogic(String id, Set<CQLDefinition> allDefinitions) {
+    CQLDefinition cqlDefinition =
+        allDefinitions.stream()
+            .filter(definition -> id != null && id.equalsIgnoreCase(definition.getId()))
+            .findFirst()
+            .orElse(null);
+    return cqlDefinition != null
+        ? cqlDefinition.getLogic().substring(cqlDefinition.getLogic().indexOf('\n') + 1)
+        : "";
   }
 }
