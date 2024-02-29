@@ -2,10 +2,14 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
@@ -48,7 +52,7 @@ public class CqlParsingService extends CqlTooling {
    * @return CQLLookups
    */
   public CqlLookups getCqlLookups(String cql, Set<String> measureExpressions, String accessToken) {
-    if(StringUtils.isBlank(cql) || CollectionUtils.isEmpty(measureExpressions)) {
+    if (StringUtils.isBlank(cql) || CollectionUtils.isEmpty(measureExpressions)) {
       return null;
     }
 
@@ -68,6 +72,8 @@ public class CqlParsingService extends CqlTooling {
     // only used CQLDefinitions(measure definitions + any used by measure definitions)
     Set<CQLDefinition> usedCqlDefinition =
         getUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
+    Set<CQLCodeSystem> cqlCodeSystems = getCqlCodeSystems(cqlTools.getUsedCodes());
+    Set<CQLIncludeLibrary> includeLibraries = getIncludedLibraries(cqlTools);
     return CqlLookups.builder()
         .context("Patient")
         .library(name)
@@ -78,6 +84,8 @@ public class CqlParsingService extends CqlTooling {
         .valueSets(cqlTools.getUsedCQLValuesets())
         .codes(cqlTools.getUsedCodes())
         .definitions(usedCqlDefinition)
+        .codeSystems(cqlCodeSystems)
+        .includeLibraries(includeLibraries)
         .build();
   }
 
@@ -151,6 +159,37 @@ public class CqlParsingService extends CqlTooling {
                   .build();
             })
         .collect(Collectors.toSet());
+  }
+
+  private Set<CQLCodeSystem> getCqlCodeSystems(Set<CQLCode> cqlCodes) {
+    if (CollectionUtils.isEmpty(cqlCodes)) {
+      return Set.of();
+    }
+    return cqlCodes.stream()
+        .map(
+            cqlCode ->
+                CQLCodeSystem.builder()
+                    .codeSystemName(cqlCode.getCodeSystemName())
+                    .codeSystemVersion(cqlCode.getCodeSystemVersion())
+                    .codeSystem(cqlCode.getCodeSystemOID().split("urn:oid:")[1])
+                    .build())
+        .collect(Collectors.toSet());
+  }
+
+  private Set<CQLIncludeLibrary> getIncludedLibraries(CQLTools cqlTools) {
+    Set<VersionedIdentifier> identifiers =
+      cqlTools.getTranslator().getTranslatedLibraries().keySet();
+    if (CollectionUtils.isEmpty(identifiers)) {
+      return Set.of();
+    }
+    return identifiers.stream()
+      .map(
+        identifier ->
+          CQLIncludeLibrary.builder()
+            .cqlLibraryName(identifier.getId())
+            .version(identifier.getVersion())
+            .build())
+      .collect(Collectors.toSet());
   }
 
   private CQLDefinition parseDefinitionNode(String node, Map<String, String> cqlDefinitionContent) {
