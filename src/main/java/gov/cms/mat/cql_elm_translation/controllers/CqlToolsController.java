@@ -106,7 +106,10 @@ public class CqlToolsController {
     return ResponseEntity.ok(cqlParsingService.getDefinitionCallstacks(cql, accessToken));
   }
 
-  @PutMapping("/cql/lookups")
+  @PutMapping(
+      value = "/cql/lookups",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<CqlLookups> getCqlLookups(
       @RequestBody CqlLookupRequest lookupRequest,
       @RequestHeader("Authorization") String accessToken) {

@@ -40,7 +40,9 @@ public class CqlParsingService extends CqlTooling {
    * Parses the CQL and generates cql artifacts(including for the CQL of the included Libraries).
    * refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
    *
-   * @param cql
+   * @param cql- measure cql
+   * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs. If not
+   *     provided, all definitions from the cql would be used
    * @param accessToken Requesting User's Okta Bearer token
    * @return CQLLookups
    */
@@ -56,7 +58,8 @@ public class CqlParsingService extends CqlTooling {
       usedDefinitions.addAll(entry.getValue());
     }
     Set<CQLDefinition> allCqlDefinitions = prepareCqlDefinitions(cqlTools);
-    Set<CQLDefinition> usedCqlDefinition = getUseCqlDefinitions(allCqlDefinitions, usedDefinitions);
+    Set<CQLDefinition> usedCqlDefinition =
+        getUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
     return CqlLookups.builder()
         .context("Patient")
         .library(name)
@@ -126,7 +129,7 @@ public class CqlParsingService extends CqlTooling {
         .collect(toSet());
   }
 
-  private Set<CQLDefinition> getUseCqlDefinitions(
+  private Set<CQLDefinition> getUsedCqlDefinitions(
       Set<CQLDefinition> cqlDefinitions, Set<String> usedDefinitions) {
     return cqlDefinitions.stream()
         .filter(cqlDefinition -> usedDefinitions.contains(cqlDefinition.getName()))
