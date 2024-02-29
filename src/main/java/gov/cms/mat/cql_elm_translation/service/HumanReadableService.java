@@ -155,9 +155,11 @@ public class HumanReadableService {
             .definition(
                 HumanReadableUtil.escapeHtmlString(measure.getMeasureMetaData().getDefinition()))
             .references(HumanReadableUtil.buildReferences(measure.getMeasureMetaData()))
+            .measureSet(measure.getMeasureMetaData().getMeasureSetTitle())
             .build();
+
     generatePopulations(measure, modelTemp);
-    .measureSet(measure.getMeasureMetaData().getMeasureSetTitle())
+
     return modelTemp;
   }
 
