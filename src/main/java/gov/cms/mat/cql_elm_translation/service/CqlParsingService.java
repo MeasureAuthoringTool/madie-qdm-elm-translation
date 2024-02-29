@@ -5,7 +5,9 @@ import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.collections4.CollectionUtils;
 import org.springframework.stereotype.Service;
+import org.apache.commons.lang3.StringUtils;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -41,23 +43,29 @@ public class CqlParsingService extends CqlTooling {
    * refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
    *
    * @param cql- measure cql
-   * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs. If not
-   *     provided, all definitions from the cql would be used
+   * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs
    * @param accessToken Requesting User's Okta Bearer token
    * @return CQLLookups
    */
   public CqlLookups getCqlLookups(String cql, Set<String> measureExpressions, String accessToken) {
+    if(StringUtils.isBlank(cql) || CollectionUtils.isEmpty(measureExpressions)) {
+      return null;
+    }
+
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, measureExpressions);
     String name = cqlTools.getLibrary().getIdentifier().getId();
     String version = cqlTools.getLibrary().getIdentifier().getVersion();
     String model = cqlTools.getUsingProperties().getLibraryType();
     String modelVersion = cqlTools.getUsingProperties().getVersion();
     Set<String> usedDefinitions = new HashSet<>(measureExpressions);
+    // measureExpressions + used definitions
     for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
       usedDefinitions.add(entry.getKey());
       usedDefinitions.addAll(entry.getValue());
     }
+    // all CQLDefinitions
     Set<CQLDefinition> allCqlDefinitions = prepareCqlDefinitions(cqlTools);
+    // only used CQLDefinitions(measure definitions + any used by measure definitions)
     Set<CQLDefinition> usedCqlDefinition =
         getUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
     return CqlLookups.builder()
