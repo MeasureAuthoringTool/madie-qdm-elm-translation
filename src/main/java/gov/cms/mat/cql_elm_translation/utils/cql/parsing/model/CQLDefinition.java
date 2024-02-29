@@ -8,7 +8,7 @@ import lombok.NoArgsConstructor;
 import java.util.Objects;
 
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 public class CQLDefinition implements CQLExpression {

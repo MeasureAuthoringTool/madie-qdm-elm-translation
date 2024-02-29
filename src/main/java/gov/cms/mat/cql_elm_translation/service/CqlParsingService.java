@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +13,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -30,10 +32,42 @@ public class CqlParsingService extends CqlTooling {
    * @return Set of all CQL Definitions and Functions in the main and included Libraries.
    */
   public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
-    return cqlTools.getDefinitionContent().keySet().stream()
-        .map(def -> parseDefinitionNode(def, cqlTools.getDefinitionContent()))
-        .collect(toSet());
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
+    return prepareCqlDefinitions(cqlTools);
+  }
+
+  /**
+   * Parses the CQL and generates cql artifacts(including for the CQL of the included Libraries).
+   * refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
+   *
+   * @param cql
+   * @param accessToken Requesting User's Okta Bearer token
+   * @return CQLLookups
+   */
+  public CqlLookups getCqlLookups(String cql, Set<String> measureExpressions, String accessToken) {
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, measureExpressions);
+    String name = cqlTools.getLibrary().getIdentifier().getId();
+    String version = cqlTools.getLibrary().getIdentifier().getVersion();
+    String model = cqlTools.getUsingProperties().getLibraryType();
+    String modelVersion = cqlTools.getUsingProperties().getVersion();
+    Set<String> usedDefinitions = new HashSet<>(measureExpressions);
+    for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
+      usedDefinitions.add(entry.getKey());
+      usedDefinitions.addAll(entry.getValue());
+    }
+    Set<CQLDefinition> allCqlDefinitions = prepareCqlDefinitions(cqlTools);
+    Set<CQLDefinition> usedCqlDefinition = getUseCqlDefinitions(allCqlDefinitions, usedDefinitions);
+    return CqlLookups.builder()
+        .context("Patient")
+        .library(name)
+        .version(version)
+        .usingModel(model)
+        .usingModelVersion(modelVersion)
+        .parameters(cqlTools.getUsedParameters())
+        .valueSets(cqlTools.getUsedCQLValuesets())
+        .codes(cqlTools.getUsedCodes())
+        .definitions(usedCqlDefinition)
+        .build();
   }
 
   /**
@@ -54,7 +88,7 @@ public class CqlParsingService extends CqlTooling {
    *     <p>Values: Set of CQL Definition Objects that are referenced in the Key CQL Definition.
    */
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
 
     Set<CQLDefinition> cqlDefinitions =
@@ -84,6 +118,28 @@ public class CqlParsingService extends CqlTooling {
       }
     }
     return callstack;
+  }
+
+  private Set<CQLDefinition> prepareCqlDefinitions(CQLTools cqlTools) {
+    return cqlTools.getDefinitionContent().keySet().stream()
+        .map(def -> parseDefinitionNode(def, cqlTools.getDefinitionContent()))
+        .collect(toSet());
+  }
+
+  private Set<CQLDefinition> getUseCqlDefinitions(
+      Set<CQLDefinition> cqlDefinitions, Set<String> usedDefinitions) {
+    return cqlDefinitions.stream()
+        .filter(cqlDefinition -> usedDefinitions.contains(cqlDefinition.getName()))
+        .map(
+            cqlDefinition -> {
+              String logic = cqlDefinition.getLogic();
+              return cqlDefinition.toBuilder()
+                  .definitionName(cqlDefinition.getName())
+                  // TODO: Ideally should come from listener/visitor
+                  .definitionLogic(logic.split(":", 2)[1])
+                  .build();
+            })
+        .collect(Collectors.toSet());
   }
 
   private CQLDefinition parseDefinitionNode(String node, Map<String, String> cqlDefinitionContent) {
@@ -116,13 +172,8 @@ public class CqlParsingService extends CqlTooling {
     return definition;
   }
 
-  public Map<String, Set<String>> getUsedDefinitions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
-    return cqlTools.getUsedDefinitions();
-  }
-
   public Map<String, Set<String>> getUsedFunctions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService);
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
     return cqlTools.getUsedFunctions();
   }
 }

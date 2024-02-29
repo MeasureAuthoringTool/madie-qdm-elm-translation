@@ -240,8 +240,8 @@ public class CQLModel {
    *
    * @return list containing all the definitions and functions names in the model
    */
-  public List<String> getExpressionListFromCqlModel() {
-    List<String> expressionList = new ArrayList<>();
+  public Set<String> getExpressionListFromCqlModel() {
+    Set<String> expressionList = new HashSet<>();
 
     for (CQLDefinition cqlDefinition : cqlDefinitions) {
       expressionList.add(cqlDefinition.getName());

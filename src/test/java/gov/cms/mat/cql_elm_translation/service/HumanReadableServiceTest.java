@@ -409,7 +409,7 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildValuesetDataCriteriaList() {
     when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
-        .thenReturn(List.of("Opioid Antagonist", "Encounter Inpatient", "Ethnicity"));
+        .thenReturn(Set.of("Opioid Antagonist", "Encounter Inpatient", "Ethnicity"));
 
     List<HumanReadableValuesetModel> result =
         humanReadableService.buildValuesetDataCriteriaList(
@@ -435,7 +435,7 @@ class HumanReadableServiceTest {
 
   @Test
   public void testBuildValuesetDataCriteriaListEmptyUsedValuesets() {
-    when(dataCriteriaService.getUsedValuesets(anyString(), anyString())).thenReturn(List.of());
+    when(dataCriteriaService.getUsedValuesets(anyString(), anyString())).thenReturn(Set.of());
 
     List<HumanReadableValuesetModel> result =
         humanReadableService.buildValuesetDataCriteriaList(
@@ -449,7 +449,7 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildValuesetDataCriteriaListNotFound() {
     when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
-        .thenReturn(List.of("different value set"));
+        .thenReturn(Set.of("different value set"));
 
     List<HumanReadableValuesetModel> result =
         humanReadableService.buildValuesetDataCriteriaList(
@@ -536,7 +536,7 @@ class HumanReadableServiceTest {
             .oid("2.16.840.1.113762.1.4.1248.187")
             .build();
     when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
-        .thenReturn(List.of(cqlValueSet));
+        .thenReturn(Set.of(cqlValueSet));
 
     Set<HumanReadableValuesetModel> result =
         humanReadableService.findUsedCQLValueSet(
@@ -559,7 +559,7 @@ class HumanReadableServiceTest {
             .oid("2.16.840.1.113883.3.666.5.307")
             .build();
     when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
-        .thenReturn(List.of(cqlValueSet));
+        .thenReturn(Set.of(cqlValueSet));
 
     Set<HumanReadableValuesetModel> result =
         humanReadableService.findUsedCQLValueSet(
@@ -576,8 +576,7 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildValuesetTerminologyList() {
     when(dataCriteriaService.getUsedValuesets(anyString(), anyString()))
-        .thenReturn(
-            List.of("Opioid Antagonist", "Routes of Administration for Opioid Antagonists"));
+        .thenReturn(Set.of("Opioid Antagonist", "Routes of Administration for Opioid Antagonists"));
 
     List<HumanReadableValuesetModel> valuesetModels =
         humanReadableService.buildValuesetDataCriteriaList(
@@ -599,7 +598,7 @@ class HumanReadableServiceTest {
             .oid("2.16.840.1.113762.1.4.1248.187")
             .build();
     when(dataCriteriaService.getUsedCQLValuesets(anyString(), anyString()))
-        .thenReturn(List.of(cqlValueSet1, cqlValueSet2));
+        .thenReturn(Set.of(cqlValueSet1, cqlValueSet2));
 
     List<HumanReadableTerminologyModel> terminologyModels =
         humanReadableService.buildValuesetTerminologyList(

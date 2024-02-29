@@ -11,6 +11,7 @@ import java.util.Set;
 import java.util.Stack;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -79,7 +80,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   @Getter private final Set<CQLValueSet> cqlValuesets = new HashSet<>();
   @Getter private final Set<String> codes = new HashSet<>();
   @Getter private final Set<String> codesystems = new HashSet<>();
-  @Getter private final Set<String> parameters = new HashSet<>();
+  @Getter private final Set<CQLParameter> parameters = new HashSet<>();
   @Getter private final Set<String> definitions = new HashSet<>();
   @Getter private final Map<String, String> definitionContent = new HashMap<>();
   @Getter private final Set<String> functions = new HashSet<>();
@@ -514,8 +515,13 @@ public class Cql2ElmListener extends cqlBaseListener {
               .build();
       cqlValuesets.add(declaredValueSet);
 
-    } else if (element instanceof ParameterDef) {
-      parameters.add(formattedIdentifier);
+    } else if (element instanceof ParameterDef parameterDef) {
+      CQLParameter parameter =
+          CQLParameter.builder()
+              .parameterName(formattedIdentifier)
+              .parameterLogic(parameterDef.getResultType().toString())
+              .build();
+      parameters.add(parameter);
       graph.addEdge(currentContext, formattedIdentifier);
     } else if (element instanceof ExpressionDef) {
       definitions.add(formattedIdentifier);
