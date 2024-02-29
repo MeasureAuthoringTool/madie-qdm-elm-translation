@@ -116,6 +116,7 @@ class HumanReadableServiceTest {
                                 .endorsementId("test endorsement id")
                                 .endorser("test endorser")
                                 .build()))
+                    .measureSetTitle("test measure title")
                     .build())
             .groups(
                 List.of(
@@ -313,6 +314,9 @@ class HumanReadableServiceTest {
     assertThat(
         measureInfoModel.getEndorsedBy(),
         equalTo(measure.getMeasureMetaData().getEndorsements().get(0).getEndorser()));
+    assertThat(
+        measureInfoModel.getMeasureSet(),
+        equalTo(measure.getMeasureMetaData().getMeasureSetTitle()));
   }
 
   @Test
