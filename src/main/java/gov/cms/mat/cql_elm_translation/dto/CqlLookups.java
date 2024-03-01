@@ -26,4 +26,5 @@ public class CqlLookups {
   private Set<CQLValueSet> valueSets;
   private Set<CQLDefinition> definitions;
   private Set<CQLIncludeLibrary> includeLibraries;
+  private Set<ElementLookup> elementLookups;
 }

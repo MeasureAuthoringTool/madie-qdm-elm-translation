@@ -216,10 +216,10 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   @Test
   void testGetCqlLookups() {
     when(cqlParsingService.getCqlLookups(any(), any(), any()))
-      .thenReturn(CqlLookups.builder().library("Test").version("0.0.001").build());
+        .thenReturn(CqlLookups.builder().library("Test").version("0.0.001").build());
 
     ResponseEntity<CqlLookups> result =
-      cqlToolsController.getCqlLookups(new CqlLookupRequest(),"accessToken");
+        cqlToolsController.getCqlLookups(new CqlLookupRequest(), "accessToken");
     CqlLookups cqlLookups = result.getBody();
     assertNotNull(cqlLookups);
     assertThat(cqlLookups.getLibrary(), is(equalTo("Test")));

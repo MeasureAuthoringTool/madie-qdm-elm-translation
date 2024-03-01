@@ -1,12 +1,14 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
+import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -79,6 +81,7 @@ public class CqlParsingService extends CqlTooling {
         getUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
     Set<CQLCodeSystem> cqlCodeSystems = getCqlCodeSystems(cqlTools.getUsedCodes());
     Set<CQLIncludeLibrary> includeLibraries = getIncludedLibraries(cqlTools);
+    Set<ElementLookup> elementLookups = prepareElementLookups(cqlTools);
     return CqlLookups.builder()
         .context("Patient")
         .library(name)
@@ -91,6 +94,7 @@ public class CqlParsingService extends CqlTooling {
         .definitions(usedCqlDefinition)
         .codeSystems(cqlCodeSystems)
         .includeLibraries(includeLibraries)
+        .elementLookups(elementLookups)
         .build();
   }
 
@@ -142,6 +146,80 @@ public class CqlParsingService extends CqlTooling {
       }
     }
     return callstack;
+  }
+
+  private Set<ElementLookup> prepareElementLookups(CQLTools cqlTools) {
+    Set<ElementLookup> cqlElementLookups = new HashSet<>();
+    // collect element lookups for codes and code retrieves
+    if (CollectionUtils.isNotEmpty(cqlTools.getUsedCodes())) {
+      Map<CQLCode, Set<String>> cqlCodeSetMap =
+        cqlTools.getDataCriteria().getDataCriteriaWithCodes();
+      for (CQLCode usedCode : cqlTools.getUsedCodes()) {
+        for (var entry : cqlCodeSetMap.entrySet()) {
+          CQLCode cqlCode = entry.getKey();
+          if (StringUtils.equals(cqlCode.getId(), usedCode.getId())
+            && StringUtils.equals(cqlCode.getCodeSystemName(), usedCode.getCodeSystemName())) {
+            Set<ElementLookup> lookups =
+              entry.getValue().stream()
+                .map(
+                  value ->
+                    ElementLookup.builder()
+                      .code(true)
+                      .codeName(cqlCode.getCodeName())
+                      .codeSystemOID(cqlCode.getCodeSystemOID())
+                      .codeSystemVersion(cqlCode.getCodeSystemVersion())
+                      .displayName(cqlCode.getDisplayName())
+                      .name(cqlCode.getName())
+                      .datatype(value)
+                      .build())
+                .collect(Collectors.toSet());
+            cqlElementLookups.addAll(lookups);
+          } else {
+            cqlElementLookups.add(
+              ElementLookup.builder()
+                .code(true)
+                .codeName(usedCode.getCodeName())
+                .codeSystemOID(usedCode.getCodeSystemOID())
+                .codeSystemVersion(usedCode.getCodeSystemVersion())
+                .displayName(usedCode.getDisplayName())
+                .name(usedCode.getName())
+                .build());
+          }
+        }
+      }
+    }
+    // collect element lookups for value sets and value set retrieves
+    if (CollectionUtils.isNotEmpty(cqlTools.getUsedCQLValuesets())) {
+      Map<CQLValueSet, Set<String>> cqlValueSetSetMap =
+        cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
+      for (CQLValueSet usedValueSet : cqlTools.getUsedCQLValuesets()) {
+        for (var entry : cqlValueSetSetMap.entrySet()) {
+          CQLValueSet cqlValueSet = entry.getKey();
+          if (StringUtils.equals(cqlValueSet.getOid(), usedValueSet.getOid())) {
+            Set<ElementLookup> valueSetLookups =
+              entry.getValue().stream()
+                .map(
+                  value ->
+                    ElementLookup.builder()
+                      .code(false)
+                      .name(cqlValueSet.getName())
+                      .oid(cqlValueSet.getOid())
+                      .datatype(value)
+                      .build())
+                .collect(Collectors.toSet());
+            cqlElementLookups.addAll(valueSetLookups);
+          } else {
+            cqlElementLookups.add(
+              ElementLookup.builder()
+                .code(false)
+                .name(usedValueSet.getName())
+                .oid(usedValueSet.getOid())
+                .build());
+          }
+        }
+      }
+    }
+    return cqlElementLookups;
   }
 
   private Set<CQLDefinition> prepareCqlDefinitions(CQLTools cqlTools) {
