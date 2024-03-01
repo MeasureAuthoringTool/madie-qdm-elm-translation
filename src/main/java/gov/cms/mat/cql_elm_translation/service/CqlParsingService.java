@@ -6,6 +6,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -61,6 +62,10 @@ public class CqlParsingService extends CqlTooling {
     String version = cqlTools.getLibrary().getIdentifier().getVersion();
     String model = cqlTools.getUsingProperties().getLibraryType();
     String modelVersion = cqlTools.getUsingProperties().getVersion();
+    Set<CQLParameter> parameters =
+        cqlTools.getUsedParameters().stream()
+            .filter(parameter -> parameter.getParameterName().split("\\|").length == 1)
+            .collect(Collectors.toSet());
     Set<String> usedDefinitions = new HashSet<>(measureExpressions);
     // measureExpressions + used definitions
     for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
@@ -80,7 +85,7 @@ public class CqlParsingService extends CqlTooling {
         .version(version)
         .usingModel(model)
         .usingModelVersion(modelVersion)
-        .parameters(cqlTools.getUsedParameters())
+        .parameters(parameters)
         .valueSets(cqlTools.getUsedCQLValuesets())
         .codes(cqlTools.getUsedCodes())
         .definitions(usedCqlDefinition)
@@ -178,18 +183,18 @@ public class CqlParsingService extends CqlTooling {
 
   private Set<CQLIncludeLibrary> getIncludedLibraries(CQLTools cqlTools) {
     Set<VersionedIdentifier> identifiers =
-      cqlTools.getTranslator().getTranslatedLibraries().keySet();
+        cqlTools.getTranslator().getTranslatedLibraries().keySet();
     if (CollectionUtils.isEmpty(identifiers)) {
       return Set.of();
     }
     return identifiers.stream()
-      .map(
-        identifier ->
-          CQLIncludeLibrary.builder()
-            .cqlLibraryName(identifier.getId())
-            .version(identifier.getVersion())
-            .build())
-      .collect(Collectors.toSet());
+        .map(
+            identifier ->
+                CQLIncludeLibrary.builder()
+                    .cqlLibraryName(identifier.getId())
+                    .version(identifier.getVersion())
+                    .build())
+        .collect(Collectors.toSet());
   }
 
   private CQLDefinition parseDefinitionNode(String node, Map<String, String> cqlDefinitionContent) {
