@@ -155,7 +155,8 @@ public class CqlParsingService extends CqlTooling {
 
   private Set<ElementLookup> buildElementLookups(CQLTools cqlTools) {
     Set<ElementLookup> cqlElementLookups = new HashSet<>();
-    // collect element lookups for codes and code retrieves
+    // collect element lookups for codes and code retrieves.
+    // if retrieve with cql code available, use retrieve else use code to build lookup
     if (CollectionUtils.isNotEmpty(cqlTools.getUsedCodes())) {
       Map<CQLCode, Set<String>> cqlCodeSetMap =
           cqlTools.getDataCriteria().getDataCriteriaWithCodes();
@@ -176,6 +177,7 @@ public class CqlParsingService extends CqlTooling {
       }
     }
     // collect element lookups for value sets and value set retrieves
+    // if retrieve with value set available, use retrieve else use value set to build lookup
     if (CollectionUtils.isNotEmpty(cqlTools.getUsedCQLValuesets())) {
       Map<CQLValueSet, Set<String>> cqlValueSetSetMap =
           cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
