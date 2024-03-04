@@ -269,7 +269,7 @@ public class HumanReadableService {
   List<HumanReadableExpressionModel> buildDefinitions(Set<CQLDefinition> allDefinitions) {
     List<CQLDefinition> definitions =
         allDefinitions.stream()
-            .filter(definition -> definition.getParentLibrary() == null)
+            .filter(definition -> definition.getParentLibrary() == null && !definition.isFunction())
             .collect(Collectors.toList());
 
     List<HumanReadableExpressionModel> expressions =
@@ -306,7 +306,7 @@ public class HumanReadableService {
                 definition ->
                     HumanReadableExpressionModel.builder()
                         .id(definition.getId())
-                        .name(definition.getLibraryDisplayName() + "." + definition.getName())
+                        .name(definition.getName())
                         .logic(
                             definition
                                 .getLogic()
