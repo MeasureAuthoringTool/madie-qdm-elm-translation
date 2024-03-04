@@ -26,22 +26,26 @@ public abstract class CqlTooling {
       String cql,
       String accessToken,
       CqlLibraryService cqlLibraryService,
-      Set<String> expressions) {
+      Set<String> parentExpressions) {
     // Run Translator to compile libraries
     CqlTranslator cqlTranslator = runTranslator(cql, accessToken, cqlLibraryService);
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
     cqlTranslator
         .getTranslatedLibraries()
         .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
-    if (CollectionUtils.isEmpty(expressions)) {
-      expressions = getParentExpressions(cql);
+    // if no parentExpressions provided, consider all expressions from main CQL
+    Set<String> topLevelExpressions;
+    if (CollectionUtils.isEmpty(parentExpressions)) {
+      topLevelExpressions = getParentExpressions(cql);
+    } else {
+      topLevelExpressions = parentExpressions;
     }
 
     CQLTools cqlTools =
         new CQLTools(
             cql,
             getIncludedLibrariesCql(new MadieLibrarySourceProvider(), cqlTranslator),
-            expressions,
+            topLevelExpressions,
             cqlTranslator,
             translatedLibraries);
 
