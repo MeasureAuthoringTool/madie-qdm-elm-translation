@@ -9,6 +9,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -19,7 +20,6 @@ import org.apache.commons.lang3.StringUtils;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -42,7 +42,7 @@ public class CqlParsingService extends CqlTooling {
    */
   public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return prepareCqlDefinitions(cqlTools);
+    return buildCqlDefinitions(cqlTools);
   }
 
   /**
@@ -69,19 +69,25 @@ public class CqlParsingService extends CqlTooling {
             .filter(parameter -> parameter.getParameterName().split("\\|").length == 1)
             .collect(Collectors.toSet());
     Set<String> usedDefinitions = new HashSet<>(measureExpressions);
-    // measureExpressions + used definitions
+    // add used definitions
     for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
       usedDefinitions.add(entry.getKey());
       usedDefinitions.addAll(entry.getValue());
     }
+    // add used functions
+    for (var entry : cqlTools.getUsedFunctions().entrySet()) {
+      usedDefinitions.add(entry.getKey());
+      usedDefinitions.addAll(entry.getValue());
+    }
+
     // all CQLDefinitions
-    Set<CQLDefinition> allCqlDefinitions = prepareCqlDefinitions(cqlTools);
+    Set<CQLDefinition> allCqlDefinitions = buildCqlDefinitions(cqlTools);
     // only used CQLDefinitions(measure definitions + any used by measure definitions)
     Set<CQLDefinition> usedCqlDefinition =
-        getUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
-    Set<CQLCodeSystem> cqlCodeSystems = getCqlCodeSystems(cqlTools.getUsedCodes());
-    Set<CQLIncludeLibrary> includeLibraries = getIncludedLibraries(cqlTools);
-    Set<ElementLookup> elementLookups = prepareElementLookups(cqlTools);
+        buildUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
+    Set<CQLCodeSystem> cqlCodeSystems = buildCqlCodeSystems(cqlTools.getUsedCodes());
+    Set<CQLIncludeLibrary> includeLibraries = buildIncludedLibraries(cqlTools);
+    Set<ElementLookup> elementLookups = buildElementLookups(cqlTools);
     return CqlLookups.builder()
         .context("Patient")
         .library(name)
@@ -118,11 +124,11 @@ public class CqlParsingService extends CqlTooling {
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
-
+    Set<String> keys = nodeGraph.keySet();
     Set<CQLDefinition> cqlDefinitions =
-        nodeGraph.keySet().stream()
-            .map(node -> parseDefinitionNode(node, cqlTools.getDefinitionContent()))
-            .filter(Objects::nonNull) // mapping function will return null for non-Definition nodes
+        cqlTools.getDefinitionContent().stream()
+            .filter(definitionContent -> keys.contains(definitionContent.getName()))
+            .map(this::buildCqlDefinition)
             .collect(toSet());
     // remove null key, only contains included library references
     nodeGraph.remove(null);
@@ -148,42 +154,42 @@ public class CqlParsingService extends CqlTooling {
     return callstack;
   }
 
-  private Set<ElementLookup> prepareElementLookups(CQLTools cqlTools) {
+  private Set<ElementLookup> buildElementLookups(CQLTools cqlTools) {
     Set<ElementLookup> cqlElementLookups = new HashSet<>();
     // collect element lookups for codes and code retrieves
     if (CollectionUtils.isNotEmpty(cqlTools.getUsedCodes())) {
       Map<CQLCode, Set<String>> cqlCodeSetMap =
-        cqlTools.getDataCriteria().getDataCriteriaWithCodes();
+          cqlTools.getDataCriteria().getDataCriteriaWithCodes();
       for (CQLCode usedCode : cqlTools.getUsedCodes()) {
         for (var entry : cqlCodeSetMap.entrySet()) {
           CQLCode cqlCode = entry.getKey();
           if (StringUtils.equals(cqlCode.getId(), usedCode.getId())
-            && StringUtils.equals(cqlCode.getCodeSystemName(), usedCode.getCodeSystemName())) {
+              && StringUtils.equals(cqlCode.getCodeSystemName(), usedCode.getCodeSystemName())) {
             Set<ElementLookup> lookups =
-              entry.getValue().stream()
-                .map(
-                  value ->
-                    ElementLookup.builder()
-                      .code(true)
-                      .codeName(cqlCode.getCodeName())
-                      .codeSystemOID(cqlCode.getCodeSystemOID())
-                      .codeSystemVersion(cqlCode.getCodeSystemVersion())
-                      .displayName(cqlCode.getDisplayName())
-                      .name(cqlCode.getName())
-                      .datatype(value)
-                      .build())
-                .collect(Collectors.toSet());
+                entry.getValue().stream()
+                    .map(
+                        value ->
+                            ElementLookup.builder()
+                                .code(true)
+                                .codeName(cqlCode.getCodeName())
+                                .codeSystemOID(cqlCode.getCodeSystemOID())
+                                .codeSystemVersion(cqlCode.getCodeSystemVersion())
+                                .displayName(cqlCode.getDisplayName())
+                                .name(cqlCode.getName())
+                                .datatype(value)
+                                .build())
+                    .collect(Collectors.toSet());
             cqlElementLookups.addAll(lookups);
           } else {
             cqlElementLookups.add(
-              ElementLookup.builder()
-                .code(true)
-                .codeName(usedCode.getCodeName())
-                .codeSystemOID(usedCode.getCodeSystemOID())
-                .codeSystemVersion(usedCode.getCodeSystemVersion())
-                .displayName(usedCode.getDisplayName())
-                .name(usedCode.getName())
-                .build());
+                ElementLookup.builder()
+                    .code(true)
+                    .codeName(usedCode.getCodeName())
+                    .codeSystemOID(usedCode.getCodeSystemOID())
+                    .codeSystemVersion(usedCode.getCodeSystemVersion())
+                    .displayName(usedCode.getDisplayName())
+                    .name(usedCode.getName())
+                    .build());
           }
         }
       }
@@ -191,30 +197,30 @@ public class CqlParsingService extends CqlTooling {
     // collect element lookups for value sets and value set retrieves
     if (CollectionUtils.isNotEmpty(cqlTools.getUsedCQLValuesets())) {
       Map<CQLValueSet, Set<String>> cqlValueSetSetMap =
-        cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
+          cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
       for (CQLValueSet usedValueSet : cqlTools.getUsedCQLValuesets()) {
         for (var entry : cqlValueSetSetMap.entrySet()) {
           CQLValueSet cqlValueSet = entry.getKey();
           if (StringUtils.equals(cqlValueSet.getOid(), usedValueSet.getOid())) {
             Set<ElementLookup> valueSetLookups =
-              entry.getValue().stream()
-                .map(
-                  value ->
-                    ElementLookup.builder()
-                      .code(false)
-                      .name(cqlValueSet.getName())
-                      .oid(cqlValueSet.getOid())
-                      .datatype(value)
-                      .build())
-                .collect(Collectors.toSet());
+                entry.getValue().stream()
+                    .map(
+                        value ->
+                            ElementLookup.builder()
+                                .code(false)
+                                .name(cqlValueSet.getName())
+                                .oid(cqlValueSet.getOid())
+                                .datatype(value)
+                                .build())
+                    .collect(Collectors.toSet());
             cqlElementLookups.addAll(valueSetLookups);
           } else {
             cqlElementLookups.add(
-              ElementLookup.builder()
-                .code(false)
-                .name(usedValueSet.getName())
-                .oid(usedValueSet.getOid())
-                .build());
+                ElementLookup.builder()
+                    .code(false)
+                    .name(usedValueSet.getName())
+                    .oid(usedValueSet.getOid())
+                    .build());
           }
         }
       }
@@ -222,13 +228,11 @@ public class CqlParsingService extends CqlTooling {
     return cqlElementLookups;
   }
 
-  private Set<CQLDefinition> prepareCqlDefinitions(CQLTools cqlTools) {
-    return cqlTools.getDefinitionContent().keySet().stream()
-        .map(def -> parseDefinitionNode(def, cqlTools.getDefinitionContent()))
-        .collect(toSet());
+  private Set<CQLDefinition> buildCqlDefinitions(CQLTools cqlTools) {
+    return cqlTools.getDefinitionContent().stream().map(this::buildCqlDefinition).collect(toSet());
   }
 
-  private Set<CQLDefinition> getUsedCqlDefinitions(
+  private Set<CQLDefinition> buildUsedCqlDefinitions(
       Set<CQLDefinition> cqlDefinitions, Set<String> usedDefinitions) {
     return cqlDefinitions.stream()
         .filter(cqlDefinition -> usedDefinitions.contains(cqlDefinition.getName()))
@@ -244,7 +248,7 @@ public class CqlParsingService extends CqlTooling {
         .collect(Collectors.toSet());
   }
 
-  private Set<CQLCodeSystem> getCqlCodeSystems(Set<CQLCode> cqlCodes) {
+  private Set<CQLCodeSystem> buildCqlCodeSystems(Set<CQLCode> cqlCodes) {
     if (CollectionUtils.isEmpty(cqlCodes)) {
       return Set.of();
     }
@@ -259,7 +263,7 @@ public class CqlParsingService extends CqlTooling {
         .collect(Collectors.toSet());
   }
 
-  private Set<CQLIncludeLibrary> getIncludedLibraries(CQLTools cqlTools) {
+  private Set<CQLIncludeLibrary> buildIncludedLibraries(CQLTools cqlTools) {
     Set<VersionedIdentifier> identifiers =
         cqlTools.getTranslator().getTranslatedLibraries().keySet();
     if (CollectionUtils.isEmpty(identifiers)) {
@@ -275,22 +279,23 @@ public class CqlParsingService extends CqlTooling {
         .collect(Collectors.toSet());
   }
 
-  private CQLDefinition parseDefinitionNode(String node, Map<String, String> cqlDefinitionContent) {
+  private CQLDefinition buildCqlDefinition(DefinitionContent definitionContent) {
     // Graph includes retrieves, functions, and included library references.
     // Filter out any node that does not have CQL Definition text content.
-    if (!cqlDefinitionContent.containsKey(node)) {
+    if (StringUtils.isBlank(definitionContent.getContent())) {
       return null;
     }
 
     CQLDefinition definition = new CQLDefinition();
-    definition.setId(node);
-    definition.setDefinitionLogic(cqlDefinitionContent.get(node));
+    definition.setId(definitionContent.getName());
+    definition.setDefinitionLogic(definitionContent.getContent());
+    definition.setFunctionArguments(definitionContent.getFunctionArguments());
 
     // Included Lib Define: AHAOverall-2.5.000|AHA|Has Left Ventricular Assist Device
     // Main Lib Define: Numerator
-    String[] parts = node.split("\\|");
+    String[] parts = definitionContent.getName().split("\\|");
     if (parts.length == 1) { // Define from Main Library
-      definition.setDefinitionName(node);
+      definition.setDefinitionName(definitionContent.getName());
     } else if (parts.length >= 3) { // Define from some included Library
       definition.setLibraryDisplayName(parts[1]);
       definition.setDefinitionName(parts[2]);

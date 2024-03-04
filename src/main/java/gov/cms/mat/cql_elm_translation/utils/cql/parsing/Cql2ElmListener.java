@@ -6,14 +6,18 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -82,7 +86,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   @Getter private final Set<String> codesystems = new HashSet<>();
   @Getter private final Set<CQLParameter> parameters = new HashSet<>();
   @Getter private final Set<String> definitions = new HashSet<>();
-  @Getter private final Map<String, String> definitionContent = new HashMap<>();
+  @Getter private final Set<DefinitionContent> definitionContent = new HashSet<>();
   @Getter private final Set<String> functions = new HashSet<>();
   @Getter private final HashMap<String, String> valueSetOids = new HashMap<>();
   @Getter private final HashMap<String, CQLCode> drcs = new HashMap<>();
@@ -229,7 +233,8 @@ public class Cql2ElmListener extends cqlBaseListener {
         ctx.getStart()
             .getInputStream()
             .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
-    definitionContent.putIfAbsent(currentContext, content);
+    definitionContent.add(
+        DefinitionContent.builder().name(currentContext).content(content).build());
     graph.addNode(currentContext);
   }
 
@@ -244,8 +249,13 @@ public class Cql2ElmListener extends cqlBaseListener {
         ctx.getStart()
             .getInputStream()
             .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
-    definitionContent.putIfAbsent(currentContext, content);
-
+    List<CQLFunctionArgument> functionArguments = CqlParserListener.getFunctionArguments(ctx);
+    definitionContent.add(
+        DefinitionContent.builder()
+            .name(currentContext)
+            .content(content)
+            .functionArguments(functionArguments)
+            .build());
     graph.addNode(currentContext);
   }
 
@@ -437,6 +447,17 @@ public class Cql2ElmListener extends cqlBaseListener {
     return s.replace("\"", "");
   }
 
+  private String getFullText(ParserRuleContext context) {
+    if (context.start == null
+        || context.stop == null
+        || context.start.getStartIndex() < 0
+        || context.stop.getStopIndex() < 0) return context.getText();
+    return context
+        .start
+        .getInputStream()
+        .getText(Interval.of(context.start.getStartIndex(), context.stop.getStopIndex()));
+  }
+
   /**
    * Formats the identifier based on where it is relative to the parent library
    *
@@ -586,6 +607,6 @@ public class Cql2ElmListener extends cqlBaseListener {
     codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
     valueSetOids.putAll(listener.getValueSetOids());
     drcs.putAll(listener.getDrcs());
-    definitionContent.putAll(listener.getDefinitionContent());
+    definitionContent.addAll(listener.getDefinitionContent());
   }
 }

@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
 import java.util.Objects;
 
 @Data
@@ -24,6 +25,7 @@ public class CQLDefinition implements CQLExpression {
   private String libraryDisplayName;
   private String libraryVersion;
   private boolean isFunction;
+  private List<CQLFunctionArgument> functionArguments;
 
   public static class Comparator implements java.util.Comparator<CQLDefinition> {
 

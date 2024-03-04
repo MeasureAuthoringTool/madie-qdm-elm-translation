@@ -7,6 +7,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -81,7 +82,7 @@ public class CQLTools {
   private Map<String, Set<String>> usedFunctions = new HashMap<>();
   private Set<String> usedCodeSystems = new HashSet<>();
   private DataCriteria dataCriteria = new DataCriteria();
-  private Map<String, String> definitionContent = new HashMap<>();
+  private Set<DefinitionContent> definitionContent = new HashSet<>();
   private Map<String, Set<String>> callstack = new HashMap<>();
   private UsingProperties usingProperties;
 
@@ -137,7 +138,7 @@ public class CQLTools {
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
 
-    definitionContent.putAll(listener.getDefinitionContent());
+    definitionContent.addAll(listener.getDefinitionContent());
     callstack = graph.getAdjacencyList();
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());
