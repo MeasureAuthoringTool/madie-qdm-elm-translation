@@ -82,7 +82,7 @@ public class CQLTools {
   private Map<String, Set<String>> usedFunctions = new HashMap<>();
   private Set<String> usedCodeSystems = new HashSet<>();
   private DataCriteria dataCriteria = new DataCriteria();
-  private Set<DefinitionContent> definitionContent = new HashSet<>();
+  private Set<DefinitionContent> definitionContents = new HashSet<>();
   private Map<String, Set<String>> callstack = new HashMap<>();
   private UsingProperties usingProperties;
 
@@ -138,7 +138,7 @@ public class CQLTools {
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
 
-    definitionContent.addAll(listener.getDefinitionContent());
+    definitionContents.addAll(listener.getDefinitionContents());
     callstack = graph.getAdjacencyList();
 
     Set<String> librariesSet = new HashSet<>(listener.getLibraries());

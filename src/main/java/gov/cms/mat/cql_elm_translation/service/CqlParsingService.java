@@ -22,7 +22,6 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -67,7 +66,7 @@ public class CqlParsingService extends CqlTooling {
     Set<CQLParameter> parameters =
         cqlTools.getUsedParameters().stream()
             .filter(parameter -> parameter.getParameterName().split("\\|").length == 1)
-            .collect(Collectors.toSet());
+            .collect(toSet());
     Set<String> usedDefinitions = new HashSet<>(measureExpressions);
     // add used definitions
     for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
@@ -126,7 +125,7 @@ public class CqlParsingService extends CqlTooling {
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
     Set<String> keys = nodeGraph.keySet();
     Set<CQLDefinition> cqlDefinitions =
-        cqlTools.getDefinitionContent().stream()
+        cqlTools.getDefinitionContents().stream()
             .filter(definitionContent -> keys.contains(definitionContent.getName()))
             .map(this::buildCqlDefinition)
             .collect(toSet());
@@ -167,29 +166,11 @@ public class CqlParsingService extends CqlTooling {
               && StringUtils.equals(cqlCode.getCodeSystemName(), usedCode.getCodeSystemName())) {
             Set<ElementLookup> lookups =
                 entry.getValue().stream()
-                    .map(
-                        value ->
-                            ElementLookup.builder()
-                                .code(true)
-                                .codeName(cqlCode.getCodeName())
-                                .codeSystemOID(cqlCode.getCodeSystemOID())
-                                .codeSystemVersion(cqlCode.getCodeSystemVersion())
-                                .displayName(cqlCode.getDisplayName())
-                                .name(cqlCode.getName())
-                                .datatype(value)
-                                .build())
-                    .collect(Collectors.toSet());
+                    .map(value -> buildElementLookupForCqlCode(cqlCode, value))
+                    .collect(toSet());
             cqlElementLookups.addAll(lookups);
           } else {
-            cqlElementLookups.add(
-                ElementLookup.builder()
-                    .code(true)
-                    .codeName(usedCode.getCodeName())
-                    .codeSystemOID(usedCode.getCodeSystemOID())
-                    .codeSystemVersion(usedCode.getCodeSystemVersion())
-                    .displayName(usedCode.getDisplayName())
-                    .name(usedCode.getName())
-                    .build());
+            cqlElementLookups.add(buildElementLookupForCqlCode(usedCode, null));
           }
         }
       }
@@ -204,23 +185,11 @@ public class CqlParsingService extends CqlTooling {
           if (StringUtils.equals(cqlValueSet.getOid(), usedValueSet.getOid())) {
             Set<ElementLookup> valueSetLookups =
                 entry.getValue().stream()
-                    .map(
-                        value ->
-                            ElementLookup.builder()
-                                .code(false)
-                                .name(cqlValueSet.getName())
-                                .oid(cqlValueSet.getOid())
-                                .datatype(value)
-                                .build())
-                    .collect(Collectors.toSet());
+                    .map(value -> buildElementLookupForValueSet(cqlValueSet, value))
+                    .collect(toSet());
             cqlElementLookups.addAll(valueSetLookups);
           } else {
-            cqlElementLookups.add(
-                ElementLookup.builder()
-                    .code(false)
-                    .name(usedValueSet.getName())
-                    .oid(usedValueSet.getOid())
-                    .build());
+            cqlElementLookups.add(buildElementLookupForValueSet(usedValueSet, null));
           }
         }
       }
@@ -228,8 +197,29 @@ public class CqlParsingService extends CqlTooling {
     return cqlElementLookups;
   }
 
+  private ElementLookup buildElementLookupForCqlCode(CQLCode cqlCode, String dataType) {
+    return ElementLookup.builder()
+        .code(true)
+        .codeName(cqlCode.getCodeName())
+        .codeSystemOID(cqlCode.getCodeSystemOID())
+        .codeSystemVersion(cqlCode.getCodeSystemVersion())
+        .displayName(cqlCode.getDisplayName())
+        .name(cqlCode.getName())
+        .datatype(dataType)
+        .build();
+  }
+
+  private ElementLookup buildElementLookupForValueSet(CQLValueSet cqlValueSet, String dataType) {
+    return ElementLookup.builder()
+        .code(false)
+        .name(cqlValueSet.getName())
+        .oid(cqlValueSet.getOid())
+        .datatype(dataType)
+        .build();
+  }
+
   private Set<CQLDefinition> buildCqlDefinitions(CQLTools cqlTools) {
-    return cqlTools.getDefinitionContent().stream().map(this::buildCqlDefinition).collect(toSet());
+    return cqlTools.getDefinitionContents().stream().map(this::buildCqlDefinition).collect(toSet());
   }
 
   private Set<CQLDefinition> buildUsedCqlDefinitions(
@@ -245,7 +235,7 @@ public class CqlParsingService extends CqlTooling {
                   .definitionLogic(logic.split(":", 2)[1])
                   .build();
             })
-        .collect(Collectors.toSet());
+        .collect(toSet());
   }
 
   private Set<CQLCodeSystem> buildCqlCodeSystems(Set<CQLCode> cqlCodes) {
@@ -260,7 +250,7 @@ public class CqlParsingService extends CqlTooling {
                     .codeSystemVersion(cqlCode.getCodeSystemVersion())
                     .codeSystem(cqlCode.getCodeSystemOID().split("urn:oid:")[1])
                     .build())
-        .collect(Collectors.toSet());
+        .collect(toSet());
   }
 
   private Set<CQLIncludeLibrary> buildIncludedLibraries(CQLTools cqlTools) {
@@ -276,7 +266,7 @@ public class CqlParsingService extends CqlTooling {
                     .cqlLibraryName(identifier.getId())
                     .version(identifier.getVersion())
                     .build())
-        .collect(Collectors.toSet());
+        .collect(toSet());
   }
 
   private CQLDefinition buildCqlDefinition(DefinitionContent definitionContent) {
