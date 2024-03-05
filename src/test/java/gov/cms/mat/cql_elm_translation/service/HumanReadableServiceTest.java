@@ -61,6 +61,7 @@ class HumanReadableServiceTest {
   private QdmMeasure measure;
   private final Date now = new Date();
   private Set<CQLDefinition> allDefinitions;
+  private Set<CQLDefinition> onlyDefinitions;
   private CQLDefinition function;
   private Set<String> usedFunctionIds;
 
@@ -203,6 +204,7 @@ class HumanReadableServiceTest {
             .parentLibrary("MATGlobalCommonFunctionsQDM")
             .isFunction(true)
             .build();
+    onlyDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, definition3));
     allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3));
     usedFunctionIds = new HashSet<>(Arrays.asList(function.getId()));
 
@@ -384,7 +386,14 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildDefinitions() {
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(allDefinitions);
+        humanReadableService.buildDefinitions(onlyDefinitions);
+    assertThat(definitions.size(), is(equalTo(3)));
+  }
+
+  @Test
+  public void testBuildDefinitionsWithFunctionsRemoved() {
+    List<HumanReadableExpressionModel> definitions =
+            humanReadableService.buildDefinitions(allDefinitions);
     assertThat(definitions.size(), is(equalTo(3)));
   }
 
