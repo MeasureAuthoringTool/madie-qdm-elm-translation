@@ -161,18 +161,15 @@ public class CqlParsingService extends CqlTooling {
       Map<CQLCode, Set<String>> cqlCodeSetMap =
           cqlTools.getDataCriteria().getDataCriteriaWithCodes();
       for (CQLCode usedCode : cqlTools.getUsedCodes()) {
-        for (var entry : cqlCodeSetMap.entrySet()) {
-          CQLCode cqlCode = entry.getKey();
-          if (StringUtils.equals(cqlCode.getId(), usedCode.getId())
-              && StringUtils.equals(cqlCode.getCodeSystemName(), usedCode.getCodeSystemName())) {
-            Set<ElementLookup> lookups =
-                entry.getValue().stream()
-                    .map(value -> buildElementLookupForCqlCode(cqlCode, value))
-                    .collect(toSet());
-            cqlElementLookups.addAll(lookups);
-          } else {
-            cqlElementLookups.add(buildElementLookupForCqlCode(usedCode, null));
-          }
+        Set<String> datatypes = getCodeDatatypes(cqlCodeSetMap, usedCode.getId());
+        if (CollectionUtils.isNotEmpty(datatypes)) {
+          Set<ElementLookup> valueSetLookups =
+              datatypes.stream()
+                  .map(value -> buildElementLookupForCqlCode(usedCode, value))
+                  .collect(toSet());
+          cqlElementLookups.addAll(valueSetLookups);
+        } else {
+          cqlElementLookups.add(buildElementLookupForCqlCode(usedCode, null));
         }
       }
     }
@@ -182,21 +179,48 @@ public class CqlParsingService extends CqlTooling {
       Map<CQLValueSet, Set<String>> cqlValueSetSetMap =
           cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
       for (CQLValueSet usedValueSet : cqlTools.getUsedCQLValuesets()) {
-        for (var entry : cqlValueSetSetMap.entrySet()) {
-          CQLValueSet cqlValueSet = entry.getKey();
-          if (StringUtils.equals(cqlValueSet.getOid(), usedValueSet.getOid())) {
-            Set<ElementLookup> valueSetLookups =
-                entry.getValue().stream()
-                    .map(value -> buildElementLookupForValueSet(cqlValueSet, value))
-                    .collect(toSet());
-            cqlElementLookups.addAll(valueSetLookups);
-          } else {
-            cqlElementLookups.add(buildElementLookupForValueSet(usedValueSet, null));
-          }
+        Set<String> datatypes = getValueSetDatatypes(cqlValueSetSetMap, usedValueSet.getOid());
+        if (CollectionUtils.isNotEmpty(datatypes)) {
+          Set<ElementLookup> valueSetLookups =
+              datatypes.stream()
+                  .map(value -> buildElementLookupForValueSet(usedValueSet, value))
+                  .collect(toSet());
+          cqlElementLookups.addAll(valueSetLookups);
+        } else {
+          cqlElementLookups.add(buildElementLookupForValueSet(usedValueSet, null));
         }
       }
     }
     return cqlElementLookups;
+  }
+
+  // returns the data types associated with value set
+  private Set<String> getValueSetDatatypes(
+      Map<CQLValueSet, Set<String>> cqlValueSetSetMap, String oid) {
+    Optional<Set<String>> values =
+        cqlValueSetSetMap.entrySet().stream()
+            .filter(
+                entry -> {
+                  CQLValueSet cqlValueSet = entry.getKey();
+                  return StringUtils.equals(cqlValueSet.getOid(), oid);
+                })
+            .map(Map.Entry::getValue)
+            .findFirst();
+    return values.orElse(null);
+  }
+
+  // returns the data types associated with code
+  private Set<String> getCodeDatatypes(Map<CQLCode, Set<String>> cqlCodeSetMap, String code) {
+    Optional<Set<String>> values =
+        cqlCodeSetMap.entrySet().stream()
+            .filter(
+                entry -> {
+                  CQLCode cqlCode = entry.getKey();
+                  return StringUtils.equals(cqlCode.getId(), code);
+                })
+            .map(Map.Entry::getValue)
+            .findFirst();
+    return values.orElse(null);
   }
 
   private ElementLookup buildElementLookupForCqlCode(CQLCode cqlCode, String dataType) {
