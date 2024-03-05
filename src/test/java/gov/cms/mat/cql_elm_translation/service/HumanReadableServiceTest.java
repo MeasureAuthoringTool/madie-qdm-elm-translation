@@ -195,6 +195,14 @@ class HumanReadableServiceTest {
                 "define \"SDE Ethnicity\":\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]")
             .parentLibrary(null)
             .build();
+    CQLDefinition definition4 =
+            CQLDefinition.builder()
+                    .id("Fake")
+                    .definitionName("Fake")
+                    .definitionLogic(
+                            "define \"Fake\":\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]")
+                    .parentLibrary("MATGlobalCommonFunctionsQDM")
+                    .build();
     function =
         CQLDefinition.builder()
             .id("MATGlobalCommonFunctionsQDM-1.0.000|Global|NormalizeInterval")
@@ -204,8 +212,8 @@ class HumanReadableServiceTest {
             .parentLibrary("MATGlobalCommonFunctionsQDM")
             .isFunction(true)
             .build();
-    onlyDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, definition3));
-    allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3));
+    onlyDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, definition3, definition4));
+    allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3, definition4));
     usedFunctionIds = new HashSet<>(Arrays.asList(function.getId()));
 
     sourceDataCriteria1 =
