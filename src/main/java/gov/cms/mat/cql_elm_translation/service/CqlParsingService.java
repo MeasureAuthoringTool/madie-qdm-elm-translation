@@ -85,7 +85,7 @@ public class CqlParsingService extends CqlTooling {
         buildUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
     Set<CQLCodeSystem> cqlCodeSystems = buildCqlCodeSystems(cqlTools.getUsedCodes());
     Set<ElementLookup> elementLookups = buildElementLookups(cqlTools);
-    Set<CQLIncludeLibrary> usedLibraries =
+    Set<CQLIncludeLibrary> includeLibraries =
         updateIncludedLibraries(cqlTools.getUsedLibraries(), modelVersion);
     return CqlLookups.builder()
         .context("Patient")
@@ -98,7 +98,7 @@ public class CqlParsingService extends CqlTooling {
         .codes(cqlTools.getUsedCodes())
         .definitions(usedCqlDefinition)
         .codeSystems(cqlCodeSystems)
-        .includeLibraries(usedLibraries)
+        .includeLibraries(includeLibraries)
         .elementLookups(elementLookups)
         .build();
   }
