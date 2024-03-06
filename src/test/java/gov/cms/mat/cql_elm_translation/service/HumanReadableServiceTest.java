@@ -61,6 +61,7 @@ class HumanReadableServiceTest {
   private QdmMeasure measure;
   private final Date now = new Date();
   private Set<CQLDefinition> allDefinitions;
+  private Set<CQLDefinition> onlyDefinitions;
   private CQLDefinition function;
   private Set<String> usedFunctionIds;
 
@@ -194,6 +195,14 @@ class HumanReadableServiceTest {
                 "define \"SDE Ethnicity\":\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]")
             .parentLibrary(null)
             .build();
+    CQLDefinition definition4 =
+            CQLDefinition.builder()
+                    .id("Fake")
+                    .definitionName("Fake")
+                    .definitionLogic(
+                            "define \"Fake\":\n  [\"Patient Characteristic Ethnicity\": \"Ethnicity\"]")
+                    .parentLibrary("MATGlobalCommonFunctionsQDM")
+                    .build();
     function =
         CQLDefinition.builder()
             .id("MATGlobalCommonFunctionsQDM-1.0.000|Global|NormalizeInterval")
@@ -203,7 +212,8 @@ class HumanReadableServiceTest {
             .parentLibrary("MATGlobalCommonFunctionsQDM")
             .isFunction(true)
             .build();
-    allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3));
+    onlyDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, definition3, definition4));
+    allDefinitions = new HashSet<>(Arrays.asList(definition1, definition2, function, definition3, definition4));
     usedFunctionIds = new HashSet<>(Arrays.asList(function.getId()));
 
     sourceDataCriteria1 =
@@ -384,7 +394,14 @@ class HumanReadableServiceTest {
   @Test
   public void testBuildDefinitions() {
     List<HumanReadableExpressionModel> definitions =
-        humanReadableService.buildDefinitions(allDefinitions);
+        humanReadableService.buildDefinitions(onlyDefinitions);
+    assertThat(definitions.size(), is(equalTo(3)));
+  }
+
+  @Test
+  public void testBuildDefinitionsWithFunctionsRemoved() {
+    List<HumanReadableExpressionModel> definitions =
+            humanReadableService.buildDefinitions(allDefinitions);
     assertThat(definitions.size(), is(equalTo(3)));
   }
 
