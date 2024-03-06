@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -226,6 +227,7 @@ public class CqlParsingService extends CqlTooling {
   private ElementLookup buildElementLookupForCqlCode(CQLCode cqlCode, String dataType) {
     return ElementLookup.builder()
         .code(true)
+        .id(UUID.randomUUID().toString())
         .codeName(cqlCode.getCodeName())
         .codeSystemOID(cqlCode.getCodeSystemOID())
         .codeSystemVersion(cqlCode.getCodeSystemVersion())
@@ -238,6 +240,7 @@ public class CqlParsingService extends CqlTooling {
   private ElementLookup buildElementLookupForValueSet(CQLValueSet cqlValueSet, String dataType) {
     return ElementLookup.builder()
         .code(false)
+        .id(UUID.randomUUID().toString())
         .name(cqlValueSet.getName())
         .oid(cqlValueSet.getOid())
         .datatype(dataType)
