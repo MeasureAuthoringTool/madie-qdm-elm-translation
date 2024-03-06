@@ -13,6 +13,7 @@ import java.util.Stack;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import org.antlr.v4.runtime.CharStreams;
@@ -78,7 +79,7 @@ public class Cql2ElmListener extends cqlBaseListener {
   /** The current context, aka which expression are we currently in. */
   private String currentContext;
 
-  @Getter private final Set<String> libraries = new HashSet<>();
+  @Getter private final Set<CQLIncludeLibrary> libraries = new HashSet<>();
   @Getter private final Set<String> valuesets = new HashSet<>();
   @Getter private final Set<CQLValueSet> cqlValuesets = new HashSet<>();
   @Getter private final Set<String> codes = new HashSet<>();
@@ -489,14 +490,19 @@ public class Cql2ElmListener extends cqlBaseListener {
       graph.addEdge(
           currentContext, def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
       libraryAccessor = def;
-      if (!libraries.contains(
-          def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier())) {
-        try {
-          parseChildLibraries(def);
-          libraries.add(def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+      try {
+        parseChildLibraries(def);
+        libraries.add(
+            CQLIncludeLibrary.builder()
+                .cqlLibraryName(def.getPath())
+                .aliasName(def.getLocalIdentifier())
+                .version(def.getVersion())
+                // TODO: should be taken from librarySetId
+                .id(def.getTrackerId().toString())
+                .setId(def.getTrackerId().toString())
+                .build());
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);

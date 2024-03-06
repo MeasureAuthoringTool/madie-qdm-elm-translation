@@ -13,7 +13,6 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 import org.apache.commons.lang3.StringUtils;
 
@@ -85,8 +84,9 @@ public class CqlParsingService extends CqlTooling {
     Set<CQLDefinition> usedCqlDefinition =
         buildUsedCqlDefinitions(allCqlDefinitions, usedDefinitions);
     Set<CQLCodeSystem> cqlCodeSystems = buildCqlCodeSystems(cqlTools.getUsedCodes());
-    Set<CQLIncludeLibrary> includeLibraries = buildIncludedLibraries(cqlTools);
     Set<ElementLookup> elementLookups = buildElementLookups(cqlTools);
+    Set<CQLIncludeLibrary> usedLibraries =
+        updateIncludedLibraries(cqlTools.getUsedLibraries(), modelVersion);
     return CqlLookups.builder()
         .context("Patient")
         .library(name)
@@ -98,7 +98,7 @@ public class CqlParsingService extends CqlTooling {
         .codes(cqlTools.getUsedCodes())
         .definitions(usedCqlDefinition)
         .codeSystems(cqlCodeSystems)
-        .includeLibraries(includeLibraries)
+        .includeLibraries(usedLibraries)
         .elementLookups(elementLookups)
         .build();
   }
@@ -279,19 +279,18 @@ public class CqlParsingService extends CqlTooling {
         .collect(toSet());
   }
 
-  private Set<CQLIncludeLibrary> buildIncludedLibraries(CQLTools cqlTools) {
-    Set<VersionedIdentifier> identifiers =
-        cqlTools.getTranslator().getTranslatedLibraries().keySet();
-    if (CollectionUtils.isEmpty(identifiers)) {
+  private Set<CQLIncludeLibrary> updateIncludedLibraries(
+      Set<CQLIncludeLibrary> includeLibraries, String modelVersion) {
+    if (CollectionUtils.isEmpty(includeLibraries)) {
       return Set.of();
     }
-    return identifiers.stream()
+    return includeLibraries.stream()
         .map(
-            identifier ->
-                CQLIncludeLibrary.builder()
-                    .cqlLibraryName(identifier.getId())
-                    .version(identifier.getVersion())
-                    .build())
+            library -> {
+              var libraryCopy = library.toBuilder().build();
+              libraryCopy.setQdmVersion(modelVersion);
+              return libraryCopy;
+            })
         .collect(toSet());
   }
 

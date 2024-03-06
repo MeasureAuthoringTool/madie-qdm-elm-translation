@@ -6,6 +6,7 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import lombok.Getter;
@@ -73,7 +74,7 @@ public class CQLTools {
   private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
   // used expression sets
-  private Set<String> usedLibraries = new HashSet<>();
+  private Set<CQLIncludeLibrary> usedLibraries = new HashSet<>();
   private Set<CQLCode> usedCodes = new HashSet<>();
   private Set<String> usedValuesets = new HashSet<>();
   private Set<CQLValueSet> usedCQLValuesets = new HashSet<>();
@@ -141,7 +142,7 @@ public class CQLTools {
     definitionContents.addAll(listener.getDefinitionContents());
     callstack = graph.getAdjacencyList();
 
-    Set<String> librariesSet = new HashSet<>(listener.getLibraries());
+    Set<CQLIncludeLibrary> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
     Set<CQLValueSet> cqlValuesetsSet = new HashSet<>(listener.getCqlValuesets());
     Set<String> codesSet = new HashSet<>(listener.getCodes());
@@ -194,7 +195,7 @@ public class CQLTools {
 
   private void collectUsedExpressions(
       CQLGraph graph,
-      Set<String> librariesSet,
+      Set<CQLIncludeLibrary> librariesSet,
       Set<String> valuesetsSet,
       Set<CQLValueSet> cqlValuesetsSet,
       Set<String> codesSet,
@@ -203,7 +204,7 @@ public class CQLTools {
       Set<String> definitionsSet,
       Set<String> functionsSet,
       Set<CQLCode> declaredCodes) {
-    List<String> libraries = new ArrayList<>(librariesSet);
+    List<CQLIncludeLibrary> libraries = new ArrayList<>(librariesSet);
     List<String> valuesets = new ArrayList<>(valuesetsSet);
     List<CQLValueSet> cqlValuesets = new ArrayList<>(cqlValuesetsSet);
     List<String> codes = new ArrayList<>(codesSet);
@@ -366,9 +367,11 @@ public class CQLTools {
    * @param parentExpression the parent expression to check
    */
   private void collectUsedLibraries(
-      CQLGraph graph, List<String> libraries, String parentExpression) {
-    for (String library : libraries) {
-      if (graph.isPath(parentExpression, library)) {
+      CQLGraph graph, List<CQLIncludeLibrary> libraries, String parentExpression) {
+    for (CQLIncludeLibrary library : libraries) {
+      String path =
+          library.getCqlLibraryName() + "-" + library.getVersion() + "|" + library.getAliasName();
+      if (graph.isPath(parentExpression, path)) {
         usedLibraries.add(library);
       }
     }

@@ -8,7 +8,7 @@ import lombok.Data;
 
 /** The Class CQLIncludeLibrary. */
 @Data
-@Builder
+@Builder(toBuilder = true)
 @AllArgsConstructor
 public class CQLIncludeLibrary {
 

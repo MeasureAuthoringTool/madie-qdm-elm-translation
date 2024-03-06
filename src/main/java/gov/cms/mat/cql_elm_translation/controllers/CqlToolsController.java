@@ -113,6 +113,7 @@ public class CqlToolsController {
   public ResponseEntity<CqlLookups> getCqlLookups(
       @RequestBody CqlLookupRequest lookupRequest,
       @RequestHeader("Authorization") String accessToken) {
+    log.info("Translator is preparing CQL Lookups for simple xml");
     return ResponseEntity.ok(
         cqlParsingService.getCqlLookups(
             lookupRequest.getCql(), lookupRequest.getMeasureExpressions(), accessToken));
