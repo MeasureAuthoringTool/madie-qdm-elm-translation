@@ -262,7 +262,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
 
-    List<String> valuesets = dataCriteriaService.getUsedValuesets(cql, token);
+    Set<String> valuesets = dataCriteriaService.getUsedValuesets(cql, token);
 
     assertThat(valuesets.size(), is(equalTo(2)));
   }
@@ -273,7 +273,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
 
-    List<CQLValueSet> valuesets = dataCriteriaService.getUsedCQLValuesets(cql, token);
+    Set<CQLValueSet> valuesets = dataCriteriaService.getUsedCQLValuesets(cql, token);
 
     assertThat(valuesets.size(), is(equalTo(2)));
   }

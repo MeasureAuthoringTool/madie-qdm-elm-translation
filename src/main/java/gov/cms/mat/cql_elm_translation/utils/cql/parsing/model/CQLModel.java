@@ -24,7 +24,7 @@ public class CQLModel {
   @Builder.Default private List<CQLQualityDataSetDTO> allValueSetAndCodeList = new ArrayList<>();
   @Builder.Default private List<CQLParameter> cqlParameters = new ArrayList<>();
   @Builder.Default private List<CQLDefinition> cqlDefinitions = new ArrayList<>();
-  @Builder.Default private List<CQLFunctions> cqlFunctions = new ArrayList<>();
+  @Builder.Default private List<CQLFunction> cqlFunctions = new ArrayList<>();
   @Builder.Default private List<CQLCodeSystem> codeSystemList = new ArrayList<>();
   @Builder.Default private List<CQLCode> codeList = new ArrayList<>();
   @Builder.Default private List<CQLIncludeLibrary> cqlIncludeLibraries = new ArrayList<>();
@@ -56,8 +56,8 @@ public class CQLModel {
     return includedDefCQLIdentifierObject;
   }
 
-  public List<CQLFunctions> getIncludedFunc() {
-    List<CQLFunctions> includedFunctions = new ArrayList<>();
+  public List<CQLFunction> getIncludedFunc() {
+    List<CQLFunction> includedFunctions = new ArrayList<>();
 
     includedLibraries.forEach(
         (k, v) -> {
@@ -72,7 +72,7 @@ public class CQLModel {
     List<CQLIdentifierObject> includedFuncCQLIdentifierObject = new ArrayList<>();
     for (CQLIncludeLibrary lib : includedLibraries.keySet()) {
       CQLModel model = includedLibraries.get(lib);
-      for (CQLFunctions fun : model.getCqlFunctions()) {
+      for (CQLFunction fun : model.getCqlFunctions()) {
         includedFuncCQLIdentifierObject.add(
             new CQLIdentifierObject(lib.getAliasName(), fun.getName()));
       }
@@ -240,14 +240,14 @@ public class CQLModel {
    *
    * @return list containing all the definitions and functions names in the model
    */
-  public List<String> getExpressionListFromCqlModel() {
-    List<String> expressionList = new ArrayList<>();
+  public Set<String> getExpressionListFromCqlModel() {
+    Set<String> expressionList = new HashSet<>();
 
     for (CQLDefinition cqlDefinition : cqlDefinitions) {
       expressionList.add(cqlDefinition.getName());
     }
 
-    for (CQLFunctions cqlFunction : cqlFunctions) {
+    for (CQLFunction cqlFunction : cqlFunctions) {
       expressionList.add(cqlFunction.getName());
     }
 

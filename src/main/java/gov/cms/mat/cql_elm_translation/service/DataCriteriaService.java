@@ -25,7 +25,7 @@ public class DataCriteriaService extends CqlTooling {
   private final CqlLibraryService cqlLibraryService;
 
   public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
-    return parseCql(cql, accessToken, cqlLibraryService).getDataCriteria();
+    return parseCql(cql, accessToken, cqlLibraryService, null).getDataCriteria();
   }
 
   public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
@@ -35,7 +35,7 @@ public class DataCriteriaService extends CqlTooling {
     }
     List<SourceDataCriteria> sourceDataCriteria =
         getSourceDataCriteria(measure.getCql(), accessToken);
-    CQLTools tools = parseCql(measure.getCql(), accessToken, cqlLibraryService);
+    CQLTools tools = parseCql(measure.getCql(), accessToken, cqlLibraryService, null);
     Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
     // Combines explicitly called definitions with any in the tree
     Set<String> allUsedDefinitions = new HashSet<>();
@@ -214,18 +214,18 @@ public class DataCriteriaService extends CqlTooling {
     return dataType.replace(",", "").replace(" ", "").replace("Not", "");
   }
 
-  public List<String> getUsedValuesets(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService);
+  public Set<String> getUsedValuesets(String cql, String accessToken) {
+    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
     return tools.getUsedValuesets();
   }
 
-  public List<CQLValueSet> getUsedCQLValuesets(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService);
+  public Set<CQLValueSet> getUsedCQLValuesets(String cql, String accessToken) {
+    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
     return tools.getUsedCQLValuesets();
   }
 
-  public List<CQLCode> getUsedCQLCodes(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService);
+  public Set<CQLCode> getUsedCQLCodes(String cql, String accessToken) {
+    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
     return tools.getUsedCodes();
   }
 }

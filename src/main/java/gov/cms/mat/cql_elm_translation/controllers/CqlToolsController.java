@@ -2,6 +2,8 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
@@ -102,5 +104,18 @@ public class CqlToolsController {
   public ResponseEntity<Map<String, Set<CQLDefinition>>> getDefinitionCallstack(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.ok(cqlParsingService.getDefinitionCallstacks(cql, accessToken));
+  }
+
+  @PutMapping(
+      value = "/cql/lookups",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CqlLookups> getCqlLookups(
+      @RequestBody CqlLookupRequest lookupRequest,
+      @RequestHeader("Authorization") String accessToken) {
+    log.info("Translator is preparing CQL Lookups for simple xml");
+    return ResponseEntity.ok(
+        cqlParsingService.getCqlLookups(
+            lookupRequest.getCql(), lookupRequest.getMeasureExpressions(), accessToken));
   }
 }

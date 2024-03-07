@@ -177,7 +177,20 @@ public class CqlParserListener extends cqlBaseListener {
         CQLParserUtil.parseString(getFullText(ctx.identifierOrFunctionIdentifier()));
     String logic = getDefinitionAndFunctionLogic(ctx).trim();
     String comment = getExpressionComment(ctx).trim();
+    List<CQLFunctionArgument> functionArguments = getFunctionArguments(ctx);
+    CQLFunction function = new CQLFunction();
+    function.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
+    function.setName(identifier);
 
+    function.setCommentString(comment);
+    function.setLogic(CQLUtilityClass.replaceFirstWhitespaceInLineForExpression(logic));
+    function.setArgumentList(functionArguments);
+    function.setContext(currentContext);
+
+    cqlModel.getCqlFunctions().add(function);
+  }
+
+  static List<CQLFunctionArgument> getFunctionArguments(FunctionDefinitionContext ctx) {
     List<CQLFunctionArgument> functionArguments = new ArrayList<>();
     if (ctx.operandDefinition() != null) {
       for (OperandDefinitionContext operand : ctx.operandDefinition()) {
@@ -207,20 +220,10 @@ public class CqlParserListener extends cqlBaseListener {
         functionArguments.add(functionArgument);
       }
     }
-
-    CQLFunctions function = new CQLFunctions();
-    function.setId(UUID.nameUUIDFromBytes(identifier.getBytes()).toString());
-    function.setName(identifier);
-
-    function.setCommentString(comment);
-    function.setLogic(CQLUtilityClass.replaceFirstWhitespaceInLineForExpression(logic));
-    function.setArgumentList(functionArguments);
-    function.setContext(currentContext);
-
-    cqlModel.getCqlFunctions().add(function);
+    return functionArguments;
   }
 
-  private String getFullText(ParserRuleContext context) {
+  private static String getFullText(ParserRuleContext context) {
     if (context.start == null
         || context.stop == null
         || context.start.getStartIndex() < 0

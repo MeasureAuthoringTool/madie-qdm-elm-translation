@@ -4,6 +4,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +26,8 @@ import java.util.TreeSet;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 
+import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -208,5 +211,18 @@ class CqlToolsControllerTest implements ResourceFileUtil {
         cqlToolsController.getDefinitionCallstack("test cql", "accessToken");
     Set<CQLDefinition> defintions = result.getBody().get("test");
     assertThat(defintions.size(), is(equalTo(1)));
+  }
+
+  @Test
+  void testGetCqlLookups() {
+    when(cqlParsingService.getCqlLookups(any(), any(), any()))
+        .thenReturn(CqlLookups.builder().library("Test").version("0.0.001").build());
+
+    ResponseEntity<CqlLookups> result =
+        cqlToolsController.getCqlLookups(new CqlLookupRequest(), "accessToken");
+    CqlLookups cqlLookups = result.getBody();
+    assertNotNull(cqlLookups);
+    assertThat(cqlLookups.getLibrary(), is(equalTo("Test")));
+    assertThat(cqlLookups.getVersion(), is(equalTo("0.0.001")));
   }
 }

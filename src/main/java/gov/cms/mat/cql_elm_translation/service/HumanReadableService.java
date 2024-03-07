@@ -67,7 +67,7 @@ public class HumanReadableService {
 
     List<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getSourceDataCriteria(measure.getCql(), accessToken);
-    List<CQLCode> cqlCodes = dataCriteriaService.getUsedCQLCodes(measure.getCql(), accessToken);
+    Set<CQLCode> cqlCodes = dataCriteriaService.getUsedCQLCodes(measure.getCql(), accessToken);
     Set<CQLDefinition> allDefinitions =
         cqlParsingService.getAllDefinitions(measure.getCql(), accessToken);
 
@@ -79,10 +79,9 @@ public class HumanReadableService {
             .functions(buildFunctions(measure, accessToken))
             .valuesetDataCriteriaList(
                 buildValuesetDataCriteriaList(sourceDataCriteria, measure, accessToken))
-            .codeDataCriteriaList(buildCodeDataCriteriaList(cqlCodes))
+            .codeDataCriteriaList(buildCodeDataCriteriaList(new ArrayList<>(cqlCodes)))
             .build();
-    hr.setValuesetAndCodeDataCriteriaList(
-        new ArrayList<HumanReadableTerminologyModel>(hr.getValuesetDataCriteriaList()));
+    hr.setValuesetAndCodeDataCriteriaList(new ArrayList<>(hr.getValuesetDataCriteriaList()));
     hr.setValuesetTerminologyList(
         buildValuesetTerminologyList(
             hr.getValuesetDataCriteriaList(), measure, accessToken, sourceDataCriteria));
@@ -349,8 +348,7 @@ public class HumanReadableService {
   }
 
   boolean findUsedValueset(Measure measure, String accessToken, String id) {
-    List<String> usedValuesets =
-        dataCriteriaService.getUsedValuesets(measure.getCql(), accessToken);
+    Set<String> usedValuesets = dataCriteriaService.getUsedValuesets(measure.getCql(), accessToken);
     return usedValuesets != null && !usedValuesets.isEmpty() && usedValuesets.contains(id);
   }
 
@@ -394,7 +392,7 @@ public class HumanReadableService {
 
   Set<HumanReadableValuesetModel> findUsedCQLValueSet(
       Measure measure, String accessToken, List<SourceDataCriteria> sourceDataCriteria) {
-    List<CQLValueSet> usedValuesets =
+    Set<CQLValueSet> usedValuesets =
         dataCriteriaService.getUsedCQLValuesets(measure.getCql(), accessToken);
 
     List<CQLValueSet> otherValueSets =

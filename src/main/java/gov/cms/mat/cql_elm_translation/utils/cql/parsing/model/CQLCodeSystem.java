@@ -1,11 +1,15 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 // TODO: Auto-generated Javadoc
 @Data
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class CQLCodeSystem {
 
   /** The id. */
