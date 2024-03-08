@@ -14,6 +14,7 @@ import java.util.Objects;
 @NoArgsConstructor
 public class CQLDefinition implements CQLExpression {
   private String id;
+  private String uuid;
   private String definitionName;
   private String definitionLogic;
   private String context = "Patient";
