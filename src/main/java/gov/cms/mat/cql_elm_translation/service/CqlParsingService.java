@@ -261,6 +261,7 @@ public class CqlParsingService extends CqlTooling {
             cqlDefinition -> {
               String logic = cqlDefinition.getLogic();
               return cqlDefinition.toBuilder()
+                  .uuid(UUID.randomUUID().toString())
                   .definitionName(cqlDefinition.getName())
                   // TODO: Ideally should come from listener/visitor
                   .definitionLogic(logic.split(":", 2)[1])
