@@ -512,6 +512,7 @@ public class Cql2ElmListener extends cqlBaseListener {
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
               .codeSystemOID(codeSystemMap.get(codeDef.getCodeSystem().getName()).getOID())
+              .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);
       graph.addEdge(currentContext, formattedIdentifier);
@@ -593,6 +594,7 @@ public class Cql2ElmListener extends cqlBaseListener {
     libraries.addAll(listener.getLibraries());
     valuesets.addAll(listener.getValuesets());
     codes.addAll(listener.getCodes());
+    declaredCodes.addAll(listener.getDeclaredCodes());
     codesystems.addAll(listener.getCodesystems());
     parameters.addAll(listener.getParameters());
     definitions.addAll(listener.getDefinitions());

@@ -176,19 +176,20 @@ public class CqlParsingService extends CqlTooling {
     }
     // collect element lookups for value sets and value set retrieves
     // if retrieve with value set available, use retrieve else use value set to build lookup
-    if (CollectionUtils.isNotEmpty(cqlTools.getUsedCQLValuesets())) {
+    if (CollectionUtils.isNotEmpty(cqlTools.getUsedValuesets())) {
       Map<CQLValueSet, Set<String>> cqlValueSetSetMap =
           cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
-      for (CQLValueSet usedValueSet : cqlTools.getUsedCQLValuesets()) {
-        Set<String> datatypes = getValueSetDatatypes(cqlValueSetSetMap, usedValueSet.getOid());
+      for (String usedValueSet : cqlTools.getUsedValuesets()) {
+        CQLValueSet cqlValueSet = getCqlValueSet(cqlValueSetSetMap, usedValueSet);
+        Set<String> datatypes = cqlValueSetSetMap.get(cqlValueSet);
         if (CollectionUtils.isNotEmpty(datatypes)) {
           Set<ElementLookup> valueSetLookups =
               datatypes.stream()
-                  .map(value -> buildElementLookupForValueSet(usedValueSet, value))
+                  .map(value -> buildElementLookupForValueSet(cqlValueSet, value))
                   .collect(toSet());
           cqlElementLookups.addAll(valueSetLookups);
         } else {
-          cqlElementLookups.add(buildElementLookupForValueSet(usedValueSet, null));
+          cqlElementLookups.add(buildElementLookupForValueSet(cqlValueSet, null));
         }
       }
     }
@@ -196,18 +197,12 @@ public class CqlParsingService extends CqlTooling {
   }
 
   // returns the data types associated with value set
-  private Set<String> getValueSetDatatypes(
-      Map<CQLValueSet, Set<String>> cqlValueSetSetMap, String oid) {
-    Optional<Set<String>> values =
-        cqlValueSetSetMap.entrySet().stream()
-            .filter(
-                entry -> {
-                  CQLValueSet cqlValueSet = entry.getKey();
-                  return StringUtils.equals(cqlValueSet.getOid(), oid);
-                })
-            .map(Map.Entry::getValue)
+  private CQLValueSet getCqlValueSet(Map<CQLValueSet, Set<String>> cqlValueSetSetMap, String name) {
+    Optional<CQLValueSet> valueSet =
+        cqlValueSetSetMap.keySet().stream()
+            .filter(cqlValueSet -> StringUtils.equals(cqlValueSet.getName(), name))
             .findFirst();
-    return values.orElse(null);
+    return valueSet.orElse(null);
   }
 
   // returns the data types associated with code
@@ -240,10 +235,12 @@ public class CqlParsingService extends CqlTooling {
   }
 
   private ElementLookup buildElementLookupForValueSet(CQLValueSet cqlValueSet, String dataType) {
+    String[] nameParts = cqlValueSet.getName().split("\\|");
+    String name = nameParts[nameParts.length - 1];
     return ElementLookup.builder()
         .code(false)
         .id(UUID.randomUUID().toString())
-        .name(cqlValueSet.getName())
+        .name(name)
         .oid(cqlValueSet.getOid())
         .datatype(dataType)
         .taxonomy("Grouping") // hardcoded for now
