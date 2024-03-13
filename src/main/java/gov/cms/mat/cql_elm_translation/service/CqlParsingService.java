@@ -233,6 +233,7 @@ public class CqlParsingService extends CqlTooling {
         .codeSystemVersion(cqlCode.getCodeSystemVersion())
         .displayName(cqlCode.getDisplayName())
         .name(cqlCode.getName())
+        .oid(cqlCode.getId())
         .datatype(dataType)
         .taxonomy(cqlCode.getCodeSystemName())
         .build();
@@ -245,7 +246,7 @@ public class CqlParsingService extends CqlTooling {
         .name(cqlValueSet.getName())
         .oid(cqlValueSet.getOid())
         .datatype(dataType)
-        .taxonomy("Grouping") //hardcoded for now
+        .taxonomy("Grouping") // hardcoded for now
         .build();
   }
 
