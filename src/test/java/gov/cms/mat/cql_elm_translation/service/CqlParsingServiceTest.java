@@ -4,6 +4,7 @@ import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
+import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 import static org.hamcrest.CoreMatchers.equalTo;
@@ -18,7 +19,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collectors;
 
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
@@ -191,9 +191,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     assertThat(cqlLookup.getIncludeLibraries().size(), is(equalTo(0)));
     assertThat(cqlLookup.getElementLookups().size(), is(equalTo(3)));
     List<String> definitions =
-        cqlLookup.getDefinitions().stream()
-            .map(CQLDefinition::getName)
-            .collect(Collectors.toList());
+        cqlLookup.getDefinitions().stream().map(CQLDefinition::getName).toList();
     assertThat(
         definitions,
         containsInAnyOrder(
@@ -201,5 +199,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             "More Than One Order",
             "Initial Population",
             "MedicationOrderInjection"));
+    List<String> oids = cqlLookup.getElementLookups().stream().map(ElementLookup::getOid).toList();
+    assertThat(oids, containsInAnyOrder("204504", "197604", "2.16.840.1.113883.3.464.1003.1065"));
   }
 }
