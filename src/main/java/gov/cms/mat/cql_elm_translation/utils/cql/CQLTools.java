@@ -304,7 +304,7 @@ public class CQLTools {
     for (String code : codes) {
       if (graph.isPath(parentExpression, code)) {
         Optional<CQLCode> used =
-            declaredCodes.stream().filter(c -> c.getCodeName().equals(code)).findFirst();
+            declaredCodes.stream().filter(c -> c.getCodeIdentifier().equals(code)).findFirst();
         if (used.isPresent()) {
           usedCodes.add(used.get());
         }
