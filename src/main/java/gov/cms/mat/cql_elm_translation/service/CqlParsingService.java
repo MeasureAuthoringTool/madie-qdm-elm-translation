@@ -181,9 +181,10 @@ public class CqlParsingService extends CqlTooling {
           cqlTools.getDataCriteria().getDataCriteriaWithValueSets();
       for (String usedValueSet : cqlTools.getUsedValuesets()) {
         CQLValueSet cqlValueSet = getCqlValueSet(cqlValueSetSetMap, usedValueSet);
-        if (CollectionUtils.isNotEmpty(cqlValueSetSetMap.get(cqlValueSet))) {
+        Set<String> datatypes = cqlValueSetSetMap.get(cqlValueSet);
+        if (CollectionUtils.isNotEmpty(datatypes)) {
           Set<ElementLookup> valueSetLookups =
-              cqlValueSetSetMap.get(cqlValueSet).stream()
+              datatypes.stream()
                   .map(value -> buildElementLookupForValueSet(cqlValueSet, value))
                   .collect(toSet());
           cqlElementLookups.addAll(valueSetLookups);
