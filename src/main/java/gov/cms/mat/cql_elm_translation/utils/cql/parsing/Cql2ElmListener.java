@@ -528,6 +528,7 @@ public class Cql2ElmListener extends cqlBaseListener {
               .oid(vsDef.getId().replace("urn:oid:", ""))
               .name(vsDef.getName())
               .version(vsDef.getVersion())
+              .identifier(formattedIdentifier)
               .build();
       cqlValuesets.add(declaredValueSet);
 
@@ -593,6 +594,7 @@ public class Cql2ElmListener extends cqlBaseListener {
 
     libraries.addAll(listener.getLibraries());
     valuesets.addAll(listener.getValuesets());
+    cqlValuesets.addAll(listener.getCqlValuesets());
     codes.addAll(listener.getCodes());
     declaredCodes.addAll(listener.getDeclaredCodes());
     codesystems.addAll(listener.getCodesystems());
