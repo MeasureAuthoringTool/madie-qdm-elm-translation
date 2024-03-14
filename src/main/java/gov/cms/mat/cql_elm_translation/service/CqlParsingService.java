@@ -196,7 +196,6 @@ public class CqlParsingService extends CqlTooling {
   }
 
   // returns the data types associated with value set
-  // returns the data types associated with value set
   private Set<String> getValueSetDatatypes(
       Map<CQLValueSet, Set<String>> cqlValueSetSetMap, String oid) {
     Optional<Set<String>> values =
