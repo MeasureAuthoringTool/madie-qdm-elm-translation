@@ -229,6 +229,7 @@ public class CqlParsingService extends CqlTooling {
         .code(true)
         .id(UUID.randomUUID().toString())
         .codeName(cqlCode.getCodeName())
+        .codeSystemName(cqlCode.getCodeSystemName())
         .codeSystemOID(cqlCode.getCodeSystemOID())
         .codeSystemVersion(cqlCode.getCodeSystemVersion())
         .displayName(cqlCode.getDisplayName())
