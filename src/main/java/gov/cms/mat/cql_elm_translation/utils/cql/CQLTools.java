@@ -351,7 +351,7 @@ public class CQLTools {
     }
 
     for (CQLValueSet valueset : cqlValuesets) {
-      if (graph.isPath(parentExpression, valueset.getName())) {
+      if (graph.isPath(parentExpression, valueset.getIdentifier())) {
         usedCQLValuesets.add(valueset);
       }
     }
