@@ -213,19 +213,4 @@ public class DataCriteriaService extends CqlTooling {
     // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
     return dataType.replace(",", "").replace(" ", "").replace("Not", "");
   }
-
-  public Set<String> getUsedValuesets(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return tools.getUsedValuesets();
-  }
-
-  public Set<CQLValueSet> getUsedCQLValuesets(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return tools.getUsedCQLValuesets();
-  }
-
-  public Set<CQLCode> getUsedCQLCodes(String cql, String accessToken) {
-    CQLTools tools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return tools.getUsedCodes();
-  }
 }

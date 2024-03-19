@@ -256,25 +256,4 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
 
-  @Test
-  void testGetUsedValuesets() {
-    Mockito.doNothing()
-        .when(cqlLibraryService)
-        .setUpLibrarySourceProvider(anyString(), anyString());
-
-    Set<String> valuesets = dataCriteriaService.getUsedValuesets(cql, token);
-
-    assertThat(valuesets.size(), is(equalTo(2)));
-  }
-
-  @Test
-  void testGetUsedCQLValuesets() {
-    Mockito.doNothing()
-        .when(cqlLibraryService)
-        .setUpLibrarySourceProvider(anyString(), anyString());
-
-    Set<CQLValueSet> valuesets = dataCriteriaService.getUsedCQLValuesets(cql, token);
-
-    assertThat(valuesets.size(), is(equalTo(2)));
-  }
 }

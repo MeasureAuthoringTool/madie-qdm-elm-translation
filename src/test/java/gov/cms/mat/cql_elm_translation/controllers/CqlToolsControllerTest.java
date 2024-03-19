@@ -45,7 +45,6 @@ import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 @ExtendWith(MockitoExtension.class)
@@ -55,7 +54,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   @Mock private DataCriteriaService dataCriteriaService;
   @Mock private CqlConversionService cqlConversionService;
 
-  @Mock private HumanReadableService humanReadableService;
   @Mock private CqlParsingService cqlParsingService;
   @Mock private CqlFormatterVisitor cqlFormatterVisitor;
 
@@ -154,16 +152,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     var result = cqlToolsController.getLibraryElms("test cql", "john");
     List<TranslatedLibrary> libraries = result.getBody();
     assertNull(libraries);
-  }
-
-  @Test
-  void testGenerateHumanReadable() {
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("test.user");
-    when(humanReadableService.generate(any(), anyString())).thenReturn("test human Readable");
-    var result = cqlToolsController.generateHumanReadable(new Measure(), principal, "accessToken");
-    assertEquals(result.getBody(), "test human Readable");
-    assertEquals(result.getStatusCode(), HttpStatus.OK);
   }
 
   @Test
