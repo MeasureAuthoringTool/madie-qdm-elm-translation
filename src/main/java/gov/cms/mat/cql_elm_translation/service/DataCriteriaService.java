@@ -13,6 +13,7 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StopWatch;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -33,16 +34,27 @@ public class DataCriteriaService extends CqlTooling {
       log.info("Data criteria not found as cql is blank");
       return Collections.emptySet();
     }
-    List<SourceDataCriteria> sourceDataCriteria =
-        getSourceDataCriteria(measure.getCql(), accessToken);
-    CQLTools tools = parseCql(measure.getCql(), accessToken, cqlLibraryService, null);
+
     Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
+
+    StopWatch watch = new StopWatch();
+    watch.start("parseCql");
+    log.info("parsing CQL for measure: {}", measure.getMeasureName());
+    CQLTools cqlTools = parseCql(measure.getCql(), accessToken, cqlLibraryService, usedDefinitions);
+    watch.stop();
+    log.info("done parsing CQL for measure: {};; took {}ms", measure.getMeasureName(), watch.getLastTaskTimeMillis());
+
+    List<SourceDataCriteria> sourceDataCriteria = getSourceDataCriteria(cqlTools);
+
+    log.info("sourceDataCriteria: {}", sourceDataCriteria);
+
+
     // Combines explicitly called definitions with any in the tree
     Set<String> allUsedDefinitions = new HashSet<>();
     usedDefinitions.forEach(
         entry -> {
           allUsedDefinitions.add(entry);
-          tools
+          cqlTools
               .getUsedDefinitions()
               .forEach(
                   (definition, parentExpressions) -> {
@@ -50,7 +62,7 @@ public class DataCriteriaService extends CqlTooling {
                       allUsedDefinitions.add(definition);
                     }
                   });
-          tools
+          cqlTools
               .getUsedFunctions()
               .forEach(
                   (function, parentExpressions) -> {
@@ -63,16 +75,16 @@ public class DataCriteriaService extends CqlTooling {
     Set<String> values = new HashSet<>();
     allUsedDefinitions.forEach(
         def -> {
-          if (!MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap())
-              && !MapUtils.isEmpty(tools.getExpressionNameToValuesetDataTypeMap().get(def))) {
-            tools
+          if (!MapUtils.isEmpty(cqlTools.getExpressionNameToValuesetDataTypeMap())
+              && !MapUtils.isEmpty(cqlTools.getExpressionNameToValuesetDataTypeMap().get(def))) {
+            cqlTools
                 .getExpressionNameToValuesetDataTypeMap()
                 .get(def)
                 .forEach((expression, valueSet) -> values.add(expression));
           }
-          if (!MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap())
-              && !MapUtils.isEmpty(tools.getExpressionNameToCodeDataTypeMap().get(def))) {
-            tools
+          if (!MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap())
+              && !MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap().get(def))) {
+            cqlTools
                 .getExpressionNameToCodeDataTypeMap()
                 .get(def)
                 .forEach((expression, valueSet) -> values.add(expression));
@@ -90,6 +102,9 @@ public class DataCriteriaService extends CqlTooling {
   }
 
   private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
+    if (measure == null || org.springframework.util.CollectionUtils.isEmpty(measure.getGroups())) {
+      return Set.of();
+    }
     Set<String> usedDefinitions = new HashSet<>();
     measure
         .getGroups()
@@ -133,37 +148,45 @@ public class DataCriteriaService extends CqlTooling {
     return usedDefinitions;
   }
 
+  public List<SourceDataCriteria> getSourceDataCriteria(CQLTools cqlTools) {
+      DataCriteria dataCriteria = cqlTools.getDataCriteria();
+      Map<CQLValueSet, Set<String>> criteriaWithValueSet =
+              dataCriteria.getDataCriteriaWithValueSets();
+
+      Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
+      if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
+          log.info("Data criteria not found for given cql");
+          return Collections.emptyList();
+      }
+      // data criteria from value sets
+      List<SourceDataCriteria> valueSetCriteria =
+              criteriaWithValueSet.entrySet().stream()
+                      .map(
+                              criteria ->
+                                      buildSourceDataCriteriaForValueSet(criteria.getKey(), criteria.getValue()))
+                      .collect(Collectors.toList());
+
+      // data criteria from direct reference codes
+      List<SourceDataCriteria> codeCriteria =
+              criteriaWithCodes.entrySet().stream()
+                      .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
+                      .toList();
+
+      valueSetCriteria.addAll(codeCriteria);
+      return valueSetCriteria;
+  }
+
+
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
     if (StringUtils.isBlank(cql)) {
       log.info("Data criteria not found as cql is blank");
       return Collections.emptyList();
     }
 
-    DataCriteria dataCriteria = parseDataCriteriaFromCql(cql, accessToken);
-    Map<CQLValueSet, Set<String>> criteriaWithValueSet =
-        dataCriteria.getDataCriteriaWithValueSets();
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
 
-    Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
-    if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
-      log.info("Data criteria not found for given cql");
-      return Collections.emptyList();
-    }
-    // data criteria from value sets
-    List<SourceDataCriteria> valueSetCriteria =
-        criteriaWithValueSet.entrySet().stream()
-            .map(
-                criteria ->
-                    buildSourceDataCriteriaForValueSet(criteria.getKey(), criteria.getValue()))
-            .collect(Collectors.toList());
-
-    // data criteria from direct reference codes
-    List<SourceDataCriteria> codeCriteria =
-        criteriaWithCodes.entrySet().stream()
-            .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
-            .toList();
-
-    valueSetCriteria.addAll(codeCriteria);
-    return valueSetCriteria;
+//    DataCriteria dataCriteria = parseDataCriteriaFromCql(cql, accessToken);
+    return getSourceDataCriteria(cqlTools);
   }
 
   private SourceDataCriteria buildSourceDataCriteriaForCode(CQLCode code, Set<String> dataTypes) {
@@ -208,7 +231,7 @@ public class DataCriteriaService extends CqlTooling {
     return parts[parts.length - 1];
   }
 
-  private String buildCriteriaType(String dataType) {
+  String buildCriteriaType(String dataType) {
     // e.g "Encounter, Performed" becomes "EncounterPerformed",
     // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
     return dataType.replace(",", "").replace(" ", "").replace("Not", "");
