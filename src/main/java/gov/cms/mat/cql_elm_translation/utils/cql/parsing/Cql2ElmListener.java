@@ -16,6 +16,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgume
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.misc.Interval;
@@ -53,6 +54,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.Getter;
 
+@Slf4j
 public class Cql2ElmListener extends cqlBaseListener {
 
   /** The child CQL strings */
@@ -584,14 +586,21 @@ public class Cql2ElmListener extends cqlBaseListener {
     TranslationResource translationResource =
         TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
 
+    LibraryBuilder libraryBuilder = new LibraryBuilder(translationResource.getLibraryManager());
+    libraryBuilder.setCompilerOptions(translationResource.getLibraryManager().getCqlCompilerOptions());
+
     CqlPreprocessorVisitor preprocessor =
-        new CqlPreprocessorVisitor(
-            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
+        new CqlPreprocessorVisitor(libraryBuilder, tokens);
 
-    preprocessor.visit(tree);
-    ParseTreeWalker walker = new ParseTreeWalker();
-    walker.walk(listener, tree);
-
+    final String libraryIdentifier = def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier() + "|";
+    try {
+      preprocessor.visit(tree);
+      ParseTreeWalker walker = new ParseTreeWalker();
+      walker.walk(listener, tree);
+    } catch (Exception ex) {
+      log.info("exception for def: {}", libraryIdentifier);
+      throw ex;
+    }
     libraries.addAll(listener.getLibraries());
     valuesets.addAll(listener.getValuesets());
     cqlValuesets.addAll(listener.getCqlValuesets());
