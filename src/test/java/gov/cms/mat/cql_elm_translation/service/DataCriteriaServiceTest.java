@@ -11,7 +11,6 @@ import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -255,5 +254,4 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         dataCriteriaService.getRelevantElements(measure, token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
-
 }
