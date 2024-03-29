@@ -1,9 +1,12 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
+import gov.cms.mat.cql_elm_translation.utils.cql.QdmDatatypeUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +15,12 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.model.Conversion;
+import org.cqframework.cql.cql2elm.model.Model;
+import org.hl7.elm_modelinfo.r1.ClassInfo;
+import org.hl7.elm_modelinfo.r1.ProfileInfo;
+import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.springframework.stereotype.Service;
 import org.springframework.util.StopWatch;
 
@@ -35,42 +44,37 @@ public class DataCriteriaService extends CqlTooling {
       return Collections.emptySet();
     }
 
-    Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
+    Set<String> measureDefinitions = getUsedDefinitionsFromMeasure(measure);
+    log.info("measureDefinitions: {}", measureDefinitions);
 
     StopWatch watch = new StopWatch();
     watch.start("parseCql");
     log.info("parsing CQL for measure: {}", measure.getMeasureName());
-    CQLTools cqlTools = parseCql(measure.getCql(), accessToken, cqlLibraryService, usedDefinitions);
+    CQLTools cqlTools = parseCql(measure.getCql(), accessToken, cqlLibraryService, measureDefinitions);
     watch.stop();
     log.info("done parsing CQL for measure: {};; took {}ms", measure.getMeasureName(), watch.getLastTaskTimeMillis());
 
     List<SourceDataCriteria> sourceDataCriteria = getSourceDataCriteria(cqlTools);
-
+    log.info("allDataCriteria: {}", cqlTools.getDataCriteria());
     log.info("sourceDataCriteria: {}", sourceDataCriteria);
+
+    Set<String> allUsedDefinitions = new HashSet<>(measureDefinitions);
+    // add used definitions
+    for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
+      allUsedDefinitions.add(entry.getKey());
+      allUsedDefinitions.addAll(entry.getValue());
+    }
+    // add used functions
+    for (var entry : cqlTools.getUsedFunctions().entrySet()) {
+      allUsedDefinitions.add(entry.getKey());
+      allUsedDefinitions.addAll(entry.getValue());
+    }
 
 
     // Combines explicitly called definitions with any in the tree
-    Set<String> allUsedDefinitions = new HashSet<>();
-    usedDefinitions.forEach(
-        entry -> {
-          allUsedDefinitions.add(entry);
-          cqlTools
-              .getUsedDefinitions()
-              .forEach(
-                  (definition, parentExpressions) -> {
-                    if (parentExpressions.contains(entry)) {
-                      allUsedDefinitions.add(definition);
-                    }
-                  });
-          cqlTools
-              .getUsedFunctions()
-              .forEach(
-                  (function, parentExpressions) -> {
-                    if (parentExpressions.contains(entry)) {
-                      allUsedDefinitions.add(function);
-                    }
-                  });
-        });
+    Map<String, Set<String>> usedDefinitions = cqlTools.getUsedDefinitions();
+    log.info("usedDefinitions: {}", usedDefinitions);
+    log.info("allUsedDefinitions: {}", allUsedDefinitions);
 
     Set<String> values = new HashSet<>();
     allUsedDefinitions.forEach(
@@ -149,31 +153,31 @@ public class DataCriteriaService extends CqlTooling {
   }
 
   public List<SourceDataCriteria> getSourceDataCriteria(CQLTools cqlTools) {
-      DataCriteria dataCriteria = cqlTools.getDataCriteria();
-      Map<CQLValueSet, Set<String>> criteriaWithValueSet =
-              dataCriteria.getDataCriteriaWithValueSets();
+    DataCriteria dataCriteria = cqlTools.getDataCriteria();
+    Map<CQLValueSet, Set<String>> criteriaWithValueSet =
+        dataCriteria.getDataCriteriaWithValueSets();
 
-      Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
-      if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
-          log.info("Data criteria not found for given cql");
-          return Collections.emptyList();
-      }
-      // data criteria from value sets
-      List<SourceDataCriteria> valueSetCriteria =
-              criteriaWithValueSet.entrySet().stream()
-                      .map(
-                              criteria ->
-                                      buildSourceDataCriteriaForValueSet(criteria.getKey(), criteria.getValue()))
-                      .collect(Collectors.toList());
+    Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
+    if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
+      log.info("Data criteria not found for given cql");
+      return Collections.emptyList();
+    }
+    // data criteria from value sets
+    List<SourceDataCriteria> valueSetCriteria =
+        criteriaWithValueSet.entrySet().stream()
+            .map(
+                criteria ->
+                    buildSourceDataCriteriaForValueSet(criteria.getKey(), criteria.getValue()))
+            .collect(Collectors.toList());
 
-      // data criteria from direct reference codes
-      List<SourceDataCriteria> codeCriteria =
-              criteriaWithCodes.entrySet().stream()
-                      .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
-                      .toList();
+    // data criteria from direct reference codes
+    List<SourceDataCriteria> codeCriteria =
+        criteriaWithCodes.entrySet().stream()
+            .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
+            .toList();
 
-      valueSetCriteria.addAll(codeCriteria);
-      return valueSetCriteria;
+    valueSetCriteria.addAll(codeCriteria);
+    return valueSetCriteria;
   }
 
 
@@ -184,8 +188,6 @@ public class DataCriteriaService extends CqlTooling {
     }
 
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
-
-//    DataCriteria dataCriteria = parseDataCriteriaFromCql(cql, accessToken);
     return getSourceDataCriteria(cqlTools);
   }
 
@@ -199,7 +201,7 @@ public class DataCriteriaService extends CqlTooling {
         .oid(
             "drc-"
                 + DigestUtils.md5Hex(
-                    code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
+                code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
         .title(name)
         .description(dataType + ": " + name)
         .type(type)
@@ -234,6 +236,8 @@ public class DataCriteriaService extends CqlTooling {
   String buildCriteriaType(String dataType) {
     // e.g "Encounter, Performed" becomes "EncounterPerformed",
     // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
-    return dataType.replace(",", "").replace(" ", "").replace("Not", "");
+    return QdmDatatypeUtil.getTypeForNegation(dataType) == null ?
+        dataType.replace(",", "").replace(" ", "").replace("Not", "")
+        : QdmDatatypeUtil.getTypeForNegation(dataType);
   }
 }
