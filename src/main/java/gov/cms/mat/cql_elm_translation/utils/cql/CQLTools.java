@@ -477,7 +477,8 @@ public class CQLTools {
 
       Set<String> innerKeys = innerMap.keySet();
       for (String innerKey : innerKeys) {
-        flattenedMap.computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)))
+        flattenedMap
+            .computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)))
             .addAll(innerMap.get(innerKey));
       }
     }

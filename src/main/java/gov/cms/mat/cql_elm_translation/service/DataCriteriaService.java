@@ -1,7 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
@@ -15,14 +13,7 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.ModelManager;
-import org.cqframework.cql.cql2elm.model.Conversion;
-import org.cqframework.cql.cql2elm.model.Model;
-import org.hl7.elm_modelinfo.r1.ClassInfo;
-import org.hl7.elm_modelinfo.r1.ProfileInfo;
-import org.hl7.elm_modelinfo.r1.TypeInfo;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StopWatch;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -45,18 +36,9 @@ public class DataCriteriaService extends CqlTooling {
     }
 
     Set<String> measureDefinitions = getUsedDefinitionsFromMeasure(measure);
-    log.info("measureDefinitions: {}", measureDefinitions);
-
-    StopWatch watch = new StopWatch();
-    watch.start("parseCql");
-    log.info("parsing CQL for measure: {}", measure.getMeasureName());
-    CQLTools cqlTools = parseCql(measure.getCql(), accessToken, cqlLibraryService, measureDefinitions);
-    watch.stop();
-    log.info("done parsing CQL for measure: {};; took {}ms", measure.getMeasureName(), watch.getLastTaskTimeMillis());
-
+    CQLTools cqlTools =
+        parseCql(measure.getCql(), accessToken, cqlLibraryService, measureDefinitions);
     List<SourceDataCriteria> sourceDataCriteria = getSourceDataCriteria(cqlTools);
-    log.info("allDataCriteria: {}", cqlTools.getDataCriteria());
-    log.info("sourceDataCriteria: {}", sourceDataCriteria);
 
     Set<String> allUsedDefinitions = new HashSet<>(measureDefinitions);
     // add used definitions
@@ -70,12 +52,7 @@ public class DataCriteriaService extends CqlTooling {
       allUsedDefinitions.addAll(entry.getValue());
     }
 
-
     // Combines explicitly called definitions with any in the tree
-    Map<String, Set<String>> usedDefinitions = cqlTools.getUsedDefinitions();
-    log.info("usedDefinitions: {}", usedDefinitions);
-    log.info("allUsedDefinitions: {}", allUsedDefinitions);
-
     Set<String> values = new HashSet<>();
     allUsedDefinitions.forEach(
         def -> {
@@ -180,7 +157,6 @@ public class DataCriteriaService extends CqlTooling {
     return valueSetCriteria;
   }
 
-
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
     if (StringUtils.isBlank(cql)) {
       log.info("Data criteria not found as cql is blank");
@@ -201,7 +177,7 @@ public class DataCriteriaService extends CqlTooling {
         .oid(
             "drc-"
                 + DigestUtils.md5Hex(
-                code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
+                    code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
         .title(name)
         .description(dataType + ": " + name)
         .type(type)
@@ -236,8 +212,8 @@ public class DataCriteriaService extends CqlTooling {
   String buildCriteriaType(String dataType) {
     // e.g "Encounter, Performed" becomes "EncounterPerformed",
     // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
-    return QdmDatatypeUtil.getTypeForNegation(dataType) == null ?
-        dataType.replace(",", "").replace(" ", "").replace("Not", "")
-        : QdmDatatypeUtil.getTypeForNegation(dataType);
+    return QdmDatatypeUtil.isValidNegation(dataType)
+        ? QdmDatatypeUtil.getTypeForNegation(dataType)
+        : dataType.replace(",", "").replace(" ", "").replace("Not", "");
   }
 }
