@@ -3,6 +3,8 @@ package gov.cms.mat.cql_elm_translation.dto;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.Comparator;
+
 @Data
 @Builder
 public class SourceDataCriteria implements Comparable<SourceDataCriteria> {
@@ -17,6 +19,8 @@ public class SourceDataCriteria implements Comparable<SourceDataCriteria> {
 
   @Override
   public int compareTo(SourceDataCriteria o) {
-    return this.oid.compareTo(o.oid);
+    return Comparator.comparing(SourceDataCriteria::getOid)
+        .thenComparing(SourceDataCriteria::getType, Comparator.nullsFirst(String::compareTo))
+        .compare(this, o);
   }
 }
