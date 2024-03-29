@@ -20,7 +20,9 @@ public class SourceDataCriteria implements Comparable<SourceDataCriteria> {
   @Override
   public int compareTo(SourceDataCriteria o) {
     return Comparator.comparing(SourceDataCriteria::getOid)
-            .thenComparing(SourceDataCriteria::getType)
+            .thenComparing(
+                SourceDataCriteria::getType,
+                Comparator.nullsFirst(String::compareTo))
             .compare(this, o);
   }
 }
