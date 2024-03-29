@@ -159,7 +159,6 @@ public class DataCriteriaService extends CqlTooling {
 
   public List<SourceDataCriteria> getSourceDataCriteria(String cql, String accessToken) {
     if (StringUtils.isBlank(cql)) {
-      log.info("Data criteria not found as cql is blank");
       return Collections.emptyList();
     }
 

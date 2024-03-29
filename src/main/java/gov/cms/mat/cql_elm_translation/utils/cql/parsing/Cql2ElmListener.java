@@ -586,22 +586,15 @@ public class Cql2ElmListener extends cqlBaseListener {
     TranslationResource translationResource =
         TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
 
+    // Add CqlCompilerOptions from LibraryManager to prevent NPE while walking through CQL
     LibraryBuilder libraryBuilder = new LibraryBuilder(translationResource.getLibraryManager());
     libraryBuilder.setCompilerOptions(
         translationResource.getLibraryManager().getCqlCompilerOptions());
-
     CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor(libraryBuilder, tokens);
+    preprocessor.visit(tree);
+    ParseTreeWalker walker = new ParseTreeWalker();
+    walker.walk(listener, tree);
 
-    final String libraryIdentifier =
-        def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier() + "|";
-    try {
-      preprocessor.visit(tree);
-      ParseTreeWalker walker = new ParseTreeWalker();
-      walker.walk(listener, tree);
-    } catch (Exception ex) {
-      log.info("exception for def: {}", libraryIdentifier);
-      throw ex;
-    }
     libraries.addAll(listener.getLibraries());
     valuesets.addAll(listener.getValuesets());
     cqlValuesets.addAll(listener.getCqlValuesets());

@@ -80,7 +80,6 @@ public class CqlToolsController {
   @PutMapping("/qdm/relevant-elements")
   public ResponseEntity<Set<SourceDataCriteria>> getRelevantElements(
       @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
-    log.info("Received request for relevant-elements for measure: {}", measure.getMeasureName());
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON)
         .body(dataCriteriaService.getRelevantElements(measure, accessToken));
