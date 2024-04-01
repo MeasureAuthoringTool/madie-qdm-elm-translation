@@ -85,6 +85,8 @@ public class TranslationResource {
 
     if (isFhir) {
       modelManager.resolveModel("FHIR", "4.0.1");
+    } else {
+      modelManager.resolveModel("QDM", "5.6");
     }
     // MAT-6240: Upgrading to cqframework 3.2.0 introduced a reliance on default options that would
     // include locator even if locator was false
