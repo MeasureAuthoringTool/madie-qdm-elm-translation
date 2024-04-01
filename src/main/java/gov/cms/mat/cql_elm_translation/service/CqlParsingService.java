@@ -258,7 +258,7 @@ public class CqlParsingService extends CqlTooling {
   private Set<CQLDefinition> buildUsedCqlDefinitions(
       Set<CQLDefinition> cqlDefinitions, Set<String> usedDefinitions) {
     return cqlDefinitions.stream()
-        .filter(cqlDefinition -> usedDefinitions.contains(cqlDefinition.getName()))
+        .filter(cqlDefinition -> usedDefinitions.contains(cqlDefinition.getId()))
         .map(
             cqlDefinition -> {
               String logic = cqlDefinition.getLogic();
