@@ -153,53 +153,73 @@ public class DataCriteriaService extends CqlTooling {
         criteriaWithValueSet.entrySet().stream()
             .map(
                 criteria ->
-                    buildSourceDataCriteriaForValueSet(criteria.getKey(), criteria.getValue()))
+                    buildSourceDataCriteriasForValueSet(criteria.getKey(), criteria.getValue()))
+            .flatMap(Collection::stream)
             .collect(Collectors.toList());
 
     // data criteria from direct reference codes
     List<SourceDataCriteria> codeCriteria =
         criteriaWithCodes.entrySet().stream()
-            .map(criteria -> buildSourceDataCriteriaForCode(criteria.getKey(), criteria.getValue()))
+            .map(
+                criteria -> buildSourceDataCriteriasForCode(criteria.getKey(), criteria.getValue()))
+            .flatMap(Collection::stream)
             .toList();
 
     valueSetCriteria.addAll(codeCriteria);
     return valueSetCriteria;
   }
 
-  private SourceDataCriteria buildSourceDataCriteriaForCode(CQLCode code, Set<String> dataTypes) {
-    String dataType = dataTypes.stream().findFirst().orElse(null);
-    String type = buildCriteriaType(dataType);
-    String name = splitByPipeAndGetLast(code.getName());
-    return SourceDataCriteria.builder()
-        // generate fake oid for drc, as it doesn't have one: e.g.id='71802-3',
-        // codeSystemName='LOINC', codeSystemVersion='null'
-        .oid(
-            "drc-"
-                + DigestUtils.md5Hex(
-                    code.getCodeSystemName() + code.getId() + code.getCodeSystemVersion()))
-        .title(name)
-        .description(dataType + ": " + name)
-        .type(type)
-        .drc(true)
-        .codeId(code.getId())
-        .name(code.getName())
-        .build();
+  private Set<SourceDataCriteria> buildSourceDataCriteriasForCode(
+      CQLCode code, Set<String> dataTypes) {
+    // return nothing if datatype is missing..otherwise we'll get an NPE in buildCriteriaType
+    if (CollectionUtils.isEmpty(dataTypes)) {
+      return Set.of();
+    }
+    return dataTypes.stream()
+        .map(
+            dataType -> {
+              String type = buildCriteriaType(dataType);
+              String name = splitByPipeAndGetLast(code.getName());
+              return SourceDataCriteria.builder()
+                  // generate fake oid for drc, as it doesn't have one: e.g.id='71802-3',
+                  // codeSystemName='LOINC', codeSystemVersion='null'
+                  .oid(
+                      "drc-"
+                          + DigestUtils.md5Hex(
+                              code.getCodeSystemName()
+                                  + code.getId()
+                                  + code.getCodeSystemVersion()))
+                  .title(name)
+                  .description(dataType + ": " + name)
+                  .type(type)
+                  .drc(true)
+                  .codeId(code.getId())
+                  .name(code.getName())
+                  .build();
+            })
+        .collect(Collectors.toSet());
   }
 
-  private SourceDataCriteria buildSourceDataCriteriaForValueSet(
+  private Set<SourceDataCriteria> buildSourceDataCriteriasForValueSet(
       CQLValueSet valueSet, Set<String> dataTypes) {
-    String dataType = dataTypes.stream().findFirst().orElse(null);
-    String name = splitByPipeAndGetLast(valueSet.getName());
-    String oid = valueSet.getOid();
-    SourceDataCriteria result =
-        SourceDataCriteria.builder()
-            .oid(oid)
-            .title(name)
-            .description(dataType + ": " + name)
-            .type(buildCriteriaType(dataType))
-            .name(valueSet.getName())
-            .build();
-    return result;
+    // return nothing if datatype is missing..otherwise we'll get an NPE in buildCriteriaType
+    if (CollectionUtils.isEmpty(dataTypes)) {
+      return Set.of();
+    }
+    return dataTypes.stream()
+        .map(
+            dataType -> {
+              String name = splitByPipeAndGetLast(valueSet.getName());
+              String oid = valueSet.getOid();
+              return SourceDataCriteria.builder()
+                  .oid(oid)
+                  .title(name)
+                  .description(dataType + ": " + name)
+                  .type(buildCriteriaType(dataType))
+                  .name(valueSet.getName())
+                  .build();
+            })
+        .collect(Collectors.toSet());
   }
 
   private String splitByPipeAndGetLast(String criteria) {
