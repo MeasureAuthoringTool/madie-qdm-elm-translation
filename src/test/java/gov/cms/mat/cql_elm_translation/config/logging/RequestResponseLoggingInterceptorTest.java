@@ -14,8 +14,12 @@ import org.springframework.http.HttpRequest;
 import org.springframework.http.client.ClientHttpRequestExecution;
 import org.springframework.http.client.ClientHttpResponse;
 import org.springframework.mock.http.client.MockClientHttpRequest;
+
+import lombok.extern.slf4j.Slf4j;
+
 import org.mockito.junit.jupiter.MockitoExtension;
 
+@Slf4j
 @ExtendWith(MockitoExtension.class)
 class RequestResponseLoggingInterceptorTest {
 
@@ -45,8 +49,8 @@ class RequestResponseLoggingInterceptorTest {
 
     @Override
     protected void processHeaders(HttpRequest request) {
-      // doesn't do anything ; but needs body to prevent linting errors
-      assertTrue(true);
+      // doesn't do anything ; but needs body to prevent codacy errors
+      log.debug("just to have something in this method for codacy purposes");
     }
   }
 }
