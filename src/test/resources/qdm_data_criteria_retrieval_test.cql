@@ -26,3 +26,9 @@ define "Non Elective Inpatient Encounter":
   ["Encounter, Performed": "Nonelective Inpatient Encounter"] NonElectiveEncounter
     where Global."LengthInDays" ( NonElectiveEncounter.relevantPeriod ) <= 120
       and NonElectiveEncounter.relevantPeriod ends during day of "Measurement Period"
+
+define "test stratification":
+    "Qualifying Encounters"
+
+define function "Test Observation"(Encounter "Encounter, Performed" ):
+  duration in seconds of Encounter.relevantPeriod
