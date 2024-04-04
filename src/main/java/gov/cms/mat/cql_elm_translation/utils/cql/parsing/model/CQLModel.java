@@ -191,51 +191,6 @@ public class CQLModel {
   }
 
   /**
-   * Gets a code by name from the parent or any children
-   *
-   * @param formattedValuesetName the name in the format libraryname-x.x.xxx|alias|valueset
-   *     identifier
-   * @return the code found
-   */
-  public CQLQualityDataSetDTO getValuesetByName(String formattedValuesetName) {
-    String valuesetName = formattedValuesetName;
-    String libraryNameVersion = null; // name in the format libraryname-x.x.xxx
-    String[] valuesetSplit = formattedValuesetName.split("\\|");
-    if (valuesetSplit.length == 3) {
-      libraryNameVersion = valuesetSplit[0];
-      valuesetName = valuesetSplit[2];
-    }
-
-    // if the library name version is null, then the code is in the parent
-    if (libraryNameVersion == null) {
-      for (CQLQualityDataSetDTO valueset : valueSetList) {
-        if (Objects.equals(valueset.getName(), valuesetName)) {
-          return valueset;
-        }
-      }
-    } else {
-      final String nameVersion = libraryNameVersion;
-      List<CQLIncludeLibrary> cqlIncludeLibrary =
-          includedLibraries.keySet().stream()
-              .filter(
-                  lib ->
-                      createNameVersionString(lib.getCqlLibraryName(), lib.getVersion())
-                          .equals(nameVersion))
-              .collect(Collectors.toList());
-      if (!cqlIncludeLibrary.isEmpty()) {
-        for (CQLQualityDataSetDTO valueset :
-            includedLibraries.get(cqlIncludeLibrary.get(0)).getValueSetList()) {
-          if (valueset.getName().equals(valuesetName)) {
-            return valueset;
-          }
-        }
-      }
-    }
-
-    return null;
-  }
-
-  /**
    * This function returns a list containing all the definitions and functions names in the model
    *
    * @return list containing all the definitions and functions names in the model

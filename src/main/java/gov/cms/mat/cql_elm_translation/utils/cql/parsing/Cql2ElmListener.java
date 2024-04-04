@@ -4,12 +4,14 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
@@ -19,6 +21,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent
 import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -31,7 +34,9 @@ import org.cqframework.cql.gen.cqlBaseListener;
 import org.cqframework.cql.gen.cqlLexer;
 import org.cqframework.cql.gen.cqlParser;
 import org.cqframework.cql.gen.cqlParser.AliasedQuerySourceContext;
+import org.cqframework.cql.gen.cqlParser.FunctionDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.LetClauseContext;
+import org.cqframework.cql.gen.cqlParser.OperandDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.QualifiedFunctionContext;
 import org.cqframework.cql.gen.cqlParser.QualifiedIdentifierExpressionContext;
 import org.cqframework.cql.gen.cqlParser.ReferentialIdentifierContext;
@@ -251,7 +256,7 @@ public class Cql2ElmListener extends cqlBaseListener {
         ctx.getStart()
             .getInputStream()
             .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
-    List<CQLFunctionArgument> functionArguments = CqlParserListener.getFunctionArguments(ctx);
+    List<CQLFunctionArgument> functionArguments = getFunctionArguments(ctx);
     definitionContents.add(
         DefinitionContent.builder()
             .name(currentContext)
@@ -266,6 +271,63 @@ public class Cql2ElmListener extends cqlBaseListener {
     for (cqlParser.OperandDefinitionContext operand : ctx.operandDefinition()) {
       namespace.pop();
     }
+  }
+
+  private static final List<String> CQL_DATA_TYPES =
+      List.of(
+          "Boolean",
+          "Date",
+          "DateTime",
+          "Decimal",
+          "Integer",
+          "QDM Datatype",
+          "Ratio",
+          "String",
+          "Time",
+          "Others");
+
+  static List<CQLFunctionArgument> getFunctionArguments(FunctionDefinitionContext ctx) {
+    List<CQLFunctionArgument> functionArguments = new ArrayList<>();
+    if (ctx.operandDefinition() != null) {
+      for (OperandDefinitionContext operand : ctx.operandDefinition()) {
+        String name = "";
+        String type = "";
+        if (operand.referentialIdentifier() != null) {
+          name = getFullText(operand.referentialIdentifier());
+        }
+
+        if (operand.typeSpecifier() != null) {
+          type = getFullText(operand.typeSpecifier());
+        }
+
+        CQLFunctionArgument functionArgument = new CQLFunctionArgument();
+        functionArgument.setId(UUID.nameUUIDFromBytes(name.getBytes()).toString());
+        functionArgument.setArgumentName(name);
+
+        if (QDMUtil.getQDMContainer().getDatatypes().contains(CQLParserUtil.parseString(type))) {
+          functionArgument.setArgumentType("QDM Datatype");
+          functionArgument.setQdmDataType(CQLParserUtil.parseString(type));
+        } else if (CQL_DATA_TYPES.contains(type)) {
+          functionArgument.setArgumentType(type);
+        } else {
+          functionArgument.setArgumentType("Others");
+          functionArgument.setOtherType(type);
+        }
+        functionArguments.add(functionArgument);
+      }
+    }
+    return functionArguments;
+  }
+
+  private static String getFullText(ParserRuleContext context) {
+    if (context.start == null
+        || context.stop == null
+        || context.start.getStartIndex() < 0
+        || context.stop.getStopIndex() < 0) return context.getText();
+    return context
+        .start
+        .getInputStream()
+        .getText(Interval.of(context.start.getStartIndex(), context.stop.getStopIndex()));
   }
 
   @Override

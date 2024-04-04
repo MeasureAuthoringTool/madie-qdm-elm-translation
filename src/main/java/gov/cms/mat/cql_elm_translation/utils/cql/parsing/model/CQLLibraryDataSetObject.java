@@ -1,8 +1,6 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
 
 import lombok.Data;
 
@@ -37,8 +35,6 @@ public class CQLLibraryDataSetObject {
   private String libraryModelType;
   private boolean fhirConvertible;
   private transient int clickCount;
-
-  private List<CQLError> cqlErrors = new ArrayList<>();
 
   public void scrubForMarkUp() {
     String markupRegExp = "<[^>]+>";

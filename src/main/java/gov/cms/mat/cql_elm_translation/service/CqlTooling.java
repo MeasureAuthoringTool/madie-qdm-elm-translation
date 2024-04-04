@@ -6,7 +6,6 @@ import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.CqlParserListener;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
@@ -105,13 +104,13 @@ public abstract class CqlTooling {
   }
 
   private Set<String> getParentExpressions(String cql) {
-    CQLModel cqlModel;
-    try {
-      CqlParserListener listener = new CqlParserListener(cql);
-      cqlModel = listener.getCQLModel();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
-    }
+
+    // CqlParserListener listener = new CqlParserListener(cql);
+    CQLModel cqlModel = new CQLModel();
+    // GAK MAT-6865 setting to default value because that is how it was when
+    // this code was copied from CqlParserListener
+    cqlModel.setContext("Patient");
+
     return cqlModel.getExpressionListFromCqlModel();
   }
 }

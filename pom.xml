@@ -8,7 +8,7 @@
   </parent>
   <groupId>gov.cms.madie</groupId>
   <artifactId>cql-elm-translation</artifactId>
-  <version>0.0.1</version>
+  <version>0.0.2-SNAPSHOT</version>
 
   <name>CQL to ELM Translation Service</name>
   <description>Translates CQL to ELM for MADiE</description>
@@ -313,6 +313,13 @@
       <artifactId>spring-security-test</artifactId>
       <scope>test</scope>
     </dependency>
+    <dependency>
+      <groupId>org.mockito</groupId>
+      <artifactId>mockito-inline</artifactId>
+      <version>5.2.0</version>
+      <scope>test</scope>
+    </dependency>
+
   </dependencies>
 
   <!--    Required to fetch artifacts from repositories other than maven central -->
