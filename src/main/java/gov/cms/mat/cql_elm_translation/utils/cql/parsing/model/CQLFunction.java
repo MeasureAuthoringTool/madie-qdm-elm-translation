@@ -46,26 +46,6 @@ public class CQLFunction implements CQLExpression {
     this.argument = argumentList;
   }
 
-  /**
-   * Gets the id.
-   *
-   * @return the id
-   */
-  @Override
-  public String getId() {
-    return id;
-  }
-
-  /**
-   * Sets the id.
-   *
-   * @param id the new id
-   */
-  @Override
-  public void setId(String id) {
-    this.id = id;
-  }
-
   @Override
   public String getName() {
     return getFunctionName();
