@@ -44,6 +44,9 @@ class RequestResponseLoggingInterceptorTest {
   class TestLoggingInterceptor extends RequestResponseLoggingInterceptor {
 
     @Override
-    protected void processHeaders(HttpRequest request) {}
+    protected void processHeaders(HttpRequest request) {
+      // doesn't do anything ; but needs body to prevent linting errors
+      assertTrue(true);
+    }
   }
 }

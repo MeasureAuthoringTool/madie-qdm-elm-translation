@@ -62,6 +62,19 @@ import lombok.Getter;
 @Slf4j
 public class Cql2ElmListener extends cqlBaseListener {
 
+  private static final List<String> CQL_DATA_TYPES =
+      List.of(
+          "Boolean",
+          "Date",
+          "DateTime",
+          "Decimal",
+          "Integer",
+          "QDM Datatype",
+          "Ratio",
+          "String",
+          "Time",
+          "Others");
+
   /** The child CQL strings */
   private Map<String, String> childrenLibraries = new HashMap<>();
 
@@ -272,19 +285,6 @@ public class Cql2ElmListener extends cqlBaseListener {
       namespace.pop();
     }
   }
-
-  private static final List<String> CQL_DATA_TYPES =
-      List.of(
-          "Boolean",
-          "Date",
-          "DateTime",
-          "Decimal",
-          "Integer",
-          "QDM Datatype",
-          "Ratio",
-          "String",
-          "Time",
-          "Others");
 
   static List<CQLFunctionArgument> getFunctionArguments(FunctionDefinitionContext ctx) {
     List<CQLFunctionArgument> functionArguments = new ArrayList<>();
