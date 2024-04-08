@@ -2,6 +2,7 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.data.DataCriteria;
+import gov.cms.mat.cql_elm_translation.data.DataElementDescriptor;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.QdmDatatypeUtil;
@@ -178,7 +179,7 @@ public class DataCriteriaService extends CqlTooling {
     return dataTypes.stream()
         .map(
             dataType -> {
-              String type = buildCriteriaType(dataType);
+              DataElementDescriptor descriptor = getCriteriaType(dataType);
               String name = splitByPipeAndGetLast(code.getName());
               return SourceDataCriteria.builder()
                   // generate fake oid for drc, as it doesn't have one: e.g.id='71802-3',
@@ -190,8 +191,8 @@ public class DataCriteriaService extends CqlTooling {
                                   + code.getId()
                                   + code.getCodeSystemVersion()))
                   .title(name)
-                  .description(dataType + ": " + name)
-                  .type(type)
+                  .description(descriptor.title() + ": " + name)
+                  .type(descriptor.dataType())
                   .drc(true)
                   .codeId(code.getId())
                   .name(code.getName())
@@ -209,13 +210,14 @@ public class DataCriteriaService extends CqlTooling {
     return dataTypes.stream()
         .map(
             dataType -> {
+              DataElementDescriptor descriptor = getCriteriaType(dataType);
               String name = splitByPipeAndGetLast(valueSet.getName());
               String oid = valueSet.getOid();
               return SourceDataCriteria.builder()
                   .oid(oid)
                   .title(name)
-                  .description(dataType + ": " + name)
-                  .type(buildCriteriaType(dataType))
+                  .description(descriptor.title() + ": " + name)
+                  .type(descriptor.dataType())
                   .name(valueSet.getName())
                   .build();
             })
@@ -228,11 +230,10 @@ public class DataCriteriaService extends CqlTooling {
     return parts[parts.length - 1];
   }
 
-  String buildCriteriaType(String dataType) {
-    // e.g "Encounter, Performed" becomes "EncounterPerformed",
-    // e.g for negation: "Assessment, Not Performed" becomes "AssessmentPerformed"
+  DataElementDescriptor getCriteriaType(String dataType) {
     return QdmDatatypeUtil.isValidNegation(dataType)
-        ? QdmDatatypeUtil.getTypeForNegation(dataType)
-        : dataType.replace(",", "").replace(" ", "").replace("Not", "");
+        ? QdmDatatypeUtil.getDescriptorForNegation(dataType)
+        : new DataElementDescriptor(
+            dataType.replace(",", "").replace(" ", "").replace("Not", ""), dataType);
   }
 }
