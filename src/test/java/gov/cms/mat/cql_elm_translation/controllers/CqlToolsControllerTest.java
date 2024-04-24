@@ -3,7 +3,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -25,6 +25,8 @@ import java.util.TreeSet;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 
+import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -32,7 +34,6 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import gov.cms.madie.models.measure.Measure;
@@ -42,7 +43,6 @@ import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 @ExtendWith(MockitoExtension.class)
@@ -52,7 +52,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   @Mock private DataCriteriaService dataCriteriaService;
   @Mock private CqlConversionService cqlConversionService;
 
-  @Mock private HumanReadableService humanReadableService;
   @Mock private CqlParsingService cqlParsingService;
   @Mock private CqlFormatterVisitor cqlFormatterVisitor;
 
@@ -154,16 +153,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGenerateHumanReadable() {
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("test.user");
-    when(humanReadableService.generate(any(), anyString())).thenReturn("test human Readable");
-    var result = cqlToolsController.generateHumanReadable(new Measure(), principal, "accessToken");
-    assertEquals(result.getBody(), "test human Readable");
-    assertEquals(result.getStatusCode(), HttpStatus.OK);
-  }
-
-  @Test
   void testGetRelevantElements() {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     Measure measure = Measure.builder().cql(cql).build();
@@ -208,5 +197,18 @@ class CqlToolsControllerTest implements ResourceFileUtil {
         cqlToolsController.getDefinitionCallstack("test cql", "accessToken");
     Set<CQLDefinition> defintions = result.getBody().get("test");
     assertThat(defintions.size(), is(equalTo(1)));
+  }
+
+  @Test
+  void testGetCqlLookups() {
+    when(cqlParsingService.getCqlLookups(any(), any(), any()))
+        .thenReturn(CqlLookups.builder().library("Test").version("0.0.001").build());
+
+    ResponseEntity<CqlLookups> result =
+        cqlToolsController.getCqlLookups(new CqlLookupRequest(), "accessToken");
+    CqlLookups cqlLookups = result.getBody();
+    assertNotNull(cqlLookups);
+    assertThat(cqlLookups.getLibrary(), is(equalTo("Test")));
+    assertThat(cqlLookups.getVersion(), is(equalTo("0.0.001")));
   }
 }

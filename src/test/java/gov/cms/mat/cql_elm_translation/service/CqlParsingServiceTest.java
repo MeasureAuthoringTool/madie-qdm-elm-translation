@@ -3,9 +3,12 @@ package gov.cms.mat.cql_elm_translation.service;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
+import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
+
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -13,6 +16,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -29,38 +33,26 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
   @Mock private CqlLibraryService cqlLibraryService;
   @InjectMocks private CqlParsingService cqlParsingService;
 
-  private String cql;
+  private static String TOKEN = "John Doe";
+  private String qiCoreHelperCql;
+  private String qiCoreMeasureCql;
+  private String qdmMeasureCql;
 
   @BeforeEach
   void setup() {
-    String helperCql = getData("/qicore_included_lib.cql");
-    cql = getData("/qicore_define_callstack.cql");
-
-    RequestData requestData =
-        RequestData.builder()
-            .cqlData(cql)
-            .showWarnings(false)
-            .signatures(LibraryBuilder.SignatureLevel.All)
-            .annotations(true)
-            .locators(true)
-            .disableListDemotion(true)
-            .disableListPromotion(true)
-            .disableMethodInvocation(false)
-            .validateUnits(true)
-            .resultTypes(true)
-            .build();
-
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-
-    doReturn(helperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
-    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    qiCoreHelperCql = getData("/qicore_included_lib.cql");
+    qiCoreMeasureCql = getData("/qicore_define_callstack.cql");
+    qdmMeasureCql = getData("/qdm_lookup_test_lib.cql");
   }
 
   @Test
   void testCallstack() {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
     Map<String, Set<CQLDefinition>> definitionCallstacks =
-        cqlParsingService.getDefinitionCallstacks(cql, "token");
+        cqlParsingService.getDefinitionCallstacks(qiCoreMeasureCql, "token");
 
     CQLDefinition define1 =
         CQLDefinition.builder()
@@ -105,7 +97,11 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
 
   @Test
   void testAllDefinitions() {
-    Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(cql, "token");
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(qiCoreMeasureCql, "token");
 
     CQLDefinition define1 =
         CQLDefinition.builder()
@@ -160,5 +156,50 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
 
     assertThat(
         allDefs, containsInAnyOrder(define1, define2, define3, define4, helperDefine, function));
+  }
+
+  @Test
+  void testGetCqlLookupsWhenMeasureCqlNull() {
+    Set<String> measureExpressions = Set.of("Initial Population");
+    CqlLookups cqlLookup = cqlParsingService.getCqlLookups(null, measureExpressions, TOKEN);
+    assertNull(cqlLookup);
+  }
+
+  @Test
+  void testGetCqlLookupsWhenMeasureExpressionsNull() {
+    CqlLookups cqlLookup = cqlParsingService.getCqlLookups("Test CQL", null, TOKEN);
+    assertNull(cqlLookup);
+  }
+
+  @Test
+  void testGetCqlLookups() {
+    Set<String> measureExpressions = Set.of("Initial Population");
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qdmMeasureCql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    CqlLookups cqlLookup =
+        cqlParsingService.getCqlLookups(qdmMeasureCql, measureExpressions, TOKEN);
+    assertThat(cqlLookup.getContext(), is(equalTo("Patient")));
+    assertThat(cqlLookup.getLibrary(), is(equalTo("LookupTestLib")));
+    assertThat(cqlLookup.getUsingModel(), is(equalTo("QDM")));
+    assertThat(cqlLookup.getUsingModelVersion(), is(equalTo("5.6")));
+    assertThat(cqlLookup.getParameters().size(), is(equalTo(1)));
+    assertThat(cqlLookup.getValueSets().size(), is(equalTo(1)));
+    assertThat(cqlLookup.getCodes().size(), is(equalTo(2)));
+    assertThat(cqlLookup.getCodeSystems().size(), is(equalTo(1)));
+    assertThat(cqlLookup.getDefinitions().size(), is(equalTo(4)));
+    assertThat(cqlLookup.getIncludeLibraries().size(), is(equalTo(0)));
+    assertThat(cqlLookup.getElementLookups().size(), is(equalTo(3)));
+    List<String> definitions =
+        cqlLookup.getDefinitions().stream().map(CQLDefinition::getName).toList();
+    assertThat(
+        definitions,
+        containsInAnyOrder(
+            "test when then case",
+            "More Than One Order",
+            "Initial Population",
+            "MedicationOrderInjection"));
+    List<String> oids = cqlLookup.getElementLookups().stream().map(ElementLookup::getOid).toList();
+    assertThat(oids, containsInAnyOrder("204504", "197604", "2.16.840.1.113883.3.464.1003.1065"));
   }
 }

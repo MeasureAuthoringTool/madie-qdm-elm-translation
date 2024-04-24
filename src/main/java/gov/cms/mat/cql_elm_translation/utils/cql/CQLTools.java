@@ -6,6 +6,9 @@ import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import lombok.Getter;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
@@ -31,6 +34,7 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 
+@Getter
 public class CQLTools {
 
   private String parentLibraryString;
@@ -45,49 +49,48 @@ public class CQLTools {
   private Map<String, Set<String>> codeDataTypeMap = new HashMap<>();
 
   /** Maps an expression, to it's internal valueset - datatype map */
-  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToValuesetDataTypeMap =
       new HashMap<>();
 
   /** Maps an expression, to its internal code - datatype map */
-  @Getter
   private Map<String, Map<String, Set<String>>> expressionNameToCodeDataTypeMap = new HashMap<>();
 
   /** Maps an expression name to its return type (only function and definitions) */
-  @Getter private Map<String, String> nameToReturnTypeMap = new HashMap<>();
+  private Map<String, String> nameToReturnTypeMap = new HashMap<>();
 
   /**
    * The list of parent expressions. Often times, these are populations from MAT. Anything that can
    * be reached from this node in the graph should be considered used.
    */
-  private List<String> parentExpressions = new ArrayList<>();
+  private Set<String> parentExpressions = new HashSet<>();
 
   private Map<String, String> qdmTypeInfoMap = new HashMap<>();
 
   private Map<String, CompiledLibrary> CompiledLibraryMap;
 
   /** Map in the form of <LibraryName-x.x.xxx, <ExpressionName, ReturnType>>. */
-  @Getter private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
+  private Map<String, Map<String, String>> allNamesToReturnTypeMap = new HashMap<>();
 
-  @Getter private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
+  private Map<String, String> expressionToReturnTypeMap = new HashMap<>();
 
   // used expression sets
-  Set<String> usedLibraries = new HashSet<>();
-  Set<CQLCode> usedCodes = new HashSet<>();
-  Set<String> usedValuesets = new HashSet<>();
-  Set<CQLValueSet> usedCQLValuesets = new HashSet<>();
-  Set<String> usedParameters = new HashSet<>();
-  Map<String, Set<String>> usedDefinitions = new HashMap<>();
-  Map<String, Set<String>> usedFunctions = new HashMap<>();
-  Set<String> usedCodeSystems = new HashSet<>();
-  @Getter DataCriteria dataCriteria = new DataCriteria();
-  @Getter Map<String, String> definitionContent = new HashMap<>();
-  @Getter Map<String, Set<String>> callstack = new HashMap<>();
+  private Set<CQLIncludeLibrary> usedLibraries = new HashSet<>();
+  private Set<CQLCode> usedCodes = new HashSet<>();
+  private Set<String> usedValuesets = new HashSet<>();
+  private Set<CQLValueSet> usedCQLValuesets = new HashSet<>();
+  private Set<CQLParameter> usedParameters = new HashSet<>();
+  private Map<String, Set<String>> usedDefinitions = new HashMap<>();
+  private Map<String, Set<String>> usedFunctions = new HashMap<>();
+  private Set<String> usedCodeSystems = new HashSet<>();
+  private DataCriteria dataCriteria = new DataCriteria();
+  private Set<DefinitionContent> definitionContents = new HashSet<>();
+  private Map<String, Set<String>> callstack = new HashMap<>();
+  private UsingProperties usingProperties;
 
   public CQLTools(
       String parentLibraryString,
       Map<String, String> childrenLibraries,
-      List<String> parentExpressions,
+      Set<String> parentExpressions,
       CqlTranslator translator,
       Map<String, CompiledLibrary> translatedLibraries) {
 
@@ -122,6 +125,8 @@ public class CQLTools {
     ParseTree tree = parser.library();
     CqlTextParser cqlTextParser = new CqlTextParser(this.parentLibraryString);
     UsingProperties usingProperties = cqlTextParser.getUsing();
+    this.usingProperties = usingProperties;
+
     TranslationResource translationResource =
         TranslationResource.getInstance(
             usingProperties.getLibraryType() == "FHIR"); // <-- BADDDDD!!!! Defaults to fhir
@@ -134,15 +139,15 @@ public class CQLTools {
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
 
-    definitionContent.putAll(listener.getDefinitionContent());
+    definitionContents.addAll(listener.getDefinitionContents());
     callstack = graph.getAdjacencyList();
 
-    Set<String> librariesSet = new HashSet<>(listener.getLibraries());
+    Set<CQLIncludeLibrary> librariesSet = new HashSet<>(listener.getLibraries());
     Set<String> valuesetsSet = new HashSet<>(listener.getValuesets());
     Set<CQLValueSet> cqlValuesetsSet = new HashSet<>(listener.getCqlValuesets());
     Set<String> codesSet = new HashSet<>(listener.getCodes());
     Set<String> codesystemsSet = new HashSet<>(listener.getCodesystems());
-    Set<String> parametersSet = new HashSet<>(listener.getParameters());
+    Set<CQLParameter> parametersSet = new HashSet<>(listener.getParameters());
     Set<String> definitionsSet = new HashSet<>(listener.getDefinitions());
     Set<String> functionsSet = new HashSet<>(listener.getFunctions());
     Map<String, Map<String, Set<String>>> valuesetMap =
@@ -190,21 +195,21 @@ public class CQLTools {
 
   private void collectUsedExpressions(
       CQLGraph graph,
-      Set<String> librariesSet,
+      Set<CQLIncludeLibrary> librariesSet,
       Set<String> valuesetsSet,
       Set<CQLValueSet> cqlValuesetsSet,
       Set<String> codesSet,
       Set<String> codesystemsSet,
-      Set<String> parametersSet,
+      Set<CQLParameter> parametersSet,
       Set<String> definitionsSet,
       Set<String> functionsSet,
       Set<CQLCode> declaredCodes) {
-    List<String> libraries = new ArrayList<>(librariesSet);
+    List<CQLIncludeLibrary> libraries = new ArrayList<>(librariesSet);
     List<String> valuesets = new ArrayList<>(valuesetsSet);
     List<CQLValueSet> cqlValuesets = new ArrayList<>(cqlValuesetsSet);
     List<String> codes = new ArrayList<>(codesSet);
     List<String> codesystems = new ArrayList<>(codesystemsSet);
-    List<String> parameters = new ArrayList<>(parametersSet);
+    List<CQLParameter> parameters = new ArrayList<>(parametersSet);
     List<String> definitions = new ArrayList<>(definitionsSet);
     List<String> functions = new ArrayList<>(functionsSet);
 
@@ -277,9 +282,9 @@ public class CQLTools {
    * @param parentExpression the parent expression to check
    */
   private void collectUsedParameters(
-      CQLGraph graph, List<String> parameters, String parentExpression) {
-    for (String parameter : parameters) {
-      if (graph.isPath(parentExpression, parameter)) {
+      CQLGraph graph, List<CQLParameter> parameters, String parentExpression) {
+    for (CQLParameter parameter : parameters) {
+      if (graph.isPath(parentExpression, parameter.getParameterName())) {
         usedParameters.add(parameter);
       }
     }
@@ -299,7 +304,7 @@ public class CQLTools {
     for (String code : codes) {
       if (graph.isPath(parentExpression, code)) {
         Optional<CQLCode> used =
-            declaredCodes.stream().filter(c -> c.getCodeName().equals(code)).findFirst();
+            declaredCodes.stream().filter(c -> c.getCodeIdentifier().equals(code)).findFirst();
         if (used.isPresent()) {
           usedCodes.add(used.get());
         }
@@ -346,7 +351,7 @@ public class CQLTools {
     }
 
     for (CQLValueSet valueset : cqlValuesets) {
-      if (graph.isPath(parentExpression, valueset.getName())) {
+      if (graph.isPath(parentExpression, valueset.getIdentifier())) {
         usedCQLValuesets.add(valueset);
       }
     }
@@ -362,9 +367,11 @@ public class CQLTools {
    * @param parentExpression the parent expression to check
    */
   private void collectUsedLibraries(
-      CQLGraph graph, List<String> libraries, String parentExpression) {
-    for (String library : libraries) {
-      if (graph.isPath(parentExpression, library)) {
+      CQLGraph graph, List<CQLIncludeLibrary> libraries, String parentExpression) {
+    for (CQLIncludeLibrary library : libraries) {
+      String path =
+          library.getCqlLibraryName() + "-" + library.getVersion() + "|" + library.getAliasName();
+      if (graph.isPath(parentExpression, path)) {
         usedLibraries.add(library);
       }
     }
@@ -470,7 +477,9 @@ public class CQLTools {
 
       Set<String> innerKeys = innerMap.keySet();
       for (String innerKey : innerKeys) {
-        flattenedMap.computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)));
+        flattenedMap
+            .computeIfAbsent(innerKey, k -> new HashSet<>(innerMap.get(innerKey)))
+            .addAll(innerMap.get(innerKey));
       }
     }
 
@@ -501,52 +510,6 @@ public class CQLTools {
     }
 
     return codeDataTypeMapWithList;
-  }
-
-  public void setNameToReturnTypeMap(Map<String, String> nameToReturnTypeMap) {
-    this.nameToReturnTypeMap = nameToReturnTypeMap;
-  }
-
-  public List<String> getUsedLibraries() {
-    return new ArrayList<>(usedLibraries);
-  }
-
-  private List<String> formatUsedLibraries() {
-    Set<String> usedLibraryFormatted = new HashSet<>();
-    for (String usedLibrary : usedLibraries) {
-      IncludeDef def = (IncludeDef) this.library.resolve(usedLibrary);
-      usedLibraryFormatted.add(def.getPath() + "-" + def.getVersion() + "|" + usedLibrary);
-    }
-
-    return new ArrayList<>(usedLibraryFormatted);
-  }
-
-  public List<CQLCode> getUsedCodes() {
-    return new ArrayList<>(usedCodes);
-  }
-
-  public List<String> getUsedCodeSystems() {
-    return new ArrayList<>(usedCodeSystems);
-  }
-
-  public List<String> getUsedValuesets() {
-    return new ArrayList<>(usedValuesets);
-  }
-
-  public List<CQLValueSet> getUsedCQLValuesets() {
-    return new ArrayList<>(usedCQLValuesets);
-  }
-
-  public List<String> getUsedParameters() {
-    return new ArrayList<>(usedParameters);
-  }
-
-  public Map<String, Set<String>> getUsedDefinitions() {
-    return new HashMap<>(usedDefinitions);
-  }
-
-  public Map<String, Set<String>> getUsedFunctions() {
-    return new HashMap<>(usedFunctions);
   }
 
   @Override

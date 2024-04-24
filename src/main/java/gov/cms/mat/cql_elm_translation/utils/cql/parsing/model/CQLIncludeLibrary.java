@@ -2,10 +2,14 @@ package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 
 /** The Class CQLIncludeLibrary. */
 @Data
+@Builder(toBuilder = true)
+@AllArgsConstructor
 public class CQLIncludeLibrary {
 
   private String id;

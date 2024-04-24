@@ -4,15 +4,24 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
+import java.util.UUID;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
+import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
+import org.antlr.v4.runtime.ParserRuleContext;
 import org.antlr.v4.runtime.misc.Interval;
 import org.antlr.v4.runtime.misc.NotNull;
 import org.antlr.v4.runtime.tree.ParseTree;
@@ -25,7 +34,9 @@ import org.cqframework.cql.gen.cqlBaseListener;
 import org.cqframework.cql.gen.cqlLexer;
 import org.cqframework.cql.gen.cqlParser;
 import org.cqframework.cql.gen.cqlParser.AliasedQuerySourceContext;
+import org.cqframework.cql.gen.cqlParser.FunctionDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.LetClauseContext;
+import org.cqframework.cql.gen.cqlParser.OperandDefinitionContext;
 import org.cqframework.cql.gen.cqlParser.QualifiedFunctionContext;
 import org.cqframework.cql.gen.cqlParser.QualifiedIdentifierExpressionContext;
 import org.cqframework.cql.gen.cqlParser.ReferentialIdentifierContext;
@@ -48,7 +59,21 @@ import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
 import lombok.Getter;
 
+@Slf4j
 public class Cql2ElmListener extends cqlBaseListener {
+
+  private static final List<String> CQL_DATA_TYPES =
+      List.of(
+          "Boolean",
+          "Date",
+          "DateTime",
+          "Decimal",
+          "Integer",
+          "QDM Datatype",
+          "Ratio",
+          "String",
+          "Time",
+          "Others");
 
   /** The child CQL strings */
   private Map<String, String> childrenLibraries = new HashMap<>();
@@ -74,14 +99,14 @@ public class Cql2ElmListener extends cqlBaseListener {
   /** The current context, aka which expression are we currently in. */
   private String currentContext;
 
-  @Getter private final Set<String> libraries = new HashSet<>();
+  @Getter private final Set<CQLIncludeLibrary> libraries = new HashSet<>();
   @Getter private final Set<String> valuesets = new HashSet<>();
   @Getter private final Set<CQLValueSet> cqlValuesets = new HashSet<>();
   @Getter private final Set<String> codes = new HashSet<>();
   @Getter private final Set<String> codesystems = new HashSet<>();
-  @Getter private final Set<String> parameters = new HashSet<>();
+  @Getter private final Set<CQLParameter> parameters = new HashSet<>();
   @Getter private final Set<String> definitions = new HashSet<>();
-  @Getter private final Map<String, String> definitionContent = new HashMap<>();
+  @Getter private final Set<DefinitionContent> definitionContents = new HashSet<>();
   @Getter private final Set<String> functions = new HashSet<>();
   @Getter private final HashMap<String, String> valueSetOids = new HashMap<>();
   @Getter private final HashMap<String, CQLCode> drcs = new HashMap<>();
@@ -228,7 +253,8 @@ public class Cql2ElmListener extends cqlBaseListener {
         ctx.getStart()
             .getInputStream()
             .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
-    definitionContent.putIfAbsent(currentContext, content);
+    definitionContents.add(
+        DefinitionContent.builder().name(currentContext).content(content).build());
     graph.addNode(currentContext);
   }
 
@@ -243,8 +269,13 @@ public class Cql2ElmListener extends cqlBaseListener {
         ctx.getStart()
             .getInputStream()
             .getText(new Interval(ctx.getStart().getStartIndex(), ctx.getStop().getStopIndex()));
-    definitionContent.putIfAbsent(currentContext, content);
-
+    List<CQLFunctionArgument> functionArguments = getFunctionArguments(ctx);
+    definitionContents.add(
+        DefinitionContent.builder()
+            .name(currentContext)
+            .content(content)
+            .functionArguments(functionArguments)
+            .build());
     graph.addNode(currentContext);
   }
 
@@ -253,6 +284,50 @@ public class Cql2ElmListener extends cqlBaseListener {
     for (cqlParser.OperandDefinitionContext operand : ctx.operandDefinition()) {
       namespace.pop();
     }
+  }
+
+  static List<CQLFunctionArgument> getFunctionArguments(FunctionDefinitionContext ctx) {
+    List<CQLFunctionArgument> functionArguments = new ArrayList<>();
+    if (ctx.operandDefinition() != null) {
+      for (OperandDefinitionContext operand : ctx.operandDefinition()) {
+        String name = "";
+        String type = "";
+        if (operand.referentialIdentifier() != null) {
+          name = getFullText(operand.referentialIdentifier());
+        }
+
+        if (operand.typeSpecifier() != null) {
+          type = getFullText(operand.typeSpecifier());
+        }
+
+        CQLFunctionArgument functionArgument = new CQLFunctionArgument();
+        functionArgument.setId(UUID.nameUUIDFromBytes(name.getBytes()).toString());
+        functionArgument.setArgumentName(name);
+
+        if (QDMUtil.getQDMContainer().getDatatypes().contains(CQLParserUtil.parseString(type))) {
+          functionArgument.setArgumentType("QDM Datatype");
+          functionArgument.setQdmDataType(CQLParserUtil.parseString(type));
+        } else if (CQL_DATA_TYPES.contains(type)) {
+          functionArgument.setArgumentType(type);
+        } else {
+          functionArgument.setArgumentType("Others");
+          functionArgument.setOtherType(type);
+        }
+        functionArguments.add(functionArgument);
+      }
+    }
+    return functionArguments;
+  }
+
+  private static String getFullText(ParserRuleContext context) {
+    if (context.start == null
+        || context.stop == null
+        || context.start.getStartIndex() < 0
+        || context.stop.getStopIndex() < 0) return context.getText();
+    return context
+        .start
+        .getInputStream()
+        .getText(Interval.of(context.start.getStartIndex(), context.stop.getStopIndex()));
   }
 
   @Override
@@ -479,14 +554,19 @@ public class Cql2ElmListener extends cqlBaseListener {
       graph.addEdge(
           currentContext, def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
       libraryAccessor = def;
-      if (!libraries.contains(
-          def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier())) {
-        try {
-          parseChildLibraries(def);
-          libraries.add(def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
-        } catch (IOException e) {
-          e.printStackTrace();
-        }
+      try {
+        parseChildLibraries(def);
+        libraries.add(
+            CQLIncludeLibrary.builder()
+                .cqlLibraryName(def.getPath())
+                .aliasName(def.getLocalIdentifier())
+                .version(def.getVersion())
+                // TODO: should be taken from librarySetId
+                .id(def.getTrackerId().toString())
+                .setId(def.getTrackerId().toString())
+                .build());
+      } catch (IOException e) {
+        e.printStackTrace();
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
@@ -496,6 +576,7 @@ public class Cql2ElmListener extends cqlBaseListener {
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
               .codeSystemOID(codeSystemMap.get(codeDef.getCodeSystem().getName()).getOID())
+              .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);
       graph.addEdge(currentContext, formattedIdentifier);
@@ -511,11 +592,17 @@ public class Cql2ElmListener extends cqlBaseListener {
               .oid(vsDef.getId().replace("urn:oid:", ""))
               .name(vsDef.getName())
               .version(vsDef.getVersion())
+              .identifier(formattedIdentifier)
               .build();
       cqlValuesets.add(declaredValueSet);
 
-    } else if (element instanceof ParameterDef) {
-      parameters.add(formattedIdentifier);
+    } else if (element instanceof ParameterDef parameterDef) {
+      CQLParameter parameter =
+          CQLParameter.builder()
+              .parameterName(formattedIdentifier)
+              .parameterLogic(parameterDef.getResultType().toString())
+              .build();
+      parameters.add(parameter);
       graph.addEdge(currentContext, formattedIdentifier);
     } else if (element instanceof ExpressionDef) {
       definitions.add(formattedIdentifier);
@@ -561,17 +648,20 @@ public class Cql2ElmListener extends cqlBaseListener {
     TranslationResource translationResource =
         TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
 
-    CqlPreprocessorVisitor preprocessor =
-        new CqlPreprocessorVisitor(
-            new LibraryBuilder(translationResource.getLibraryManager()), tokens);
-
+    // Add CqlCompilerOptions from LibraryManager to prevent NPE while walking through CQL
+    LibraryBuilder libraryBuilder = new LibraryBuilder(translationResource.getLibraryManager());
+    libraryBuilder.setCompilerOptions(
+        translationResource.getLibraryManager().getCqlCompilerOptions());
+    CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor(libraryBuilder, tokens);
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
 
     libraries.addAll(listener.getLibraries());
     valuesets.addAll(listener.getValuesets());
+    cqlValuesets.addAll(listener.getCqlValuesets());
     codes.addAll(listener.getCodes());
+    declaredCodes.addAll(listener.getDeclaredCodes());
     codesystems.addAll(listener.getCodesystems());
     parameters.addAll(listener.getParameters());
     definitions.addAll(listener.getDefinitions());
@@ -580,6 +670,6 @@ public class Cql2ElmListener extends cqlBaseListener {
     codeDataTypeMap.putAll(listener.getCodeDataTypeMap());
     valueSetOids.putAll(listener.getValueSetOids());
     drcs.putAll(listener.getDrcs());
-    definitionContent.putAll(listener.getDefinitionContent());
+    definitionContents.addAll(listener.getDefinitionContents());
   }
 }

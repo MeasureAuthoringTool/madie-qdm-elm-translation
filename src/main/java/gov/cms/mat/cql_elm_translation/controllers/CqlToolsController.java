@@ -2,12 +2,13 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
-import gov.cms.mat.cql_elm_translation.service.HumanReadableService;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -29,10 +30,11 @@ public class CqlToolsController {
 
   private final DataCriteriaService dataCriteriaService;
   private final CqlConversionService cqlConversionService;
-  private final HumanReadableService humanReadableService;
   private final CqlParsingService cqlParsingService;
 
-  @PutMapping(value = "/cql/format", produces = {MediaType.TEXT_PLAIN_VALUE})
+  @PutMapping(
+      value = "/cql/format",
+      produces = {MediaType.TEXT_PLAIN_VALUE})
   public ResponseEntity<String> formatCql(@RequestBody String cqlData, Principal principal) {
     try (var cqlDataStream = new ByteArrayInputStream(cqlData.getBytes())) {
       CqlFormatterVisitor.FormatResult formatResult =
@@ -43,9 +45,7 @@ public class CqlToolsController {
             "Unable to format CQL, because one or more Syntax errors are identified");
       }
       log.info("User [{}] successfully formatted the CQL", principal.getName());
-      return ResponseEntity.ok()
-          .contentType(MediaType.TEXT_PLAIN)
-          .body(formatResult.getOutput());
+      return ResponseEntity.ok().contentType(MediaType.TEXT_PLAIN).body(formatResult.getOutput());
     } catch (IOException e) {
       log.info("User [{}] is unable to format the CQL", principal.getName());
       throw new CqlFormatException(e.getMessage());
@@ -64,19 +64,6 @@ public class CqlToolsController {
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.status(HttpStatus.OK)
         .body(cqlParsingService.getAllDefinitions(cql, accessToken));
-  }
-
-  @PutMapping("/human-readable")
-  public ResponseEntity<String> generateHumanReadable(
-      @RequestBody Measure madieMeasure,
-      Principal principal,
-      @RequestHeader("Authorization") String accessToken) {
-    log.info(
-        "User [{}] requested QDM Human Readable for Measure ID [{}]",
-        principal.getName(),
-        madieMeasure.getId());
-    return ResponseEntity.status(HttpStatus.OK)
-        .body(humanReadableService.generate(madieMeasure, accessToken));
   }
 
   @PutMapping("/cql/elm")
@@ -102,5 +89,18 @@ public class CqlToolsController {
   public ResponseEntity<Map<String, Set<CQLDefinition>>> getDefinitionCallstack(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.ok(cqlParsingService.getDefinitionCallstacks(cql, accessToken));
+  }
+
+  @PutMapping(
+      value = "/cql/lookups",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CqlLookups> getCqlLookups(
+      @RequestBody CqlLookupRequest lookupRequest,
+      @RequestHeader("Authorization") String accessToken) {
+    log.info("Translator is preparing CQL Lookups for simple xml");
+    return ResponseEntity.ok(
+        cqlParsingService.getCqlLookups(
+            lookupRequest.getCql(), lookupRequest.getMeasureExpressions(), accessToken));
   }
 }

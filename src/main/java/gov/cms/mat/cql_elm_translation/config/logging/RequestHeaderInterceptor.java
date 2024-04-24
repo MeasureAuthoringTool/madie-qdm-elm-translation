@@ -45,8 +45,7 @@ public class RequestHeaderInterceptor implements HandlerInterceptor {
       HttpServletRequest request,
       HttpServletResponse response,
       Object handler,
-      @Nullable Exception ex)
-      throws Exception {
+      @Nullable Exception ex) {
     long executionTime = -1;
 
     Object attribute = request.getAttribute(MDC_START_KEY);

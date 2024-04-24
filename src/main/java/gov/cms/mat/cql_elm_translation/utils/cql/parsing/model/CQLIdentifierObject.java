@@ -1,5 +1,7 @@
 package gov.cms.mat.cql_elm_translation.utils.cql.parsing.model;
 
+import org.apache.commons.lang3.StringUtils;
+
 import lombok.Data;
 
 @Data
@@ -23,7 +25,7 @@ public class CQLIdentifierObject {
   public CQLIdentifierObject() {}
 
   public String getDisplay() {
-    if (aliasName != null && !aliasName.isEmpty()) {
+    if (StringUtils.isNotEmpty(aliasName)) {
       return aliasName + "." + identifier;
     } else {
       return identifier;
@@ -32,7 +34,7 @@ public class CQLIdentifierObject {
 
   @Override
   public String toString() {
-    if (aliasName != null && !aliasName.isEmpty()) {
+    if (StringUtils.isNotEmpty(aliasName)) {
       return aliasName + "." + "\"" + identifier + "\"";
     } else {
       return "\"" + identifier + "\"";
