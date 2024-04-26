@@ -570,12 +570,13 @@ public class Cql2ElmListener extends cqlBaseListener {
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
+      CQLCodeSystem cqlCodeSystem = codeSystemMap.get(codeDef.getCodeSystem().getName());
       CQLCode declaredCode =
           CQLCode.builder()
               .id(codeDef.getId())
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
-              .codeSystemOID(codeSystemMap.get(codeDef.getCodeSystem().getName()).getOID())
+              .codeSystemOID(cqlCodeSystem == null ? null : cqlCodeSystem.getOID())
               .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);
