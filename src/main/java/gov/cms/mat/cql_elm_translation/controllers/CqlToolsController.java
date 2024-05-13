@@ -77,7 +77,7 @@ public class CqlToolsController {
     }
   }
 
-  @PutMapping("/qdm/relevant-elements")
+  @PutMapping("/cql/relevant-elements")
   public ResponseEntity<Set<SourceDataCriteria>> getRelevantElements(
       @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
     return ResponseEntity.ok()
