@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REPO: https://github.com/MeasureAuthoringTool/cql-elm-translation
-      REMOTE_EXCLUDES_URL: https://raw.githubusercontent.com/semanticbits/bmat-gitleaks-automation/master/cql-elm-translation/gitleaks.toml
+      REMOTE_EXCLUDES_URL: https://raw.githubusercontent.com/semanticbits/bmat-gitleaks-automation/master/madie-fhir-elm-translator/gitleaks.toml
       GITLEAKS_VERSION: v7.5.0
     steps:
       - name: Execute Gitleaks
