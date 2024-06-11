@@ -12,6 +12,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
@@ -163,11 +165,23 @@ public class Cql2ElmListener extends cqlBaseListener {
       CQLCodeSystem codeSystem = new CQLCodeSystem();
       codeSystem.setId(csDef.getId());
       codeSystem.setOID(csDef.getId());
-      codeSystem.setCodeSystemVersion(csDef.getVersion());
+      codeSystem.setCodeSystemVersion(getParsedVersion(csDef.getVersion()));
       codeSystem.setCodeSystemName(csDef.getName());
 
       codeSystemMap.putIfAbsent(identifier, codeSystem);
     }
+  }
+
+  private String getParsedVersion(String version){
+    if(version != null) {
+      String versionRegex= "urn:hl7:version:(\\d+(\\.\\d+)?)";
+      Pattern pattern= Pattern.compile(versionRegex);
+      Matcher matcher=pattern.matcher(version);
+      if(matcher.find()){
+        return matcher.group(1);
+      }
+    }
+    return version;
   }
 
   @Override
