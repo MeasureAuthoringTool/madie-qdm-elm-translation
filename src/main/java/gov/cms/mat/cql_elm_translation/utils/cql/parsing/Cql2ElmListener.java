@@ -171,10 +171,8 @@ public class Cql2ElmListener extends cqlBaseListener {
   }
 
   private String getParsedVersion(String version) {
-    if (version != null) {
-      if (version.startsWith("urn:hl7:version:")) {
-        return version.substring("urn:hl7:version:".length());
-      }
+    if (version != null && version.startsWith("urn:hl7:version:")) {
+      return version.substring("urn:hl7:version:".length());
     }
     return version;
   }
