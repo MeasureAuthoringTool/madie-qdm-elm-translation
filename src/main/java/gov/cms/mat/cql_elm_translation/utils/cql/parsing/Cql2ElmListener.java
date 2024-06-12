@@ -163,11 +163,18 @@ public class Cql2ElmListener extends cqlBaseListener {
       CQLCodeSystem codeSystem = new CQLCodeSystem();
       codeSystem.setId(csDef.getId());
       codeSystem.setOID(csDef.getId());
-      codeSystem.setCodeSystemVersion(csDef.getVersion());
+      codeSystem.setCodeSystemVersion(getParsedVersion(csDef.getVersion()));
       codeSystem.setCodeSystemName(csDef.getName());
 
       codeSystemMap.putIfAbsent(identifier, codeSystem);
     }
+  }
+
+  private String getParsedVersion(String version) {
+    if (version != null && version.startsWith("urn:hl7:version:")) {
+      return version.substring("urn:hl7:version:".length());
+    }
+    return version;
   }
 
   @Override
@@ -578,7 +585,8 @@ public class Cql2ElmListener extends cqlBaseListener {
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
               .codeSystemOID(cqlCodeSystem == null ? null : cqlCodeSystem.getOID())
-              .codeSystemVersion(cqlCodeSystem == null ? null : cqlCodeSystem.getCodeSystemVersion())
+              .codeSystemVersion(
+                  cqlCodeSystem == null ? null : cqlCodeSystem.getCodeSystemVersion())
               .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);
