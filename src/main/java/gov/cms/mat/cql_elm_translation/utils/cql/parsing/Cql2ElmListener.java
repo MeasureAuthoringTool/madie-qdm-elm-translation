@@ -12,8 +12,6 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
@@ -172,13 +170,10 @@ public class Cql2ElmListener extends cqlBaseListener {
     }
   }
 
-  private String getParsedVersion(String version){
-    if(version != null) {
-      String versionRegex= "urn:hl7:version:(\\d+(\\.\\d+)?)";
-      Pattern pattern= Pattern.compile(versionRegex);
-      Matcher matcher=pattern.matcher(version);
-      if(matcher.find()){
-        return matcher.group(1);
+  private String getParsedVersion(String version) {
+    if (version != null) {
+      if (version.startsWith("urn:hl7:version:")) {
+        return version.substring("urn:hl7:version:".length());
       }
     }
     return version;
@@ -592,7 +587,8 @@ public class Cql2ElmListener extends cqlBaseListener {
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
               .codeSystemOID(cqlCodeSystem == null ? null : cqlCodeSystem.getOID())
-              .codeSystemVersion(cqlCodeSystem == null ? null : cqlCodeSystem.getCodeSystemVersion())
+              .codeSystemVersion(
+                  cqlCodeSystem == null ? null : cqlCodeSystem.getCodeSystemVersion())
               .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);
