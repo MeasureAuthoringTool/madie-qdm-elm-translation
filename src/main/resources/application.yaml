@@ -1,5 +1,5 @@
 server:
-  port: 8084
+  port: 8083
   servlet:
     context-path: /api/fhir
 
@@ -28,6 +28,9 @@ madie:
       baseUrl: ${CQL_LIBRARY_SERVICE_URL:http://localhost:8082/api}
       cql:
         uri: /cql-libraries/cql
+  translatorVersion:
+      currentVersion: "3.3.2"
+      mostRecentVersion: "3.10.0"
 
 springdoc:
   swagger-ui:
