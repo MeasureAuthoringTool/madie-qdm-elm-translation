@@ -381,7 +381,8 @@ public class CQLTools {
 
   /** Collects and creates a mapping of expression names to return types. */
   private void collectReturnTypeMap() {
-    // the following makes an assumption that a library can not have any duplicate libraries
+    // the following makes an assumption that a library can not have any duplicate
+    // libraries
     // declared in it.
 
     // statements contain all function and definitions.
@@ -392,12 +393,12 @@ public class CQLTools {
     this.allNamesToReturnTypeMap.put(libraryName + "-" + libraryVersion, new HashMap<>());
 
     for (ExpressionDef expression : statements.getDef()) {
+      String resultType = Objects.toString(expression.getResultType(), "");
       this.allNamesToReturnTypeMap
           .get(libraryName + "-" + libraryVersion)
-          .put(expression.getName(), expression.getResultType().toString());
-      this.nameToReturnTypeMap.put(expression.getName(), expression.getResultType().toString());
-      this.expressionToReturnTypeMap.put(
-          expression.getName(), expression.getResultType().toString());
+          .put(expression.getName(), resultType);
+      this.nameToReturnTypeMap.put(expression.getName(), resultType);
+      this.expressionToReturnTypeMap.put(expression.getName(), resultType);
     }
 
     if (parameters != null) {
@@ -413,7 +414,7 @@ public class CQLTools {
 
     if (null != this.library.getLibrary().getIncludes()) {
       for (IncludeDef include : this.library.getLibrary().getIncludes().getDef()) {
-        //                CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath() + "-"
+        // CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath() + "-"
         // + include.getVersion());
         CompiledLibrary lib = this.CompiledLibraryMap.get(include.getPath());
 
