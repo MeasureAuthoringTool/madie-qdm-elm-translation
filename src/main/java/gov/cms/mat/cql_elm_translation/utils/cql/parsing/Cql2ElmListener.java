@@ -13,12 +13,6 @@ import java.util.Set;
 import java.util.Stack;
 import java.util.UUID;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
-import lombok.extern.slf4j.Slf4j;
 import org.antlr.v4.runtime.CharStreams;
 import org.antlr.v4.runtime.CommonTokenStream;
 import org.antlr.v4.runtime.ParserRuleContext;
@@ -29,7 +23,8 @@ import org.antlr.v4.runtime.tree.ParseTreeWalker;
 import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorVisitor;
+import org.cqframework.cql.cql2elm.preprocessor.CqlPreprocessorElmCommonVisitor;
+import org.cqframework.cql.elm.IdObjectFactory;
 import org.cqframework.cql.gen.cqlBaseListener;
 import org.cqframework.cql.gen.cqlLexer;
 import org.cqframework.cql.gen.cqlParser;
@@ -55,9 +50,15 @@ import org.hl7.elm.r1.ValueSetDef;
 
 import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLFunctionArgument;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLGraph;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
+import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 public class Cql2ElmListener extends cqlBaseListener {
@@ -656,14 +657,13 @@ public class Cql2ElmListener extends cqlBaseListener {
             childrenLibraries);
     ParseTree tree = parser.library();
 
-    TranslationResource translationResource =
-        TranslationResource.getInstance(true); // <-- BADDDDD!!!! Defaults to fhir
+    TranslationResource translationResource = TranslationResource.getInstance(true);
 
     // Add CqlCompilerOptions from LibraryManager to prevent NPE while walking through CQL
-    LibraryBuilder libraryBuilder = new LibraryBuilder(translationResource.getLibraryManager());
-    libraryBuilder.setCompilerOptions(
-        translationResource.getLibraryManager().getCqlCompilerOptions());
-    CqlPreprocessorVisitor preprocessor = new CqlPreprocessorVisitor(libraryBuilder, tokens);
+    CqlPreprocessorElmCommonVisitor preprocessor =
+        new CqlPreprocessorElmCommonVisitor(
+            new LibraryBuilder(translationResource.getLibraryManager(), new IdObjectFactory()),
+            tokens);
     preprocessor.visit(tree);
     ParseTreeWalker walker = new ParseTreeWalker();
     walker.walk(listener, tree);
