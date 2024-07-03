@@ -171,7 +171,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r5</artifactId>
-      <version>6.6.1</version>
+      <version>6.10.5</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
