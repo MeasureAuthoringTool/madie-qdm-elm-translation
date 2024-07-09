@@ -583,7 +583,9 @@ public class Cql2ElmListener extends cqlBaseListener {
                   .build());
         }
       } catch (IOException e) {
-        log.error(e.getMessage());
+        log.error(
+            "IOException while parsing child library [{}] " + e.getMessage(),
+            def.getPath() + "-" + def.getVersion());
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
