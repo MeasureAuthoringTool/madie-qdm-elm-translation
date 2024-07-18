@@ -29,8 +29,8 @@ madie:
       cql:
         uri: /cql-libraries/cql
   translatorVersion:
-    currentVersion: "3.3.2"
-    mostRecentVersion: "3.10.0"
+      currentVersion: ${CURRENT_TRANSLATOR_VERSION:3.3.2}
+      mostRecentVersion: ${MOST_RECENT_TRANSLATOR_VERSION:3.3.2}
 
 springdoc:
   swagger-ui:
