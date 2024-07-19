@@ -164,10 +164,18 @@ public class Cql2ElmListener extends cqlBaseListener {
       CQLCodeSystem codeSystem = new CQLCodeSystem();
       codeSystem.setId(csDef.getId());
       codeSystem.setOID(csDef.getId());
+      codeSystem.setCodeSystemVersion(getParsedVersion(csDef.getVersion()));
       codeSystem.setCodeSystemName(csDef.getName());
 
       codeSystemMap.putIfAbsent(identifier, codeSystem);
     }
+  }
+
+  private String getParsedVersion(String version) {
+    if (version != null && version.startsWith("urn:hl7:version:")) {
+      return version.substring("urn:hl7:version:".length());
+    }
+    return version;
   }
 
   @Override
@@ -556,18 +564,29 @@ public class Cql2ElmListener extends cqlBaseListener {
           currentContext, def.getPath() + "-" + def.getVersion() + "|" + def.getLocalIdentifier());
       libraryAccessor = def;
       try {
-        parseChildLibraries(def);
-        libraries.add(
-            CQLIncludeLibrary.builder()
-                .cqlLibraryName(def.getPath())
-                .aliasName(def.getLocalIdentifier())
-                .version(def.getVersion())
-                // TODO: should be taken from librarySetId
-                .id(def.getTrackerId().toString())
-                .setId(def.getTrackerId().toString())
-                .build());
+        var parsedLibrary =
+            libraries.stream()
+                .filter(
+                    l ->
+                        l.getCqlLibraryName().equalsIgnoreCase(def.getPath())
+                            && l.getVersion().equalsIgnoreCase(def.getVersion()))
+                .findFirst();
+        if (parsedLibrary.isEmpty()) {
+          parseChildLibraries(def);
+          libraries.add(
+              CQLIncludeLibrary.builder()
+                  .cqlLibraryName(def.getPath())
+                  .aliasName(def.getLocalIdentifier())
+                  .version(def.getVersion())
+                  // TODO: should be taken from librarySetId
+                  .id(def.getTrackerId().toString())
+                  .setId(def.getTrackerId().toString())
+                  .build());
+        }
       } catch (IOException e) {
-        e.printStackTrace();
+        log.error(
+            "IOException while parsing child library [{}] " + e.getMessage(),
+            def.getPath() + "-" + def.getVersion());
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
@@ -578,6 +597,8 @@ public class Cql2ElmListener extends cqlBaseListener {
               .codeName(codeDef.getDisplay())
               .codeSystemName(codeDef.getCodeSystem().getName())
               .codeSystemOID(cqlCodeSystem == null ? null : cqlCodeSystem.getOID())
+              .codeSystemVersion(
+                  cqlCodeSystem == null ? null : cqlCodeSystem.getCodeSystemVersion())
               .codeIdentifier(formattedIdentifier)
               .build();
       declaredCodes.add(declaredCode);

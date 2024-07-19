@@ -1,7 +1,7 @@
 server:
   port: 8083
   servlet:
-    context-path: /api/fhir
+    context-path: /api/qdm
 
 spring:
   profiles:

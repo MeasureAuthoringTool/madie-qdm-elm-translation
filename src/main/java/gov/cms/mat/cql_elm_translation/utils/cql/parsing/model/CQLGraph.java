@@ -9,6 +9,9 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.Set;
 
+import lombok.extern.slf4j.Slf4j;
+
+@Slf4j
 public class CQLGraph {
 
   private final Map<String, Set<String>> graph = new HashMap<>();
@@ -49,20 +52,32 @@ public class CQLGraph {
 
     while (!queue.isEmpty()) {
       String currentNode = queue.remove();
-      List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
 
-      for (String adjacentNode : adjacentVertices) {
-        // we've found the destination node that we were looking for, so return true.
-        if (adjacentNode.equals(destination)) {
-          return true;
-        }
+      if (this.graph.get(currentNode) != null) {
+        List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
 
-        // if it's not the destination node and the node hasn't been visited yet, add it to the
-        // queue to be visited.
-        if (!visited.contains(adjacentNode)) {
-          visited.add(adjacentNode);
-          queue.add(adjacentNode);
+        for (String adjacentNode : adjacentVertices) {
+          // we've found the destination node that we were looking for, so return true.
+          if (adjacentNode.equals(destination)) {
+            return true;
+          }
+
+          // if it's not the destination node and the node hasn't been visited yet, add it to the
+          // queue to be visited.
+          if (!visited.contains(adjacentNode)) {
+            visited.add(adjacentNode);
+            queue.add(adjacentNode);
+          }
         }
+      } else {
+        log.error(
+            "source = "
+                + source
+                + " destination = "
+                + destination
+                + " this.graph.get currentNode: "
+                + currentNode
+                + " is null");
       }
     }
 
