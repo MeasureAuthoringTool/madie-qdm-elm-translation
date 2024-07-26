@@ -146,8 +146,9 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
         CQLDefinition.builder()
             .id("HelperLibrary-0.0.000|Helper|Null Abatement")
             .definitionName("Null Abatement")
-            .definitionLogic("define fluent function \"Null Abatement\"(Conditions List<Condition>):\n" +
-              "  Conditions C where C.abatement is null")
+            .definitionLogic(
+                "define fluent function \"Null Abatement\"(Conditions List<Condition>):\n"
+                    + "  Conditions C where C.abatement is null")
             .build();
 
     CQLDefinition helperDefine =
@@ -165,7 +166,9 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .build();
 
     assertThat(
-        allDefs, containsInAnyOrder(define1, define2, define3, define4, helperDefine, function, fluentFunction));
+        allDefs,
+        containsInAnyOrder(
+            define1, define2, define3, define4, helperDefine, function, fluentFunction));
   }
 
   @Test
