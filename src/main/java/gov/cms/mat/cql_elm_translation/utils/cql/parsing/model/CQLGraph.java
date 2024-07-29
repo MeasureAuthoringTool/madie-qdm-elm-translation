@@ -49,19 +49,19 @@ public class CQLGraph {
 
     while (!queue.isEmpty()) {
       String currentNode = queue.remove();
-      List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
-
-      for (String adjacentNode : adjacentVertices) {
-        // we've found the destination node that we were looking for, so return true.
-        if (adjacentNode.equals(destination)) {
-          return true;
-        }
-
-        // if it's not the destination node and the node hasn't been visited yet, add it to the
-        // queue to be visited.
-        if (!visited.contains(adjacentNode)) {
-          visited.add(adjacentNode);
-          queue.add(adjacentNode);
+      if (this.graph.get(currentNode) != null) {
+        List<String> adjacentVertices = new ArrayList<>(this.graph.get(currentNode));
+        for (String adjacentNode : adjacentVertices) {
+          // we've found the destination node that we were looking for, so return true.
+          if (adjacentNode.equals(destination)) {
+            return true;
+          }
+          // if it's not the destination node and the node hasn't been visited yet, add it to the
+          // queue to be visited.
+          if (!visited.contains(adjacentNode)) {
+            visited.add(adjacentNode);
+            queue.add(adjacentNode);
+          }
         }
       }
     }

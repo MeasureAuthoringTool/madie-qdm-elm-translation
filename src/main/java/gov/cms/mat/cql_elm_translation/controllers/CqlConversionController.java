@@ -8,6 +8,7 @@ import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
+import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -32,6 +33,7 @@ public class CqlConversionController {
 
   private final CqlConversionService cqlConversionService;
   private final CqlLibraryService cqlLibraryService;
+  private final CqlParsingService cqlParsingService;
 
   @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
   public CqlConversionPayload cqlToElmJson(
@@ -63,7 +65,7 @@ public class CqlConversionController {
             .validateUnits(validateUnits)
             .resultTypes(resultTypes)
             .build();
-
+    cqlParsingService.getCqlBuilderLookups(cqlData, accessToken);
     cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
     CqlConversionPayload cqlConversionPayload =
