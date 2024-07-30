@@ -569,28 +569,28 @@ public class Cql2ElmListener extends cqlBaseListener {
       libraryAccessor = def;
       try {
         var parsedLibrary =
-          libraries.stream()
-            .filter(
-              l ->
-                l.getCqlLibraryName().equalsIgnoreCase(def.getPath())
-                  && l.getVersion().equalsIgnoreCase(def.getVersion()))
-            .findFirst();
+            libraries.stream()
+                .filter(
+                    l ->
+                        l.getCqlLibraryName().equalsIgnoreCase(def.getPath())
+                            && l.getVersion().equalsIgnoreCase(def.getVersion()))
+                .findFirst();
         if (parsedLibrary.isEmpty()) {
           parseChildLibraries(def);
           libraries.add(
-            CQLIncludeLibrary.builder()
-              .cqlLibraryName(def.getPath())
-              .aliasName(def.getLocalIdentifier())
-              .version(def.getVersion())
-              // TODO: should be taken from librarySetId
-              .id(def.getTrackerId().toString())
-              .setId(def.getTrackerId().toString())
-              .build());
+              CQLIncludeLibrary.builder()
+                  .cqlLibraryName(def.getPath())
+                  .aliasName(def.getLocalIdentifier())
+                  .version(def.getVersion())
+                  // TODO: should be taken from librarySetId
+                  .id(def.getTrackerId().toString())
+                  .setId(def.getTrackerId().toString())
+                  .build());
         }
       } catch (IOException e) {
         log.error(
-          "IOException while parsing child library [{}] " + e.getMessage(),
-          def.getPath() + "-" + def.getVersion());
+            "IOException while parsing child library [{}] " + e.getMessage(),
+            def.getPath() + "-" + def.getVersion());
       }
     } else if (element instanceof CodeDef codeDef) {
       codes.add(formattedIdentifier);
