@@ -84,6 +84,7 @@ public class CQLTools {
   private Set<String> usedCodeSystems = new HashSet<>();
   private DataCriteria dataCriteria = new DataCriteria();
   private Set<DefinitionContent> definitionContents = new HashSet<>();
+  private Set<CQLParameter> allParameters = new HashSet<>();
   private Map<String, Set<String>> callstack = new HashMap<>();
   private UsingProperties usingProperties;
 
@@ -140,6 +141,7 @@ public class CQLTools {
     walker.walk(listener, tree);
 
     definitionContents.addAll(listener.getDefinitionContents());
+    allParameters.addAll(listener.getParameters());
     callstack = graph.getAdjacencyList();
 
     Set<CQLIncludeLibrary> librariesSet = new HashSet<>(listener.getLibraries());

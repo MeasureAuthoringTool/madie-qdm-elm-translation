@@ -3,11 +3,13 @@ package gov.cms.mat.cql_elm_translation.service;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
 import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -140,6 +142,15 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .definitionLogic("define function \"func\":\n" + "    true")
             .build();
 
+    CQLDefinition fluentFunction =
+        CQLDefinition.builder()
+            .id("HelperLibrary-0.0.000|Helper|Null Abatement")
+            .definitionName("Null Abatement")
+            .definitionLogic(
+                "define fluent function \"Null Abatement\"(Conditions List<Condition>):\n"
+                    + "  Conditions C where C.abatement is null")
+            .build();
+
     CQLDefinition helperDefine =
         CQLDefinition.builder()
             .id("HelperLibrary-0.0.000|Helper|Inpatient Encounter")
@@ -155,7 +166,9 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .build();
 
     assertThat(
-        allDefs, containsInAnyOrder(define1, define2, define3, define4, helperDefine, function));
+        allDefs,
+        containsInAnyOrder(
+            define1, define2, define3, define4, helperDefine, function, fluentFunction));
   }
 
   @Test
@@ -201,5 +214,24 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             "MedicationOrderInjection"));
     List<String> oids = cqlLookup.getElementLookups().stream().map(ElementLookup::getOid).toList();
     assertThat(oids, containsInAnyOrder("204504", "197604", "2.16.840.1.113883.3.464.1003.1065"));
+  }
+
+  @Test
+  void testGetCqlBuilderLookups() {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(qiCoreMeasureCql, "token");
+    assertThat(lookup.getParameters().size(), is(2));
+    assertThat(lookup.getDefinitions().size(), is(5));
+    assertThat(lookup.getFunctions().size(), is(1));
+    assertThat(lookup.getFluentFunctions().size(), is(1));
+  }
+
+  @Test
+  void testGetCqlBuilderLookupsForEmptyCql() {
+    CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(null, "token");
+    assertThat(lookup, is(nullValue()));
   }
 }

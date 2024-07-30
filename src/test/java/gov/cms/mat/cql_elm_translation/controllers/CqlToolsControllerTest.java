@@ -2,6 +2,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
@@ -25,6 +26,7 @@ import java.util.TreeSet;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 
+import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
@@ -210,5 +212,28 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     assertNotNull(cqlLookups);
     assertThat(cqlLookups.getLibrary(), is(equalTo("Test")));
     assertThat(cqlLookups.getVersion(), is(equalTo("0.0.001")));
+  }
+
+  @Test
+  void testGetCqlBuilderLookups() {
+    var p = CqlBuilderLookup.Lookup.builder().name("Parameter").logic("abc").build();
+    var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
+    var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
+    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString()))
+        .thenReturn(
+            CqlBuilderLookup.builder()
+                .parameters(Set.of(p))
+                .definitions(Set.of(d))
+                .functions(Set.of(f))
+                .build());
+
+    ResponseEntity<CqlBuilderLookup> result =
+        cqlToolsController.getCqlBuilderLookups("CQL", "accessToken");
+    CqlBuilderLookup cqlBuilderLookups = result.getBody();
+    assertNotNull(cqlBuilderLookups);
+    assertThat(cqlBuilderLookups.getParameters().size(), is(1));
+    assertThat(cqlBuilderLookups.getDefinitions().size(), is(1));
+    assertThat(cqlBuilderLookups.getFunctions().size(), is(1));
+    assertThat(cqlBuilderLookups.getFluentFunctions(), is(nullValue()));
   }
 }

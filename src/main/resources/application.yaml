@@ -1,8 +1,7 @@
 server:
   port: 8083
   servlet:
-    context-path: /api/fhir
-
+    context-path: /api/qdm
 spring:
   profiles:
     active: local
@@ -29,8 +28,8 @@ madie:
       cql:
         uri: /cql-libraries/cql
   translatorVersion:
-      currentVersion: ${CURRENT_TRANSLATOR_VERSION:3.3.2}
-      mostRecentVersion: ${MOST_RECENT_TRANSLATOR_VERSION:3.3.2}
+      currentVersion: ${CURRENT_TRANSLATOR_VERSION:3.11.0}
+      mostRecentVersion: ${MOST_RECENT_TRANSLATOR_VERSION:3.11.0}
 
 springdoc:
   swagger-ui:

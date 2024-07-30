@@ -11,4 +11,5 @@ public class DefinitionContent {
   private String name;
   private String content;
   private List<CQLFunctionArgument> functionArguments;
+  private boolean function;
 }

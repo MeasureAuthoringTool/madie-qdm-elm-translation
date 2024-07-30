@@ -2,6 +2,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.madie.models.measure.Measure;
+import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
@@ -102,5 +103,15 @@ public class CqlToolsController {
     return ResponseEntity.ok(
         cqlParsingService.getCqlLookups(
             lookupRequest.getCql(), lookupRequest.getMeasureExpressions(), accessToken));
+  }
+
+  @PutMapping(
+      value = "/cql-builder-lookups",
+      produces = MediaType.APPLICATION_JSON_VALUE,
+      consumes = MediaType.APPLICATION_JSON_VALUE)
+  public ResponseEntity<CqlBuilderLookup> getCqlBuilderLookups(
+      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+    log.info("Preparing CqlBuilder Lookups");
+    return ResponseEntity.ok(cqlParsingService.getCqlBuilderLookups(cql, accessToken));
   }
 }

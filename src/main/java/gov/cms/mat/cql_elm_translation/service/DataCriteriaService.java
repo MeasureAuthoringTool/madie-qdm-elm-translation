@@ -26,10 +26,6 @@ public class DataCriteriaService extends CqlTooling {
 
   private final CqlLibraryService cqlLibraryService;
 
-  public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
-    return parseCql(cql, accessToken, cqlLibraryService, null).getDataCriteria();
-  }
-
   public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
     if (StringUtils.isBlank(measure.getCql())) {
       log.info("Data criteria not found as cql is blank");
