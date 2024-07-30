@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
@@ -45,13 +46,13 @@ public class CqlParsingService extends CqlTooling {
   }
 
   /**
-   * Parses the CQL and generates cql artifacts(including for the CQL of the included Libraries).
-   * refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
+   * Parses the CQL and generates only used cql artifacts(including for the CQL of the included
+   * Libraries). refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
    *
    * @param cql- measure cql
    * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs
    * @param accessToken Requesting User's Okta Bearer token
-   * @return CQLLookups
+   * @return CQLLookups -> building blocks for HQMF and Human Readable generation
    */
   public CqlLookups getCqlLookups(String cql, Set<String> measureExpressions, String accessToken) {
     if (StringUtils.isBlank(cql) || CollectionUtils.isEmpty(measureExpressions)) {
@@ -101,6 +102,78 @@ public class CqlParsingService extends CqlTooling {
         .codeSystems(cqlCodeSystems)
         .includeLibraries(includeLibraries)
         .elementLookups(elementLookups)
+        .build();
+  }
+
+  /**
+   * Parses the CQL and collect all CQL building blocks irrespective of used or unused(including for
+   * the CQL of the included Libraries)
+   *
+   * @param cql- measure cql
+   * @param accessToken Requesting User's Okta Bearer token
+   * @return CqlBuilderLookup -> building blocks for CQL Definition UI builder
+   */
+  public CqlBuilderLookup getCqlBuilderLookups(String cql, String accessToken) {
+    if (StringUtils.isBlank(cql)) {
+      return null;
+    }
+
+    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
+    // all parameters
+    Set<CqlBuilderLookup.Lookup> parameters =
+        cqlTools.getAllParameters().stream().map(this::buildParameterLookup).collect(toSet());
+
+    // get all CQLDefinitions including functions
+    Set<CQLDefinition> allCqlDefinitions = buildCqlDefinitions(cqlTools);
+    // prepare lookups for definitions, functions and fluent functions from CQLDefinitions
+    Set<CqlBuilderLookup.Lookup> definitions = new HashSet<>();
+    Set<CqlBuilderLookup.Lookup> functions = new HashSet<>();
+    Set<CqlBuilderLookup.Lookup> fluentFunctions = new HashSet<>();
+    for (CQLDefinition cqlDefinition : allCqlDefinitions) {
+      CqlBuilderLookup.Lookup lookup =
+          buildCqlBuilderLookup(
+              cqlDefinition.getName(),
+              cqlDefinition.getLogic(),
+              cqlDefinition.getParentLibrary(),
+              cqlDefinition.getLibraryDisplayName());
+      if (cqlDefinition.isFunction()) {
+        if (StringUtils.startsWith(cqlDefinition.getLogic(), "define fluent function")) {
+          fluentFunctions.add(lookup);
+        } else {
+          functions.add(lookup);
+        }
+      } else {
+        definitions.add(lookup);
+      }
+    }
+    return CqlBuilderLookup.builder()
+        .parameters(parameters)
+        .definitions(definitions)
+        .functions(functions)
+        .fluentFunctions(fluentFunctions)
+        .build();
+  }
+
+  private CqlBuilderLookup.Lookup buildParameterLookup(CQLParameter parameter) {
+    String[] parts = parameter.getParameterName().split("\\|");
+    String name = parameter.getParameterName();
+    String libraryName = null;
+    String libraryAlias = null;
+    if (parts.length == 3) {
+      libraryName = parts[0].split("-")[0];
+      libraryAlias = parts[1];
+      name = parts[2];
+    }
+    return buildCqlBuilderLookup(name, parameter.getParameterLogic(), libraryName, libraryAlias);
+  }
+
+  private CqlBuilderLookup.Lookup buildCqlBuilderLookup(
+      String name, String logic, String libraryName, String libraryAlias) {
+    return CqlBuilderLookup.Lookup.builder()
+        .name(name)
+        .logic(logic)
+        .libraryName(libraryName)
+        .libraryAlias(libraryAlias)
         .build();
   }
 
@@ -328,13 +401,7 @@ public class CqlParsingService extends CqlTooling {
         definition.setLibraryVersion(libraryParts[1]);
       }
     }
-    // TODO could use a stronger comparator for determining if node is Definition or Function
-    definition.setFunction(definition.getDefinitionLogic().startsWith("define function"));
+    definition.setFunction(definitionContent.isFunction());
     return definition;
-  }
-
-  public Map<String, Set<String>> getUsedFunctions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return cqlTools.getUsedFunctions();
   }
 }
