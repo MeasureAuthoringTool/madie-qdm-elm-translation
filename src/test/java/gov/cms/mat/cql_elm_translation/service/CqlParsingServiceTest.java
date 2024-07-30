@@ -3,12 +3,10 @@ package gov.cms.mat.cql_elm_translation.service;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
-import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
+import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.hamcrest.CoreMatchers.nullValue;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,7 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
@@ -33,16 +30,14 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
   @Mock private CqlLibraryService cqlLibraryService;
   @InjectMocks private CqlParsingService cqlParsingService;
 
-  private static String TOKEN = "John Doe";
+  private static final String TOKEN = "John Doe";
   private String qiCoreHelperCql;
   private String qiCoreMeasureCql;
-  private String qdmMeasureCql;
 
   @BeforeEach
   void setup() {
     qiCoreHelperCql = getData("/qicore_included_lib.cql");
     qiCoreMeasureCql = getData("/qicore_define_callstack.cql");
-    qdmMeasureCql = getData("/qdm_lookup_test_lib.cql");
   }
 
   @Test
@@ -52,7 +47,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
     Map<String, Set<CQLDefinition>> definitionCallstacks =
-        cqlParsingService.getDefinitionCallstacks(qiCoreMeasureCql, "token");
+        cqlParsingService.getDefinitionCallstacks(qiCoreMeasureCql, TOKEN);
 
     CQLDefinition define1 =
         CQLDefinition.builder()
@@ -101,7 +96,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
-    Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(qiCoreMeasureCql, "token");
+    Set<CQLDefinition> allDefs = cqlParsingService.getAllDefinitions(qiCoreMeasureCql, TOKEN);
 
     CQLDefinition define1 =
         CQLDefinition.builder()
@@ -154,52 +149,37 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .libraryVersion("0.0.000")
             .build();
 
+    CQLDefinition fluentFunction =
+        CQLDefinition.builder()
+            .id("HelperLibrary-0.0.000|Helper|Null Abatement")
+            .definitionName("Null Abatement")
+            .definitionLogic(
+                "define fluent function \"Null Abatement\"(Conditions List<Condition>):\n"
+                    + "  Conditions C where C.abatement is null")
+            .build();
+
     assertThat(
-        allDefs, containsInAnyOrder(define1, define2, define3, define4, helperDefine, function));
-  }
-
-  @Test
-  void testGetCqlLookupsWhenMeasureCqlNull() {
-    Set<String> measureExpressions = Set.of("Initial Population");
-    CqlLookups cqlLookup = cqlParsingService.getCqlLookups(null, measureExpressions, TOKEN);
-    assertNull(cqlLookup);
-  }
-
-  @Test
-  void testGetCqlLookupsWhenMeasureExpressionsNull() {
-    CqlLookups cqlLookup = cqlParsingService.getCqlLookups("Test CQL", null, TOKEN);
-    assertNull(cqlLookup);
-  }
-
-  @Test
-  void testGetCqlLookups() {
-    Set<String> measureExpressions = Set.of("Initial Population");
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qdmMeasureCql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
-    CqlLookups cqlLookup =
-        cqlParsingService.getCqlLookups(qdmMeasureCql, measureExpressions, TOKEN);
-    assertThat(cqlLookup.getContext(), is(equalTo("Patient")));
-    assertThat(cqlLookup.getLibrary(), is(equalTo("LookupTestLib")));
-    assertThat(cqlLookup.getUsingModel(), is(equalTo("QDM")));
-    assertThat(cqlLookup.getUsingModelVersion(), is(equalTo("5.6")));
-    assertThat(cqlLookup.getParameters().size(), is(equalTo(1)));
-    assertThat(cqlLookup.getValueSets().size(), is(equalTo(1)));
-    assertThat(cqlLookup.getCodes().size(), is(equalTo(2)));
-    assertThat(cqlLookup.getCodeSystems().size(), is(equalTo(1)));
-    assertThat(cqlLookup.getDefinitions().size(), is(equalTo(4)));
-    assertThat(cqlLookup.getIncludeLibraries().size(), is(equalTo(0)));
-    assertThat(cqlLookup.getElementLookups().size(), is(equalTo(3)));
-    List<String> definitions =
-        cqlLookup.getDefinitions().stream().map(CQLDefinition::getName).toList();
-    assertThat(
-        definitions,
+        allDefs,
         containsInAnyOrder(
-            "test when then case",
-            "More Than One Order",
-            "Initial Population",
-            "MedicationOrderInjection"));
-    List<String> oids = cqlLookup.getElementLookups().stream().map(ElementLookup::getOid).toList();
-    assertThat(oids, containsInAnyOrder("204504", "197604", "2.16.840.1.113883.3.464.1003.1065"));
+            define1, define2, define3, define4, helperDefine, function, fluentFunction));
+  }
+
+  @Test
+  void testGetCqlBuilderLookups() {
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(qiCoreMeasureCql, TOKEN);
+    assertThat(lookup.getParameters().size(), is(2));
+    assertThat(lookup.getDefinitions().size(), is(5));
+    assertThat(lookup.getFunctions().size(), is(1));
+    assertThat(lookup.getFluentFunctions().size(), is(1));
+  }
+
+  @Test
+  void testGetCqlBuilderLookupsForEmptyCql() {
+    CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(null, TOKEN);
+    assertThat(lookup, is(nullValue()));
   }
 }

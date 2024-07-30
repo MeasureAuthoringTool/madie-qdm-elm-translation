@@ -63,7 +63,6 @@ public class CqlConversionController {
             .validateUnits(validateUnits)
             .resultTypes(resultTypes)
             .build();
-
     cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
     CqlConversionPayload cqlConversionPayload =
