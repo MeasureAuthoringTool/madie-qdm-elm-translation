@@ -10,6 +10,7 @@ import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
@@ -43,6 +44,7 @@ import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
+@Slf4j
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
 
@@ -84,9 +86,15 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     try {
       JsonNode jsonNode = objectMapper.readTree(resultJson);
       assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertTrue(libraryNode.isMissingNode());
+      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+      assertNotNull(libraryNodeEx);
+      assertFalse(libraryNodeEx.isMissingNode());
+      assertThat(libraryNodeEx.isArray(), is(true));
+      assertThat(
+          libraryNodeEx.get(0).get("message").textValue(),
+          is(
+              equalTo(
+                  "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }
@@ -136,9 +144,15 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     try {
       JsonNode jsonNode = objectMapper.readTree(resultJson);
       assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertTrue(libraryNode.isMissingNode());
+      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+      assertNotNull(libraryNodeEx);
+      assertFalse(libraryNodeEx.isMissingNode());
+      assertThat(libraryNodeEx.isArray(), is(true));
+      assertThat(
+          libraryNodeEx.get(0).get("message").textValue(),
+          is(
+              equalTo(
+                  "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }
