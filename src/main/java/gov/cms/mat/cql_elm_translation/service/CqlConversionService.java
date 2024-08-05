@@ -7,6 +7,7 @@ import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql_elm_translation.data.RequestData;
 import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
@@ -20,7 +21,6 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
-import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
@@ -56,18 +56,7 @@ public class CqlConversionService extends CqlTooling {
     CqlTranslator cqlTranslator = processCqlData(requestData);
 
     // QI-Core measures require FHIRHelpers...enforce this validation only for measure CQL
-    VersionedIdentifier identifier = cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
-    if (StringUtils.isNotBlank(requestData.getCqlData()) && identifier != null && !identifier.getId().contains("FHIRHelpers")) {
-      Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
-      if (includes == null || includes.getDef() == null || includes.getDef().isEmpty() || !includes.getDef().stream().anyMatch(includeDef -> includeDef.getPath().contains("FHIRHelpers"))) {
-        CqlCompilerException fhirHelpersError = new CqlCompilerException(
-            "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.",
-            CqlCompilerException.ErrorSeverity.Error,
-            new TrackBack(cqlTranslator.getTranslatedLibrary().getIdentifier(), 1,0,1,0)
-        );
-        cqlTranslator.getExceptions().add(fhirHelpersError);
-      }
-    }
+    processForMissingFhirHelpersLibrary(cqlTranslator, requestData.getCqlData());
 
     List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
@@ -102,6 +91,35 @@ public class CqlConversionService extends CqlTooling {
       }
     }
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
+  }
+
+  /**
+   * MODIFIES INPUT PARAMETER Checks for FHIRHelpers library and adds an exception on the
+   * CqlTranslator object if missing. Exception is not added if the CQL is for the FHIRHelpers
+   * library itself.
+   *
+   * @param cqlTranslator
+   * @param cql
+   */
+  public void processForMissingFhirHelpersLibrary(CqlTranslator cqlTranslator, String cql) {
+    VersionedIdentifier identifier =
+        cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
+    if (StringUtils.isNotBlank(cql)
+        && identifier != null
+        && !identifier.getId().contains("FHIRHelpers")) {
+      Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
+      if (includes == null
+          || includes.getDef() == null
+          || includes.getDef().isEmpty()
+          || !includes.getDef().stream()
+              .anyMatch(includeDef -> includeDef.getPath().contains("FHIRHelpers"))) {
+        cqlTranslator
+            .getExceptions()
+            .add(
+                new MissingLibraryCqlCompilerException(
+                    "FHIRHelpers", cqlTranslator.getTranslatedLibrary().getIdentifier(), 1));
+      }
+    }
   }
 
   public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
