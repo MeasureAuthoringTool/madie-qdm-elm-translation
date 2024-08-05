@@ -20,6 +20,7 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
+import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
@@ -53,6 +54,20 @@ public class CqlConversionService extends CqlTooling {
     }
     // Gets the translator results
     CqlTranslator cqlTranslator = processCqlData(requestData);
+
+    // QI-Core measures require FHIRHelpers...enforce this validation only for measure CQL
+    VersionedIdentifier identifier = cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
+    if (StringUtils.isNotBlank(requestData.getCqlData()) && identifier != null && !identifier.getId().contains("FHIRHelpers")) {
+      Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
+      if (includes == null || includes.getDef() == null || includes.getDef().isEmpty() || !includes.getDef().stream().anyMatch(includeDef -> includeDef.getPath().contains("FHIRHelpers"))) {
+        CqlCompilerException fhirHelpersError = new CqlCompilerException(
+            "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.",
+            CqlCompilerException.ErrorSeverity.Error,
+            new TrackBack(cqlTranslator.getTranslatedLibrary().getIdentifier(), 1,0,1,0)
+        );
+        cqlTranslator.getExceptions().add(fhirHelpersError);
+      }
+    }
 
     List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
