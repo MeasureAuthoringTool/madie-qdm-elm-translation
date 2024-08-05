@@ -14,6 +14,7 @@ public class CqlBuilderLookup {
   private Set<Lookup> fluentFunctions;
 
   @Builder
+  @Data
   public static class Lookup {
     private String name;
     private String libraryName;
