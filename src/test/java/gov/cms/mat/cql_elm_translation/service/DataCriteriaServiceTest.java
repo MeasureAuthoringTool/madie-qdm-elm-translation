@@ -7,10 +7,12 @@ import gov.cms.madie.models.measure.Population;
 import gov.cms.madie.models.measure.Stratification;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.mat.cql_elm_translation.data.DataElementDescriptor;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -31,6 +33,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -253,5 +256,20 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     Set<SourceDataCriteria> sourceDataCriteria =
         dataCriteriaService.getRelevantElements(measure, token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetRelevantElementsGroupsNull() {
+    Measure measure = Measure.builder().cql(cql).groups(null).build();
+    Set<SourceDataCriteria> sourceDataCriteria =
+        dataCriteriaService.getRelevantElements(measure, token);
+    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetCriteriaType() {
+    DataElementDescriptor dataElementDescriptor =
+        dataCriteriaService.getCriteriaType("Substance, Not Recommended");
+    assertNotNull(dataElementDescriptor);
   }
 }

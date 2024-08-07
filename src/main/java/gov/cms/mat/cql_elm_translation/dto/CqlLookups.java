@@ -1,11 +1,11 @@
 package gov.cms.mat.cql_elm_translation.dto;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCode;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLValueSet;
 import lombok.Builder;
 import lombok.Data;
 

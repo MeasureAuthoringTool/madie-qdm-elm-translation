@@ -1,7 +1,7 @@
 package gov.cms.mat.cql_elm_translation;
 
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
-import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.ResourceUtils;
 
 import java.io.IOException;
 import java.io.InputStream;

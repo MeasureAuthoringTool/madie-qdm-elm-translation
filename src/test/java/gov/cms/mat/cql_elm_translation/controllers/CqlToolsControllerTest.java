@@ -2,31 +2,30 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import java.io.IOException;
-import java.security.Principal;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Set;
 import java.util.TreeSet;
 
 import gov.cms.madie.models.dto.TranslatedLibrary;
 
 import gov.cms.mat.cql_elm_translation.dto.CqlLookupRequest;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
+import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
+
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -38,12 +37,10 @@ import org.springframework.http.ResponseEntity;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
-import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 
 @ExtendWith(MockitoExtension.class)
 class CqlToolsControllerTest implements ResourceFileUtil {
@@ -68,59 +65,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
                 "define \"Initial Population\":\n  \"Encounter with Opioid Administration Outside of Operating Room\"")
             .build();
     allDefinitions = new HashSet<>(Arrays.asList(definition1));
-  }
-
-  @Test
-  void formatCql() {
-    String cqlData = getData("/cv_populations.cql");
-
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("test.user");
-
-    var result = cqlToolsController.formatCql(cqlData, principal);
-    assertTrue(inputMatchesOutput(cqlData, Objects.requireNonNull(result.getBody())));
-  }
-
-  @Test
-  void formatCqlWithMissingModel() {
-    String cqlData = getData("/missing-model.cql");
-
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("test.user");
-
-    var result = cqlToolsController.formatCql(cqlData, principal);
-    assertTrue(inputMatchesOutput(cqlData, Objects.requireNonNull(result.getBody())));
-  }
-
-  @Test
-  void formatCqlWithInvalidSyntax() {
-    String cqlData = getData("/invalid_syntax.cql");
-
-    Principal principal = mock(Principal.class);
-    assertThrows(CqlFormatException.class, () -> cqlToolsController.formatCql(cqlData, principal));
-  }
-
-  @Test
-  void formatCqlWithNoData() {
-    Principal principal = mock(Principal.class);
-    when(principal.getName()).thenReturn("test.user");
-
-    var result = cqlToolsController.formatCql("", principal);
-    assertTrue(inputMatchesOutput("", Objects.requireNonNull(result.getBody())));
-  }
-
-  @Test
-  void testGetSourceDataCriteria() {
-    String cql = getData("/qdm_data_criteria_retrieval_test.cql");
-    String token = "john";
-    var sdc = SourceDataCriteria.builder().oid("1.2.3").description("EP: Test").title("EP").build();
-    when(dataCriteriaService.getSourceDataCriteria(anyString(), anyString()))
-        .thenReturn(List.of(sdc));
-    var result = cqlToolsController.getSourceDataCriteria(cql, token);
-    SourceDataCriteria sourceDataCriteria = result.getBody().get(0);
-    assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
-    assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
-    assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));
   }
 
   @Test
@@ -177,16 +121,6 @@ class CqlToolsControllerTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGetAllDefinitions() {
-
-    when(cqlParsingService.getAllDefinitions(any(), anyString())).thenReturn(allDefinitions);
-    ResponseEntity<Set<CQLDefinition>> result =
-        cqlToolsController.getAllDefinitions("test cql", "accessToken");
-    Set<CQLDefinition> defintions = result.getBody();
-    assertThat(defintions.size(), is(equalTo(1)));
-  }
-
-  @Test
   void testGetDefinitionCallstack() {
     Map<String, Set<CQLDefinition>> definitionCallstacks = new HashMap<>();
     definitionCallstacks.put("test", allDefinitions);
@@ -210,5 +144,28 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     assertNotNull(cqlLookups);
     assertThat(cqlLookups.getLibrary(), is(equalTo("Test")));
     assertThat(cqlLookups.getVersion(), is(equalTo("0.0.001")));
+  }
+
+  @Test
+  void testGetCqlBuilderLookups() {
+    var p = CqlBuilderLookup.Lookup.builder().name("Parameter").logic("abc").build();
+    var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
+    var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
+    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString()))
+        .thenReturn(
+            CqlBuilderLookup.builder()
+                .parameters(Set.of(p))
+                .definitions(Set.of(d))
+                .functions(Set.of(f))
+                .build());
+
+    ResponseEntity<CqlBuilderLookup> result =
+        cqlToolsController.getCqlBuilderLookups("CQL", "accessToken");
+    CqlBuilderLookup cqlBuilderLookups = result.getBody();
+    assertNotNull(cqlBuilderLookups);
+    assertThat(cqlBuilderLookups.getParameters().size(), is(1));
+    assertThat(cqlBuilderLookups.getDefinitions().size(), is(1));
+    assertThat(cqlBuilderLookups.getFunctions().size(), is(1));
+    assertThat(cqlBuilderLookups.getFluentFunctions(), is(nullValue()));
   }
 }

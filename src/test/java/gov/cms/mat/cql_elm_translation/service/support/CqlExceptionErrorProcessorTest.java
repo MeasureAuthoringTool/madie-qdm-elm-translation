@@ -36,4 +36,14 @@ class CqlExceptionErrorProcessorTest implements ResourceFileUtil {
   private CqlCompilerException createError() {
     return new CqlCompilerException("message", CqlCompilerException.ErrorSeverity.Error);
   }
+
+  @Test
+  void testProcessThrowsException() {
+    String json = "wrong json";
+    List<CqlCompilerException> errors = Collections.singletonList(createError());
+    cqlExceptionErrorProcessor = new CqlExceptionErrorProcessor(errors, json);
+
+    assertEquals(
+        json, cqlExceptionErrorProcessor.process()); // since invalid json, no change to json
+  }
 }

@@ -7,9 +7,11 @@ import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
@@ -248,5 +250,20 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   void testGetElmForBlankCql() throws IOException {
     List<TranslatedLibrary> elms = service.getTranslatedLibrariesForCql(null, "token");
     assertThat(elms.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetTranslatedLibrariesForCqlIncludedLibraryNull() throws IOException {
+    String cql = getData("/qdm_data_criteria_retrieval_test.cql");
+    doReturn(null)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
+
+    List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
+    var matchingLib =
+        libraries.stream()
+            .filter(library -> library.getElmJson().contains("DataCriteriaRetrivalTest"))
+            .findFirst();
+    assertThat(matchingLib.get().getName(), is(equalTo("DataCriteriaRetrivalTest")));
   }
 }

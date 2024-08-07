@@ -1,13 +1,14 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.models.measure.Measure;
-import gov.cms.mat.cql_elm_translation.data.DataCriteria;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.DataCriteria;
 import gov.cms.mat.cql_elm_translation.data.DataElementDescriptor;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
+import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.mat.cql_elm_translation.utils.cql.QdmDatatypeUtil;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCode;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLValueSet;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -25,10 +26,6 @@ import java.util.stream.Collectors;
 public class DataCriteriaService extends CqlTooling {
 
   private final CqlLibraryService cqlLibraryService;
-
-  public DataCriteria parseDataCriteriaFromCql(String cql, String accessToken) {
-    return parseCql(cql, accessToken, cqlLibraryService, null).getDataCriteria();
-  }
 
   public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken) {
     if (StringUtils.isBlank(measure.getCql())) {
