@@ -35,13 +35,13 @@ public class CqlParsingService extends CqlTooling {
   private final CqlLibraryService cqlLibraryService;
 
   /**
-   * Parses the CQL and generates only used cql artifacts(including for the CQL of the included
-   * Libraries). refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
+   * >>>>>>> origin Parses the CQL and generates only used cql artifacts(including for the CQL of
+   * the included Libraries). refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
    *
    * @param cql- measure cql
    * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs
    * @param accessToken Requesting User's Okta Bearer token
-   * @return CQLLookups -> building blocks for HQMF and Human Readable generation
+   * @return CQLLookups -> building blocks for HQMF and Human Readable generation <<<<<<< HEAD
    *     <p>Used for QDM
    */
   public CqlLookups getCqlLookups(String cql, Set<String> measureExpressions, String accessToken) {

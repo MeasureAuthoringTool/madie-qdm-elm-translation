@@ -9,6 +9,8 @@ import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 
+import static org.hamcrest.CoreMatchers.equalTo;
+import static org.hamcrest.CoreMatchers.nullValue;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -20,8 +22,6 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.containsInAnyOrder;
 import static org.hamcrest.Matchers.is;
 import static org.hamcrest.Matchers.contains;
-import static org.hamcrest.Matchers.equalTo;
-import static org.hamcrest.CoreMatchers.nullValue;
 
 import java.util.List;
 import java.util.Map;
