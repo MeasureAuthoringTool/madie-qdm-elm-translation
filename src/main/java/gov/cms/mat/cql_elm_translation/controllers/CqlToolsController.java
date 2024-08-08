@@ -108,7 +108,7 @@ public class CqlToolsController {
   @PutMapping(
       value = "/cql-builder-lookups",
       produces = MediaType.APPLICATION_JSON_VALUE,
-      consumes = MediaType.APPLICATION_JSON_VALUE)
+      consumes = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<CqlBuilderLookup> getCqlBuilderLookups(
       @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
     log.info("Preparing CqlBuilder Lookups");
