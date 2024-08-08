@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.mat.cql_elm_translation.dto.CqlLibraryDetails;
+import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
 import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;

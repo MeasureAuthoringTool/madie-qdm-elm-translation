@@ -97,18 +97,6 @@
 		https://github.com/cqframework/clinical_quality_language/blob/master/Src/java/cql-to-elm/OVERVIEW.md  -->
     <dependency>
       <groupId>info.cqframework</groupId>
-      <artifactId>cql</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
       <artifactId>model-jaxb</artifactId>
       <version>${cqframework.version}</version>
     </dependency>
@@ -127,23 +115,6 @@
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>elm-jaxb</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>quick</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>qdm</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>cql-formatter</artifactId>
       <version>${cqframework.version}</version>
     </dependency>
 
@@ -282,6 +253,12 @@
           <groupId>com.fasterxml.jackson.core</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>gov.cms.madie</groupId>
+      <artifactId>madie-translator-commons</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>

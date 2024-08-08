@@ -9,7 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.UncheckedIOException;
 
-import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,7 +24,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 
 @ExtendWith(MockitoExtension.class)

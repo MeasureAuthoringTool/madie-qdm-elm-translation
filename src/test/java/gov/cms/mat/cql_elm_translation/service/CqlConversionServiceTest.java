@@ -7,9 +7,11 @@ import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
@@ -24,7 +26,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
-import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -37,9 +38,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.ArgumentMatchers.nullable;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
@@ -183,25 +181,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testGetTranslatedLibrariesForCqlForCql() throws IOException {
-    String cql = getData("/qdm_data_criteria_retrieval_test.cql");
-    String matGlobal = getData("/mat_global_common_functions.cql");
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(matGlobal)
-        .when(cqlLibraryService)
-        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
-
-    List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
-    AtomicBoolean foundAMatch = new AtomicBoolean();
-    var matchingLib =
-        libraries.stream()
-            .filter(library -> library.getElmJson().contains("DataCriteriaRetrivalTest"))
-            .findFirst();
-    assertThat(matchingLib.get().getName(), is(equalTo("DataCriteriaRetrivalTest")));
-  }
-
-  @Test
   void testBuildTranslatedLibrary() {
     Library library = new Library();
     VersionedIdentifier identifier = new VersionedIdentifier();
@@ -242,11 +221,5 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   void testBuildTranslatedLibraryWhenCompiledLibraryIsNull() {
     TranslatedLibrary library = service.buildTranslatedLibrary(null, null);
     assertNull(library);
-  }
-
-  @Test
-  void testGetElmForBlankCql() throws IOException {
-    List<TranslatedLibrary> elms = service.getTranslatedLibrariesForCql(null, "token");
-    assertThat(elms.size(), is(equalTo(0)));
   }
 }

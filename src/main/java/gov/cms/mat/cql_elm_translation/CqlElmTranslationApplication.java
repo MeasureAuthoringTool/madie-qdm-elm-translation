@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation;
 
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -14,6 +15,8 @@ import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.cache.support.SimpleCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
@@ -26,6 +29,7 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
+@Import({CqlLibraryService.class, RestTemplate.class})
 public class CqlElmTranslationApplication {
 
   public static void main(String[] args) {

@@ -4,17 +4,16 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
-import org.apache.commons.collections4.MapUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
@@ -26,8 +25,6 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
@@ -87,35 +84,6 @@ public class CqlConversionService extends CqlTooling {
       }
     }
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
-  }
-
-  public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
-      throws IOException {
-    if (StringUtils.isBlank(cql)) {
-      return Collections.emptyList();
-    }
-    CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService);
-    TranslatedLibrary translatedMeasureLib =
-        buildTranslatedLibrary(translator.getTranslatedLibrary().getLibrary(), cql);
-    Map<VersionedIdentifier, CompiledLibrary> includedLibraries =
-        translator.getTranslatedLibraries();
-    List<TranslatedLibrary> libraries = new ArrayList<>();
-    libraries.add(translatedMeasureLib);
-    // if no included libraries, return only measure library
-    if (MapUtils.isEmpty(includedLibraries)) {
-      return libraries;
-    }
-    // get the cql for included libraries
-    Map<String, String> cqlMap =
-        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translator);
-
-    // create TranslatedLibrary for each included library
-    List<TranslatedLibrary> translatedIncludeLibs =
-        includedLibraries.values().stream()
-            .map(compiledLibrary -> buildTranslatedLibrary(compiledLibrary, cqlMap))
-            .toList();
-    libraries.addAll(translatedIncludeLibs);
-    return libraries;
   }
 
   public TranslatedLibrary buildTranslatedLibrary(

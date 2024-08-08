@@ -7,10 +7,11 @@ import gov.cms.madie.models.measure.Population;
 import gov.cms.madie.models.measure.Stratification;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.dto.SourceDataCriteria;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -23,7 +24,6 @@ import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Collections;
-import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
@@ -65,101 +65,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             .validateUnits(true)
             .resultTypes(true)
             .build();
-  }
-
-  @Test
-  void testGetSourceDataCriteria() {
-    Mockito.doNothing()
-        .when(cqlLibraryService)
-        .setUpLibrarySourceProvider(anyString(), anyString());
-
-    List<SourceDataCriteria> sourceDataCriteria =
-        dataCriteriaService.getSourceDataCriteria(cql, token);
-
-    // source data criteria for value set
-
-    SourceDataCriteria singleSdc =
-        sourceDataCriteria.stream()
-            .filter(sdc -> sdc.getTitle().equals("Encounter Inpatient"))
-            .toList()
-            .get(0);
-    assertThat(singleSdc.getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
-    assertThat(singleSdc.getTitle(), is(equalTo("Encounter Inpatient")));
-    assertThat(singleSdc.getType(), is(equalTo("EncounterPerformed")));
-    assertThat(
-        singleSdc.getDescription(), is(equalTo("Encounter, Performed: Encounter Inpatient")));
-    assertFalse(singleSdc.isDrc());
-    //
-    //    // source data criteria for direct reference code
-    //    assertThat(sourceDataCriteria.size(), is(equalTo(3)));
-    //    assertTrue(sourceDataCriteria.get(2).isDrc());
-    //    assertThat(sourceDataCriteria.get(2).getTitle(), is(equalTo("Clinical Examples")));
-    //    assertThat(sourceDataCriteria.get(2).getType(), is(equalTo("EncounterPerformed")));
-    //    assertThat(
-    //        sourceDataCriteria.get(2).getDescription(),
-    //        is(equalTo("Encounter, Performed: Clinical Examples")));
-    //
-    //    // MAT-6210 only setCodeId for direct reference code
-    //    assertThat(sourceDataCriteria.get(0).getCodeId(), is(equalTo(null)));
-    //    assertThat(sourceDataCriteria.get(1).getCodeId(), is(equalTo(null)));
-    //    assertThat(sourceDataCriteria.get(2).getCodeId(), is(equalTo("1021859")));
-  }
-
-  @Test
-  void testGetSourceDataCriteriaWhenNoSourceCriteriaFound() {
-    String cql =
-        "library DataCriteriaRetrivalTest version '0.0.000'\n"
-            + "using QDM version '5.6'\n"
-            + "valueset \"Encounter Inpatient\": 'urn:oid:2.16.840.1.113883.3.666.5.307'\n"
-            + "parameter \"Measurement Period\" Interval<DateTime>\n"
-            + "context Patient\n"
-            + "define \"Qualifying Encounters\":\n true";
-
-    RequestData data = requestData.toBuilder().cqlData(cql).build();
-    Mockito.doNothing()
-        .when(cqlLibraryService)
-        .setUpLibrarySourceProvider(anyString(), anyString());
-
-    List<SourceDataCriteria> sourceDataCriteria =
-        dataCriteriaService.getSourceDataCriteria(cql, token);
-
-    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
-  }
-
-  @Test
-  void testGetSourceDataCriteriaWithCriteriaWithCodes() {
-    String cql =
-        "library DRCTest version '0.0.000'\n"
-            + "using QDM version '5.6'\n"
-            + "codesystem \"LOINC\": 'urn:oid:2.16.840.1.113883.6.1'\n"
-            + "valueset \"Palliative Care Encounter\": 'urn:oid:2.16.840.1.113883.3.464.1003.101.12.1090'\n"
-            + "code \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\": '71007-9' from \"LOINC\" display 'Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)'\n"
-            + "parameter \"Measurement Period\" Interval<DateTime>\n"
-            + "context Patient\n"
-            + "define \"Palliative Care in the Measurement Period\":\n"
-            + "( [\"Encounter, Performed\": \"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\"]\n"
-            + ")";
-
-    RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        TranslationResource.getInstance(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
-
-    Mockito.doNothing()
-        .when(cqlLibraryService)
-        .setUpLibrarySourceProvider(anyString(), anyString());
-
-    List<SourceDataCriteria> sourceDataCriteria =
-        dataCriteriaService.getSourceDataCriteria(cql, token);
-
-    assertThat(sourceDataCriteria.size(), is(equalTo(1)));
-  }
-
-  @Test
-  void testGetSourceDataCriteriaWhenNoCqlProvided() {
-    List<SourceDataCriteria> sourceDataCriteria =
-        dataCriteriaService.getSourceDataCriteria("", token);
-    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
 
   @Test

@@ -1,10 +1,11 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.DefinitionContent;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -23,19 +24,6 @@ import static java.util.stream.Collectors.toSet;
 @RequiredArgsConstructor
 public class CqlParsingService extends CqlTooling {
   private final CqlLibraryService cqlLibraryService;
-
-  /**
-   * Parses the CQL and generates objects for all CQL Definitions and Functions found in the Main
-   * and Included Libraries.
-   *
-   * @param cql Main Library CQL
-   * @param accessToken Requesting User's Okta Bearer token
-   * @return Set of all CQL Definitions and Functions in the main and included Libraries.
-   */
-  public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return buildCqlDefinitions(cqlTools);
-  }
 
   /**
    * Parses the CQL and collect all CQL building blocks irrespective of used or unused(including for
