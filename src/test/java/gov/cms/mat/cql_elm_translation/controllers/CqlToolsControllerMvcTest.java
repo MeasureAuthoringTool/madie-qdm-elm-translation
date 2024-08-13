@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
