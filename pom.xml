@@ -290,6 +290,18 @@
     </dependency>
   </dependencies>
 
+  <!--    Required to fetch artifacts from repositories other than maven central -->
+  <repositories>
+    <repository>
+      <releases>
+        <enabled>true</enabled>
+      </releases>
+      <id>github</id>
+      <name>Github madie rest commons</name>
+      <url>https://maven.pkg.github.com/MeasureAuthoringTool/madie-rest-commons</url>
+    </repository>
+  </repositories>
+
   <build>
     <pluginManagement>
       <plugins>
