@@ -4,10 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ObjectNode;
+
 import gov.cms.mat.cql.dto.CqlConversionPayload;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
-import gov.cms.mat.cql_elm_translation.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

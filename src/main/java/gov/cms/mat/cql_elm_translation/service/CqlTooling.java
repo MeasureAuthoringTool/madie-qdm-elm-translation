@@ -1,12 +1,14 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;

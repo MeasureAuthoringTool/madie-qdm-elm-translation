@@ -7,8 +7,8 @@
     <version>3.2.7</version>
   </parent>
   <groupId>gov.cms.madie</groupId>
-  <artifactId>cql-elm-translation</artifactId>
-  <version>0.0.2-SNAPSHOT</version>
+  <artifactId>madie-qdm-elm-translation</artifactId>
+  <version>1.0.0-SNAPSHOT</version>
 
   <name>CQL to ELM Translation Service</name>
   <description>Translates CQL to ELM for MADiE</description>
@@ -93,20 +93,6 @@
     </dependency>
 
     <!--  Dependencies required to use cql to elm translator from cqFramework  -->
-    <!--
-		https://github.com/cqframework/clinical_quality_language/blob/master/Src/java/cql-to-elm/OVERVIEW.md  -->
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>cql</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>model</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>model-jaxb</artifactId>
@@ -127,23 +113,6 @@
     <dependency>
       <groupId>info.cqframework</groupId>
       <artifactId>elm-jaxb</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>quick</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>qdm</artifactId>
-      <version>${cqframework.version}</version>
-    </dependency>
-
-    <dependency>
-      <groupId>info.cqframework</groupId>
-      <artifactId>cql-formatter</artifactId>
       <version>${cqframework.version}</version>
     </dependency>
 
@@ -237,12 +206,6 @@
     </dependency>
 
     <dependency>
-      <groupId>gov.cms.madie</groupId>
-      <artifactId>madie-rest-commons</artifactId>
-      <version>0.0.4-SNAPSHOT</version>
-    </dependency>
-
-    <dependency>
       <groupId>com.okta.spring</groupId>
       <artifactId>okta-spring-boot-starter</artifactId>
       <version>3.0.7</version>
@@ -267,7 +230,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-java-models</artifactId>
-      <version>0.6.42-SNAPSHOT</version>
+      <version>0.6.56-SNAPSHOT</version>
       <exclusions>
         <exclusion>
           <artifactId>jackson-core</artifactId>
@@ -282,6 +245,12 @@
           <groupId>com.fasterxml.jackson.core</groupId>
         </exclusion>
       </exclusions>
+    </dependency>
+
+    <dependency>
+      <groupId>gov.cms.madie</groupId>
+      <artifactId>madie-translator-commons</artifactId>
+      <version>0.0.1-SNAPSHOT</version>
     </dependency>
 
     <dependency>
@@ -319,7 +288,6 @@
       <version>5.2.0</version>
       <scope>test</scope>
     </dependency>
-
   </dependencies>
 
   <!--    Required to fetch artifacts from repositories other than maven central -->
