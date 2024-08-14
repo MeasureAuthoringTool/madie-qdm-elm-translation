@@ -22,7 +22,7 @@ public class ResourceUtilsTest {
 
   @Test
   public void testReadData() {
-    String result = new ResourceUtils().getData("/cv_populations.cql");
+    String result = ResourceUtils.getData("/cv_populations.cql");
     assertNotNull(result);
   }
 
