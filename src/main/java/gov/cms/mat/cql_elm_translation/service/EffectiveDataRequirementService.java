@@ -2,9 +2,9 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
-import gov.cms.mat.cql_elm_translation.dto.CqlLibraryDetails;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
+import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.cqframework.cql.cql2elm.CqlCompilerOptions;
@@ -14,6 +14,7 @@ import org.cqframework.cql.cql2elm.LibraryManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.springframework.stereotype.Service;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
 @Slf4j
 @Service

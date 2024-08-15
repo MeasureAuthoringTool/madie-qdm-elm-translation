@@ -1,7 +1,7 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import gov.cms.mat.cql_elm_translation.dto.CqlLibraryDetails;
-import gov.cms.mat.cql_elm_translation.exceptions.CqlFormatException;
+import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
+import gov.cms.madie.cql_elm_translator.exceptions.CqlFormatException;
 import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;

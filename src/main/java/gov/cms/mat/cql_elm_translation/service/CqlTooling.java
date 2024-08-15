@@ -2,12 +2,16 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.cql_translator.TranslationResource;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLModel;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
+
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+
 import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -20,6 +24,7 @@ import java.util.Map;
 import java.util.Set;
 
 @RequiredArgsConstructor
+@Slf4j
 public abstract class CqlTooling {
   protected CQLTools parseCql(
       String cql,
@@ -99,7 +104,9 @@ public abstract class CqlTooling {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
     return TranslationResource.getInstance(
-            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
+            usingProperties != null
+                && ("FHIR".equals(usingProperties.getLibraryType())
+                    || "QICore".equals(usingProperties.getLibraryType())))
         .buildTranslator(requestData);
   }
 
