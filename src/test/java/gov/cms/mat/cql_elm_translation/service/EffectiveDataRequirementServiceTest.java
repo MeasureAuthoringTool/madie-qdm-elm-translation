@@ -2,10 +2,11 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.JsonParser;
-import gov.cms.mat.cql_elm_translation.dto.CqlLibraryDetails;
+import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.mat.cql.CqlTextParser;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.utils.ResourceUtils;
+import gov.cms.madie.cql_elm_translator.utils.ResourceUtils;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

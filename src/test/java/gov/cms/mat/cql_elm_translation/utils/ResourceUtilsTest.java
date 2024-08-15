@@ -13,7 +13,9 @@ import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.ResourceUtils;
+import gov.cms.madie.cql_elm_translator.utils.StreamUtils;
 
 @ExtendWith(MockitoExtension.class)
 public class ResourceUtilsTest {

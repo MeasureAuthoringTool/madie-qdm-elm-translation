@@ -13,6 +13,6 @@ define "Inpatient Encounter":
   [Encounter: "Encounter Inpatient"] EncounterInpatient
 		where EncounterInpatient.status = 'finished'
 		and EncounterInpatient.period ends during day of "Measurement Period"
-
+		
 define fluent function "Null Abatement"(Conditions List<Condition>):
   Conditions C where C.abatement is null

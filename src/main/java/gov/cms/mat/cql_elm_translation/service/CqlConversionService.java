@@ -2,14 +2,17 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
-import gov.cms.mat.cql_elm_translation.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.mat.cql_elm_translation.data.RequestData;
-import gov.cms.mat.cql_elm_translation.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
@@ -115,6 +118,7 @@ public class CqlConversionService extends CqlTooling {
             .map(compiledLibrary -> buildTranslatedLibrary(compiledLibrary, cqlMap))
             .toList();
     libraries.addAll(translatedIncludeLibs);
+    log.info("getTranslatedLibrariesForCql: libraries size = " + libraries.size());
     return libraries;
   }
 

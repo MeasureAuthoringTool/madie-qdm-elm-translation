@@ -1,21 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import gov.cms.mat.cql_elm_translation.dto.CqlBuilderLookup;
-import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
-import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
-import gov.cms.mat.cql_elm_translation.utils.cql.CQLTools;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCode;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLCodeSystem;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLDefinition;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLIncludeLibrary;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLParameter;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.CQLValueSet;
-import gov.cms.mat.cql_elm_translation.utils.cql.parsing.model.DefinitionContent;
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.collections4.CollectionUtils;
-import org.springframework.stereotype.Service;
-import org.apache.commons.lang3.StringUtils;
+import static java.util.stream.Collectors.toSet;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -24,7 +9,24 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
-import static java.util.stream.Collectors.toSet;
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.stereotype.Service;
+
+import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.DefinitionContent;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
+import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCode;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCodeSystem;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLIncludeLibrary;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
+import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLValueSet;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
 @Service
@@ -33,21 +35,8 @@ public class CqlParsingService extends CqlTooling {
   private final CqlLibraryService cqlLibraryService;
 
   /**
-   * Parses the CQL and generates objects for all CQL Definitions and Functions found in the Main
-   * and Included Libraries.
-   *
-   * @param cql Main Library CQL
-   * @param accessToken Requesting User's Okta Bearer token
-   * @return Set of all CQL Definitions and Functions in the main and included Libraries.
-   */
-  public Set<CQLDefinition> getAllDefinitions(String cql, String accessToken) {
-    CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
-    return buildCqlDefinitions(cqlTools);
-  }
-
-  /**
    * Parses the CQL and generates only used cql artifacts(including for the CQL of the included
-   * Libraries). refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups
+   * Libraries). refer CQL artifacts- gov.cms.mat.cql_elm_translation.dto.CQLLookups Used for QDM
    *
    * @param cql- measure cql
    * @param measureExpressions- set of cql definitions used in measure groups, SDEs & RAVs
@@ -193,6 +182,7 @@ public class CqlParsingService extends CqlTooling {
    *     Functions. CQL Definitions that do not reference any other CQL Definition and/or Function
    *     will not appear as a Key.
    *     <p>Values: Set of CQL Definition Objects that are referenced in the Key CQL Definition.
+   *     <p>Used for both QDM and QICore.
    */
   public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null);
@@ -224,6 +214,7 @@ public class CqlParsingService extends CqlTooling {
         callstack.putIfAbsent(parentDefinition, calledDefinitions);
       }
     }
+    log.info("getDefinitionCallstacks: callstack size = " + callstack.size());
     return callstack;
   }
 
