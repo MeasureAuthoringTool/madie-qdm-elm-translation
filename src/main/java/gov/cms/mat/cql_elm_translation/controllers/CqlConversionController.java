@@ -19,10 +19,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.io.FileOutputStream;
 import java.io.UncheckedIOException;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Objects;
 
@@ -75,19 +72,6 @@ public class CqlConversionController {
     TranslatorOptionsRemover remover = new TranslatorOptionsRemover(cqlConversionPayload.getJson());
     String cleanedJson = remover.clean();
     cqlConversionPayload.setJson(cleanedJson);
-    // temp
-    Timestamp timestamp = new Timestamp(System.currentTimeMillis());
-    //    long currentTime = timestamp.getTime();
-    SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy.MM.dd.HH.mm.ss");
-    try {
-      FileOutputStream outputStream =
-          new FileOutputStream("cqlConversionPayload_json" + sdf1.format(timestamp) + ".txt");
-      byte[] strToBytes = cleanedJson.getBytes();
-      outputStream.write(strToBytes);
-      outputStream.close();
-    } catch (Exception ex) {
-      ex.printStackTrace();
-    }
     return cqlConversionPayload;
   }
 
