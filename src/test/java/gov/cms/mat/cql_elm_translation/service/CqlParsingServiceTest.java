@@ -148,7 +148,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
     CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(qiCoreMeasureCql, "token");
-    assertThat(lookup.getParameters().size(), is(2));
+    assertThat(lookup.getParameters().size(), is(3));
     assertThat(lookup.getDefinitions().size(), is(5));
     assertThat(lookup.getFunctions().size(), is(1));
     assertThat(lookup.getFluentFunctions().size(), is(1));
