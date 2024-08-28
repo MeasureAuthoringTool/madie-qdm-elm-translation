@@ -1,3 +1,4 @@
+cqlConversionPayload_json*.*
 HELP.md
 target/
 !**/src/main/**

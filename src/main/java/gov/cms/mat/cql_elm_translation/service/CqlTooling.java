@@ -33,6 +33,7 @@ public abstract class CqlTooling {
       Set<String> parentExpressions) {
     // Run Translator to compile libraries
     CqlTranslator cqlTranslator = runTranslator(cql, accessToken, cqlLibraryService);
+
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
     cqlTranslator
         .getTranslatedLibraries()
