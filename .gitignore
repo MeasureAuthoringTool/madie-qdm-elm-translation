@@ -5,6 +5,9 @@ target/
 *.bak
 *.tmp
 
+cqlConversionPayload_json*.txt
+
+
 ### STS ###
 .apt_generated
 .classpath
