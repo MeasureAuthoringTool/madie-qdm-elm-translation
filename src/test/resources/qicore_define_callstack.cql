@@ -22,3 +22,6 @@ define "define 4":
 
 define function "func"():
     true
+
+define "Testing Quantity":
+    Helper.Quantity(2, 'mg') is not null

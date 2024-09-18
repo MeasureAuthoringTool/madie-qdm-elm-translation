@@ -16,3 +16,9 @@ define "Inpatient Encounter":
 
 define fluent function "Null Abatement"(Conditions List<Condition>):
   Conditions C where C.abatement is null
+
+define function Quantity(value Decimal, unit String):
+  if value is not null then
+    System.Quantity { value: value, unit: unit }
+  else
+    null
