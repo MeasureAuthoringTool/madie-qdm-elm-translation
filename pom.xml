@@ -48,7 +48,7 @@
     <dependency>
       <groupId>org.eclipse.persistence</groupId>
       <artifactId>org.eclipse.persistence.moxy</artifactId>
-      <version>4.0.2</version>
+      <version>4.0.4</version>
     </dependency>
 
     <!-- END JAXB API only -->
@@ -114,7 +114,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>6.6.1</version>
+      <version>6.10.5</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -126,7 +126,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r5</artifactId>
-      <version>6.6.1</version>
+      <version>6.10.5</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -138,7 +138,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>6.6.1</version>
+      <version>6.10.5</version>
     </dependency>
 
     <dependency>
@@ -150,20 +150,20 @@
     <dependency>
       <groupId>net.sf.saxon</groupId>
       <artifactId>Saxon-HE</artifactId>
-      <version>11.2</version>
+      <version>11.6</version>
     </dependency>
 
     <dependency>
       <groupId>commons-io</groupId>
       <artifactId>commons-io</artifactId>
-      <version>2.11.0</version>
+      <version>2.16.1</version>
     </dependency>
 
     <!--  openAPI needs to be updated for springBoot 3  -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-ui</artifactId>
-      <version>1.7.0</version>
+      <version>1.8.0</version>
       <exclusions>
         <exclusion>
           <artifactId>jackson-core</artifactId>
@@ -204,13 +204,13 @@
     <dependency>
       <groupId>org.apache.commons</groupId>
       <artifactId>commons-compress</artifactId>
-      <version>1.26.0</version>
+      <version>1.27.0</version>
     </dependency>
 
     <dependency>
       <groupId>jakarta.xml.bind</groupId>
       <artifactId>jakarta.xml.bind-api</artifactId>
-      <version>4.0.1</version>
+      <version>4.0.2</version>
     </dependency>
 
     <dependency>
