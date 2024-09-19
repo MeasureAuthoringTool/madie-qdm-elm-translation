@@ -85,10 +85,26 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
             .libraryVersion("0.0.000")
             .build();
 
-    assertThat(definitionCallstacks.keySet().size(), is(3));
+    CQLDefinition helperQuantity =
+        CQLDefinition.builder()
+            .id("HelperLibrary-0.0.000|Helper|Quantity")
+            .definitionName("Quantity")
+            .definitionLogic(
+                "define function Quantity(value Decimal, unit String):\n"
+                    + "  if value is not null then\n"
+                    + "    System.Quantity { value: value, unit: unit }\n"
+                    + "  else\n"
+                    + "    null")
+            .parentLibrary("HelperLibrary")
+            .libraryDisplayName("Helper")
+            .libraryVersion("0.0.000")
+            .build();
+
+    assertThat(definitionCallstacks.keySet().size(), is(4));
     assertThat(definitionCallstacks.get("define 3"), containsInAnyOrder(define1, define2));
     assertThat(definitionCallstacks.get("define 2"), contains(define1));
     assertThat(definitionCallstacks.get("define 4"), containsInAnyOrder(helperDefine, function));
+    assertThat(definitionCallstacks.get("Testing Quantity"), contains(helperQuantity));
   }
 
   void testGetCqlBuilderLookups() {

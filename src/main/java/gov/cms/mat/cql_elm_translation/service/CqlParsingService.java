@@ -126,6 +126,12 @@ public class CqlParsingService extends CqlTooling {
             .collect(toSet());
     // remove null key, only contains included library references
     nodeGraph.remove(null);
+
+    // Remove if a def is referring to its parent and creating an infinite loop
+    // This happens if any function or definition uses System level Types (ex: System.Quantity {
+    // value: value, unit: unit })
+    nodeGraph.forEach((key, value) -> value.removeIf(def -> def.equals(key)));
+
     // remove nodes that don't reference any other Definition
     nodeGraph.keySet().removeIf(def -> nodeGraph.get(def).isEmpty());
 
