@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
-  CqlConversionService cqlConversionService = new CqlConversionService(null);
+  CqlConversionService cqlConversionService = new CqlConversionService();
 
   String cqlData;
   LibraryBuilder.SignatureLevel signatureLevel;
@@ -43,7 +43,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     validateUnits = Boolean.TRUE;
     resultTypes = Boolean.TRUE;
 
-    cqlConversionService = new CqlConversionService(null);
+    cqlConversionService = new CqlConversionService();
   }
 
   @Test

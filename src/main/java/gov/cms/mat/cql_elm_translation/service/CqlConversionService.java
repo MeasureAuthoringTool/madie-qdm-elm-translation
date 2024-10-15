@@ -4,10 +4,10 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
+import gov.cms.madie.cql_elm_translator.utils.MadieCqlValidator;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
-import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.SimpleIncludeDef;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
-import gov.cms.mat.cql_elm_translation.exceptions.DuplicateIncludeCqlCompilerException;
 import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
@@ -29,14 +29,10 @@ import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.io.StringWriter;
-import java.util.Arrays;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -44,7 +40,6 @@ import java.util.stream.Collectors;
 public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
-  private final CqlLibraryService cqlLibraryService;
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
@@ -61,7 +56,7 @@ public class CqlConversionService extends CqlTooling {
 
     // QI-Core measures require FHIRHelpers...enforce this validation only for
     // measure CQL
-    processForMissingFhirHelpersLibrary(cqlTranslator, requestData.getCqlData());
+    processForLibraryRulesExceptions(cqlTranslator, requestData.getCqlData());
 
     List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
@@ -108,7 +103,7 @@ public class CqlConversionService extends CqlTooling {
    */
   private SimpleIncludeDef lastInclude = null;
 
-  public void processForMissingFhirHelpersLibrary(CqlTranslator cqlTranslator, String cql) {
+  public void processForLibraryRulesExceptions(CqlTranslator cqlTranslator, String cql) {
     VersionedIdentifier identifier =
         cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
     if (StringUtils.isNotBlank(cql)) {
@@ -125,46 +120,7 @@ public class CqlConversionService extends CqlTooling {
                   new MissingLibraryCqlCompilerException(
                       "FHIRHelpers", cqlTranslator.getTranslatedLibrary().getIdentifier(), 1));
         }
-        if (includes != null && includes.getDef() != null && !includes.getDef().isEmpty()) {
-          // check for Include uniqueness
-          lastInclude = null;
-          Map<SimpleIncludeDef, String> uniqueSet =
-              includes.getDef().stream()
-                  .map(includeDef -> new SimpleIncludeDef(includeDef))
-                  .collect(
-                      Collectors.toMap(
-                          p -> p, p -> p.getVersion(), (s, a) -> s + "," + a, LinkedHashMap::new));
-
-          uniqueSet.forEach(
-              (k, v) -> {
-                String[] versionArray = v.split(",");
-                int includesLen = versionArray.length;
-                log.debug("Map:" + k + " - " + includesLen);
-
-                if (includesLen > 1) {
-                  Set<String> set = Arrays.stream(versionArray).collect(Collectors.toSet());
-                  int startLine = Integer.parseInt(k.getLocator().split("-")[0].split(":")[0]);
-                  if (set.size() == 1) {
-                    cqlTranslator
-                        .getExceptions()
-                        .add(
-                            new DuplicateIncludeCqlCompilerException(
-                                k.getPath(),
-                                cqlTranslator.getTranslatedLibrary().getIdentifier(),
-                                (String) set.toArray()[0],
-                                startLine));
-                  } else {
-                    cqlTranslator
-                        .getExceptions()
-                        .add(
-                            new DuplicateIncludeCqlCompilerException(
-                                k.getPath(),
-                                cqlTranslator.getTranslatedLibrary().getIdentifier(),
-                                startLine));
-                  }
-                }
-              });
-        }
+        new MadieCqlValidator().checkNoDuplicateIncludes(cqlTranslator, includes);
       }
     }
   }
