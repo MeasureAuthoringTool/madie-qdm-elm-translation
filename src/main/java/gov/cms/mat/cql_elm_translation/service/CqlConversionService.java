@@ -1,21 +1,14 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
+import java.io.IOException;
+import java.io.StringWriter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-import gov.cms.madie.models.dto.TranslatedLibrary;
-import gov.cms.mat.cql.dto.CqlConversionPayload;
-import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
-import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
-import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
-import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
-import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
-import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
-import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
-
-import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import net.minidev.json.JSONArray;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
@@ -27,14 +20,22 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.StringWriter;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+
+import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.MadieCqlValidator;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.madie.models.dto.TranslatedLibrary;
+import gov.cms.mat.cql.dto.CqlConversionPayload;
+import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
+import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
+import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
+import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import net.minidev.json.JSONArray;
 
 @Service
 @Slf4j
@@ -56,6 +57,8 @@ public class CqlConversionService extends CqlTooling {
     }
     // Gets the translator results
     CqlTranslator cqlTranslator = processCqlData(requestData);
+
+    processForLibraryRulesExceptions(cqlTranslator, requestData.getCqlData());
 
     List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
@@ -90,6 +93,18 @@ public class CqlConversionService extends CqlTooling {
       }
     }
     return CqlConversionPayload.builder().json(jsonWithErrors).xml(cqlTranslator.toXml()).build();
+  }
+
+  public void processForLibraryRulesExceptions(CqlTranslator cqlTranslator, String cql) {
+    VersionedIdentifier identifier =
+        cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
+    if (StringUtils.isNotBlank(cql)) {
+      if (identifier != null) {
+        Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
+
+        new MadieCqlValidator().checkNoDuplicateIncludes(cqlTranslator, includes);
+      }
+    }
   }
 
   public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
