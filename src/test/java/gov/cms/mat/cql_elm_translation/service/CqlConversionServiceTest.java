@@ -16,11 +16,13 @@ import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
+import org.junit.Before;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.File;
 import java.io.IOException;
@@ -38,19 +40,27 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
 
+  @Mock RestTemplate restTemplate;
   @Mock private CqlLibraryService cqlLibraryService;
+  // private CqlLibraryService cqlLibraryService = new
+  // CqlLibraryService(restTemplate);
   @InjectMocks private CqlConversionService service;
 
   private static RequestData requestData;
+  private String supplementalDataElements;
 
   @BeforeAll
   static void setUp() {
+
     requestData =
         RequestData.builder()
             .showWarnings(true)
@@ -63,6 +73,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .resultTypes(true)
             .build();
   }
+
+  @Before
+  void before() {}
 
   @Test
   void testProcessCqlDataWithErrors() {
@@ -190,6 +203,118 @@ class CqlConversionServiceTest implements ResourceFileUtil {
                           .asText()
                           .contains("Model Type and version are required")));
       assertTrue(foundMessage.get());
+    } catch (JsonProcessingException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
+  void testProcessCqlDataWithDuplicateIncludes() {
+
+    String supplementalDataElement;
+    File inputCqlFile =
+        new File(this.getClass().getResource("/SupplementalDataElements.cql").getFile());
+
+    try {
+      supplementalDataElement = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+
+    String supplementalDataElement3;
+    inputCqlFile =
+        new File(this.getClass().getResource("/SupplementalDataElements_3.cql").getFile());
+
+    try {
+      supplementalDataElement3 = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    doReturn(supplementalDataElement)
+        .when(cqlLibraryService)
+        .getLibraryCql(any(String.class), eq("4.0.000"), any(String.class));
+    doReturn(supplementalDataElement3)
+        .when(cqlLibraryService)
+        .getLibraryCql(any(String.class), eq("3.0.000"), any(String.class));
+
+    String cqlData;
+    inputCqlFile = new File(this.getClass().getResource("/fhir_duplicate_includes.cql").getFile());
+
+    try {
+      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    assertNotNull(payload);
+    String resultJson = payload.getJson();
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      JsonNode jsonNode = objectMapper.readTree(resultJson);
+      assertNotNull(jsonNode);
+
+      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+      assertNotNull(libraryNodeEx);
+      assertFalse(libraryNodeEx.isMissingNode());
+      assertThat(libraryNodeEx.isArray(), is(true));
+      assertThat(
+          libraryNodeEx.get(1).get("message").textValue(),
+          is(equalTo("Library SupplementalDataElements is already in use in this library.")));
+    } catch (JsonProcessingException e) {
+      fail(e.getMessage());
+    }
+  }
+
+  @Test
+  void testProcessCqlDataWithDuplicateIncludeSameVersions() {
+
+    String supplementalDataElement;
+    File inputCqlFile =
+        new File(this.getClass().getResource("/SupplementalDataElements.cql").getFile());
+
+    try {
+      supplementalDataElement = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    doReturn(supplementalDataElement)
+        .when(cqlLibraryService)
+        .getLibraryCql(any(String.class), any(String.class), any(String.class));
+
+    String cqlData;
+    inputCqlFile =
+        new File(this.getClass().getResource("/fhir_duplicate_includes_sameversion.cql").getFile());
+
+    try {
+      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    assertNotNull(payload);
+    String resultJson = payload.getJson();
+    ObjectMapper objectMapper = new ObjectMapper();
+    try {
+      JsonNode jsonNode = objectMapper.readTree(resultJson);
+      assertNotNull(jsonNode);
+
+      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+      assertNotNull(libraryNodeEx);
+      assertFalse(libraryNodeEx.isMissingNode());
+      assertThat(libraryNodeEx.isArray(), is(true));
+      assertThat(
+          libraryNodeEx.get(1).get("message").textValue(),
+          is(
+              equalTo(
+                  "Library SupplementalDataElements Version 4.0.000 is already in use in this library.")));
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }

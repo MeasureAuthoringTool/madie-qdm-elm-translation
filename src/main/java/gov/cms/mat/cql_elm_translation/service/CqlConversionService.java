@@ -4,8 +4,9 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
+import gov.cms.madie.cql_elm_translator.utils.MadieCqlValidator;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
-import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.cql.data.SimpleIncludeDef;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerException;
 import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
@@ -39,7 +40,6 @@ import java.util.regex.Pattern;
 public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
-  private final CqlLibraryService cqlLibraryService;
 
   public CqlConversionPayload processCqlDataWithErrors(RequestData requestData) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
@@ -54,8 +54,9 @@ public class CqlConversionService extends CqlTooling {
     // Gets the translator results
     CqlTranslator cqlTranslator = processCqlData(requestData);
 
-    // QI-Core measures require FHIRHelpers...enforce this validation only for measure CQL
-    processForMissingFhirHelpersLibrary(cqlTranslator, requestData.getCqlData());
+    // QI-Core measures require FHIRHelpers...enforce this validation only for
+    // measure CQL
+    processForLibraryRulesExceptions(cqlTranslator, requestData.getCqlData());
 
     List<CqlCompilerException> cqlTranslatorExceptions =
         processErrors(
@@ -72,7 +73,7 @@ public class CqlConversionService extends CqlTooling {
     if (noModelVersion) {
       // Does jsonWithErrors contain "Model and version don't exist"
       // Looking for both the original error in cqlTranslatorException
-      //  and the 'Model and version' error in jsonWithErrors
+      // and the 'Model and version' error in jsonWithErrors
 
       DocumentContext jsonContext = JsonPath.parse(jsonWithErrors);
       try {
@@ -100,23 +101,26 @@ public class CqlConversionService extends CqlTooling {
    * @param cqlTranslator
    * @param cql
    */
-  public void processForMissingFhirHelpersLibrary(CqlTranslator cqlTranslator, String cql) {
+  private SimpleIncludeDef lastInclude = null;
+
+  public void processForLibraryRulesExceptions(CqlTranslator cqlTranslator, String cql) {
     VersionedIdentifier identifier =
         cqlTranslator.getTranslatedLibrary().getLibrary().getIdentifier();
-    if (StringUtils.isNotBlank(cql)
-        && identifier != null
-        && !identifier.getId().contains("FHIRHelpers")) {
-      Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
-      if (includes == null
-          || includes.getDef() == null
-          || includes.getDef().isEmpty()
-          || !includes.getDef().stream()
-              .anyMatch(includeDef -> includeDef.getPath().contains("FHIRHelpers"))) {
-        cqlTranslator
-            .getExceptions()
-            .add(
-                new MissingLibraryCqlCompilerException(
-                    "FHIRHelpers", cqlTranslator.getTranslatedLibrary().getIdentifier(), 1));
+    if (StringUtils.isNotBlank(cql)) {
+      if (identifier != null && !identifier.getId().contains("FHIRHelpers")) {
+        Library.Includes includes = cqlTranslator.getTranslatedLibrary().getLibrary().getIncludes();
+        if (includes == null
+            || includes.getDef() == null
+            || includes.getDef().isEmpty()
+            || !includes.getDef().stream()
+                .anyMatch(includeDef -> includeDef.getPath().contains("FHIRHelpers"))) {
+          cqlTranslator
+              .getExceptions()
+              .add(
+                  new MissingLibraryCqlCompilerException(
+                      "FHIRHelpers", cqlTranslator.getTranslatedLibrary().getIdentifier(), 1));
+        }
+        new MadieCqlValidator().checkNoDuplicateIncludes(cqlTranslator, includes);
       }
     }
   }
