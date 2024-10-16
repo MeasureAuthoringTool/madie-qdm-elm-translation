@@ -236,7 +236,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>0.0.4-cqframework3.14.0-SNAPSHOT</version>
+      <version>0.0.4-SNAPSHOT</version>
     </dependency>
 
     <dependency>
