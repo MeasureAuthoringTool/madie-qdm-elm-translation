@@ -15,13 +15,13 @@
 
   <properties>
     <cqframework.version>3.14.0</cqframework.version>
-
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
     <mvn.checkstyle.version>3.1.2</mvn.checkstyle.version>
     <mvnreports.version>3.1.1</mvnreports.version>
     <mvnsite.version>3.9.1</mvnsite.version>
     <spotify.fmt.version>2.21.1</spotify.fmt.version>
+
   </properties>
 
   <dependencies>
@@ -236,7 +236,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>1.0.0</version>
+      <version>1.0.2-SNAPSHOT</version>
     </dependency>
 
     <dependency>
