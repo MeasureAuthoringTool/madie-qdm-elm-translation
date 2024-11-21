@@ -336,7 +336,6 @@ public class CqlParsingService extends CqlTooling {
 
   private Set<CQLDefinition> buildCqlDefinitions(CQLTools cqlTools) {
     Set<DefinitionContent> definitionContents = cqlTools.getDefinitionContents();
-    Map<String, Set<String>> usedDefinitions = cqlTools.getUsedDefinitions();
     return definitionContents.stream().map(this::buildCqlDefinition).collect(toSet());
   }
 
