@@ -48,6 +48,7 @@ public class CqlConversionController {
           Boolean disableMethodInvocation,
       @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
       @RequestParam(value = "result-types", defaultValue = "true") Boolean resultTypes,
+      @RequestParam(value = "checkContext", defaultValue = "false") Boolean checkContext,
       @RequestHeader("Authorization") String accessToken) {
 
     RequestData requestData =
@@ -66,7 +67,7 @@ public class CqlConversionController {
     cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
     CqlConversionPayload cqlConversionPayload =
-        cqlConversionService.processCqlDataWithErrors(requestData);
+        cqlConversionService.processCqlDataWithErrors(requestData, checkContext);
     // Todo Do we need to remove empty annotations from library object, Also why are we removing
     // translatorOptions from annotations, Could be MAT specific.
     TranslatorOptionsRemover remover = new TranslatorOptionsRemover(cqlConversionPayload.getJson());

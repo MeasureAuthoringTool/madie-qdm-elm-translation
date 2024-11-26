@@ -12,6 +12,9 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlTranslator;
+import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
@@ -28,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -88,7 +92,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -121,7 +125,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -147,7 +151,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -183,7 +187,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -249,7 +253,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -298,7 +302,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data);
+    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -361,5 +365,87 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   void testBuildTranslatedLibraryWhenCompiledLibraryIsNull() {
     TranslatedLibrary library = service.buildTranslatedLibrary(null, null);
     assertNull(library);
+  }
+
+  @Test
+  void testProcessNoContextError() {
+    String cqlData;
+    File inputCqlFile = new File(this.getClass().getResource("/fhir_noContext.cql").getFile());
+    try {
+      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("FHIRHelpers");
+    identifier.setVersion("4.1.000");
+
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData(cqlData)
+            .signatures(LibraryBuilder.SignatureLevel.Overloads)
+            .annotations(Boolean.TRUE)
+            .locators(Boolean.TRUE)
+            .disableListDemotion(Boolean.TRUE)
+            .disableListPromotion(Boolean.TRUE)
+            .disableMethodInvocation(Boolean.TRUE)
+            .validateUnits(Boolean.TRUE)
+            .resultTypes(Boolean.TRUE)
+            .sourceInfo(identifier)
+            .build();
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
+
+    CqlTranslator cqlTranslator = service.processCqlData(requestData);
+
+    service.processNoContextError(cqlTranslator, cqlData);
+
+    List<CqlCompilerException> exceptions = cqlTranslator.getExceptions();
+    assertNotNull(exceptions);
+    assertTrue(
+        "Measure CQL must contain a Context.".equalsIgnoreCase(exceptions.get(1).getMessage()));
+  }
+
+  @Test
+  void testProcessNoContextErrorCqlNull() {
+    String cqlData;
+    File inputCqlFile = new File(this.getClass().getResource("/fhir_noContext.cql").getFile());
+    try {
+      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
+    } catch (IOException e) {
+      throw new UncheckedIOException(e);
+    }
+
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("FHIRHelpers");
+    identifier.setVersion("4.1.000");
+
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData(cqlData)
+            .signatures(LibraryBuilder.SignatureLevel.Overloads)
+            .annotations(Boolean.TRUE)
+            .locators(Boolean.TRUE)
+            .disableListDemotion(Boolean.TRUE)
+            .disableListPromotion(Boolean.TRUE)
+            .disableMethodInvocation(Boolean.TRUE)
+            .validateUnits(Boolean.TRUE)
+            .resultTypes(Boolean.TRUE)
+            .sourceInfo(identifier)
+            .build();
+    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
+    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
+    MadieLibrarySourceProvider.setAccessToken("access token");
+
+    CqlTranslator cqlTranslator = service.processCqlData(requestData);
+
+    service.processNoContextError(cqlTranslator, null);
+
+    List<CqlCompilerException> exceptions = cqlTranslator.getExceptions();
+    assertNotNull(exceptions);
+    assertFalse(
+        "Measure CQL must contain a Context.".equalsIgnoreCase(exceptions.get(0).getMessage()));
   }
 }
