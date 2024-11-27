@@ -132,7 +132,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>7.4.4</version>
+      <version>7.6.0</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -144,7 +144,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r5</artifactId>
-      <version>7.4.4</version>
+      <version>7.6.0</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -156,7 +156,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>7.4.4</version>
+      <version>7.6.0</version>
     </dependency>
 
     <dependency>
