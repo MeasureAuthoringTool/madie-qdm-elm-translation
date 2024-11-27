@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookupComparator;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
@@ -16,6 +17,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeSet;
 
 import static java.util.stream.Collectors.toSet;
 
@@ -45,17 +47,22 @@ public class CqlParsingService extends CqlTooling {
 
     // get all CQLDefinitions including functions
     Set<CQLDefinition> allCqlDefinitions = buildCqlDefinitions(cqlTools);
+
     // prepare lookups for definitions, functions and fluent functions from CQLDefinitions
-    Set<CqlBuilderLookup.Lookup> definitions = new HashSet<>();
+    Set<CqlBuilderLookup.Lookup> definitions =
+        new TreeSet<CqlBuilderLookup.Lookup>(
+            new CqlBuilderLookupComparator<CqlBuilderLookup.Lookup>());
     Set<CqlBuilderLookup.Lookup> functions = new HashSet<>();
     Set<CqlBuilderLookup.Lookup> fluentFunctions = new HashSet<>();
     for (CQLDefinition cqlDefinition : allCqlDefinitions) {
+
       CqlBuilderLookup.Lookup lookup =
           buildCqlBuilderLookup(
               cqlDefinition.getName(),
               cqlDefinition.getLogic(),
               cqlDefinition.getParentLibrary(),
-              cqlDefinition.getLibraryDisplayName());
+              cqlDefinition.getLibraryDisplayName(),
+              cqlDefinition.getStartLine());
       if (cqlDefinition.isFunction()) {
         if (StringUtils.startsWith(cqlDefinition.getLogic(), "define fluent function")) {
           fluentFunctions.add(lookup);
@@ -85,12 +92,19 @@ public class CqlParsingService extends CqlTooling {
       libraryAlias = parts[1];
       name = parts[2];
     }
-    return buildCqlBuilderLookup(name, parameter.getParameterLogic(), libraryName, libraryAlias);
+    return buildCqlBuilderLookup(
+        name,
+        parameter.getParameterLogic(),
+        libraryName,
+        libraryAlias,
+        0); // MAT-7897 - no need for this value yet..
   }
 
   private CqlBuilderLookup.Lookup buildCqlBuilderLookup(
-      String name, String logic, String libraryName, String libraryAlias) {
+      String name, String logic, String libraryName, String libraryAlias, int startLine) {
+
     return CqlBuilderLookup.Lookup.builder()
+        .startLine(startLine)
         .name(name)
         .logic(logic)
         .libraryName(libraryName)
@@ -155,7 +169,12 @@ public class CqlParsingService extends CqlTooling {
   }
 
   private Set<CQLDefinition> buildCqlDefinitions(CQLTools cqlTools) {
-    return cqlTools.getDefinitionContents().stream().map(this::buildCqlDefinition).collect(toSet());
+    Set<DefinitionContent> definitions = cqlTools.getDefinitionContents();
+
+    Set<CQLDefinition> results =
+        definitions.stream().map(this::buildCqlDefinition).collect(toSet());
+
+    return results;
   }
 
   private CQLDefinition buildCqlDefinition(DefinitionContent definitionContent) {
@@ -169,7 +188,7 @@ public class CqlParsingService extends CqlTooling {
     definition.setId(definitionContent.getName());
     definition.setDefinitionLogic(definitionContent.getContent());
     definition.setFunctionArguments(definitionContent.getFunctionArguments());
-
+    definition.setStartLine(definitionContent.getStartLine());
     // Included Lib Define: AHAOverall-2.5.000|AHA|Has Left Ventricular Assist Device
     // Main Lib Define: Numerator
     String[] parts = definitionContent.getName().split("\\|");
@@ -185,6 +204,7 @@ public class CqlParsingService extends CqlTooling {
       }
     }
     definition.setFunction(definitionContent.isFunction());
+
     return definition;
   }
 }
