@@ -2,7 +2,6 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import static java.util.stream.Collectors.toSet;
 
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -19,6 +18,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.DefinitionContent;
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookupComparator;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.dto.ElementLookup;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
@@ -118,7 +118,8 @@ public class CqlParsingService extends CqlTooling {
     Set<CQLDefinition> allCqlDefinitions = buildCqlDefinitions(cqlTools);
     // prepare lookups for definitions, functions and fluent functions from CQLDefinitions
     Set<CqlBuilderLookup.Lookup> definitions =
-        new TreeSet<>(Comparator.comparingInt(CqlBuilderLookup.Lookup::getStartLine));
+        new TreeSet<CqlBuilderLookup.Lookup>(
+            new CqlBuilderLookupComparator<CqlBuilderLookup.Lookup>());
     Set<CqlBuilderLookup.Lookup> functions = new HashSet<>();
     Set<CqlBuilderLookup.Lookup> fluentFunctions = new HashSet<>();
     for (CQLDefinition cqlDefinition : allCqlDefinitions) {
@@ -136,6 +137,7 @@ public class CqlParsingService extends CqlTooling {
           functions.add(lookup);
         }
       } else {
+        log.info("Adding \"{}\".{} ", lookup.getLibraryAlias(), lookup.getName());
         definitions.add(lookup);
       }
     }
