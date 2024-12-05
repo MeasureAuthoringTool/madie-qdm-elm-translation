@@ -29,6 +29,7 @@ import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import org.hl7.elm.r1.CodeDef;
 import org.hl7.elm.r1.CodeSystemDef;
+import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.ParameterDef;
@@ -211,7 +212,8 @@ public class CqlConversionService extends CqlTooling {
           cqlTranslator.getTranslatedLibrary().getLibrary().getStatements();
       if (statements != null) {
         List<ExpressionDef> defs = statements.getDef();
-        allLines = getStartLinesFromStatements(defs);
+        allLines = getLines(defs, "start");
+        Collections.sort(allLines);
         startLineForContext = allLines.size() > 0 ? allLines.get(0) - 1 : 0;
       } else {
         allLines.addAll(getUsingEndLines(cqlTranslator));
@@ -230,20 +232,23 @@ public class CqlConversionService extends CqlTooling {
     }
   }
 
-  protected List<Integer> getStartLinesFromStatements(List<ExpressionDef> defs) {
-    List<Integer> startLines = new ArrayList<>();
+  protected List<Integer> getLines(List<? extends Element> defs, String type) {
+    List<Integer> lines = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(defs)) {
-      for (ExpressionDef def : defs) {
+      for (Element def : defs) {
         List<TrackBack> trackBacks = def.getTrackbacks();
         if (CollectionUtils.isNotEmpty(trackBacks)) {
           for (TrackBack trackBack : trackBacks) {
-            startLines.add(trackBack.getStartLine());
+            if ("start".equalsIgnoreCase(type)) {
+              lines.add(trackBack.getStartLine());
+            } else {
+              lines.add(trackBack.getEndLine());
+            }
           }
         }
       }
     }
-    Collections.sort(startLines);
-    return startLines;
+    return lines;
   }
 
   protected List<Integer> getUsingEndLines(CqlTranslator cqlTranslator) {
@@ -251,14 +256,7 @@ public class CqlConversionService extends CqlTooling {
     Library.Usings usings = cqlTranslator.getTranslatedLibrary().getLibrary().getUsings();
     if (usings != null) {
       List<UsingDef> defs = usings.getDef();
-      for (UsingDef def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
-        if (CollectionUtils.isNotEmpty(trackBacks)) {
-          for (TrackBack trackBack : trackBacks) {
-            endLines.add(trackBack.getEndLine());
-          }
-        }
-      }
+      endLines = getLines(defs, "end");
     }
     return endLines;
   }
@@ -269,14 +267,7 @@ public class CqlConversionService extends CqlTooling {
         cqlTranslator.getTranslatedLibrary().getLibrary().getParameters();
     if (parameters != null) {
       List<ParameterDef> defs = parameters.getDef();
-      for (ParameterDef def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
-        if (CollectionUtils.isNotEmpty(trackBacks)) {
-          for (TrackBack trackBack : trackBacks) {
-            endLines.add(trackBack.getEndLine());
-          }
-        }
-      }
+      endLines = getLines(defs, "end");
     }
     return endLines;
   }
@@ -286,14 +277,7 @@ public class CqlConversionService extends CqlTooling {
     Library.ValueSets valuesets = cqlTranslator.getTranslatedLibrary().getLibrary().getValueSets();
     if (valuesets != null) {
       List<ValueSetDef> defs = valuesets.getDef();
-      for (ValueSetDef def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
-        if (CollectionUtils.isNotEmpty(trackBacks)) {
-          for (TrackBack trackBack : trackBacks) {
-            endLines.add(trackBack.getEndLine());
-          }
-        }
-      }
+      endLines = getLines(defs, "end");
     }
     return endLines;
   }
@@ -304,14 +288,7 @@ public class CqlConversionService extends CqlTooling {
         cqlTranslator.getTranslatedLibrary().getLibrary().getCodeSystems();
     if (codeSystems != null) {
       List<CodeSystemDef> defs = codeSystems.getDef();
-      for (CodeSystemDef def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
-        if (CollectionUtils.isNotEmpty(trackBacks)) {
-          for (TrackBack trackBack : trackBacks) {
-            endLines.add(trackBack.getEndLine());
-          }
-        }
-      }
+      endLines = getLines(defs, "end");
     }
     return endLines;
   }
@@ -321,14 +298,7 @@ public class CqlConversionService extends CqlTooling {
     Library.Codes codes = cqlTranslator.getTranslatedLibrary().getLibrary().getCodes();
     if (codes != null) {
       List<CodeDef> defs = codes.getDef();
-      for (CodeDef def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
-        if (CollectionUtils.isNotEmpty(trackBacks)) {
-          for (TrackBack trackBack : trackBacks) {
-            endLines.add(trackBack.getEndLine());
-          }
-        }
-      }
+      endLines = getLines(defs, "end");
     }
     return endLines;
   }
