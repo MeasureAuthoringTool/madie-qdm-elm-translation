@@ -53,12 +53,6 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     return newList;
   }
 
-  /*
-   * MAT-7995: error: "No Viable Input at 'define :'"
-   * should be customized as: "Definition is missing a name."
-   * This is done in cql-antlr-parse, so on the frontend we don't want a duplicate error message
-   * therefore we are filtering it out here.
-   */
   private List<CqlCompilerException> filterOutWarnings() {
     if (showWarnings) {
       return cqlTranslatorExceptions;
@@ -118,6 +112,12 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
         .toList();
   }
 
+  /*
+   * MAT-7995: error: "No Viable Input at 'define :'"
+   * should be customized as: "Definition is missing a name."
+   * This is done in cql-antlr-parse, so on the frontend we don't want a duplicate error message
+   * therefore we are filtering it out here.
+   */
   private List<CqlCompilerException> filterOutCustomErrors(
       List<CqlCompilerException> filteredCqlTranslatorExceptions) {
     return filteredCqlTranslatorExceptions.stream()
