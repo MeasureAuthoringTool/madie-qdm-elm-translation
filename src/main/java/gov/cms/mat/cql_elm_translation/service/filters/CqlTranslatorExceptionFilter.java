@@ -123,8 +123,9 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
     return filteredCqlTranslatorExceptions.stream()
         .filter(
             cqlCompilerException ->
-                !"no viable alternative at input 'define :'"
-                    .equalsIgnoreCase(cqlCompilerException.getMessage()))
+                !cqlCompilerException
+                    .getMessage()
+                    .contains("no viable alternative at input 'define"))
         .toList();
   }
 }
