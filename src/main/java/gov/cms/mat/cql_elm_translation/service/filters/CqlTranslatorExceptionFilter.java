@@ -4,6 +4,7 @@ import gov.cms.mat.cql.elements.LibraryProperties;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.hl7.elm.r1.VersionedIdentifier;
 
@@ -113,18 +114,20 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
   }
 
   /*
-   * MAT-7995: error: "No Viable Input at 'define :'"
+   * MAT-7995: error: "no viable alternative at input 'define :'"
    * should be customized as: "Definition is missing a name."
-   * This is done in cql-antlr-parse, so on the frontend we don't want a duplicate error message
-   * therefore we are filtering it out here.
+   * MAT-7998: error: "no viable alternative at input 'define KEYWORD'"
+   * should be customized as: "Definition names must not be a reserved word."
+   * The errors are handled in cql-antlr-parser, so on the front-end we don't want
+   * duplicate error message therefore we are filtering it out here.
    */
   private List<CqlCompilerException> filterOutCustomErrors(
       List<CqlCompilerException> filteredCqlTranslatorExceptions) {
     return filteredCqlTranslatorExceptions.stream()
         .filter(
             cqlCompilerException ->
-                !"no viable alternative at input 'define :'"
-                    .equalsIgnoreCase(cqlCompilerException.getMessage()))
+                !StringUtils.containsIgnoreCase(
+                    cqlCompilerException.getMessage(), "no viable alternative at input 'define"))
         .toList();
   }
 }
