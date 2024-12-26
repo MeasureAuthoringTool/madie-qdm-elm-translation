@@ -72,4 +72,28 @@ public class CqlTranslatorExceptionFilterTest {
     CqlCompilerException syntaxException = filteredExceptions.get(0);
     assertEquals(syntaxException.getClass(), CqlCompilerException.class);
   }
+
+  @Test
+  public void testFilterOutCustomErrors() {
+    CqlCompilerException definitionKeyWordException =
+        new CqlCompilerException("no viable alternative at input 'define :'");
+    cqlTranslatorExceptions.add(definitionKeyWordException);
+    CqlTranslatorExceptionFilter filter =
+        new CqlTranslatorExceptionFilter(cqlData, false, cqlTranslatorExceptions);
+
+    List<CqlCompilerException> filteredExceptions = filter.filter();
+    assertTrue(filteredExceptions.size() == 0);
+  }
+
+  @Test
+  public void testFilterOutDefinitionWithKeywords() {
+    CqlCompilerException definitionKeyWordException =
+        new CqlCompilerException("no viable alternative at input 'define year'");
+    cqlTranslatorExceptions.add(definitionKeyWordException);
+    CqlTranslatorExceptionFilter filter =
+        new CqlTranslatorExceptionFilter(cqlData, false, cqlTranslatorExceptions);
+
+    List<CqlCompilerException> filteredExceptions = filter.filter();
+    assertTrue(filteredExceptions.size() == 0);
+  }
 }
