@@ -128,6 +128,11 @@ public class CqlTranslatorExceptionFilter implements CqlLibraryFinder {
             cqlCompilerException ->
                 !StringUtils.containsIgnoreCase(
                     cqlCompilerException.getMessage(), "no viable alternative at input 'define"))
+        .filter(
+            cqlCompilerException ->
+                !StringUtils.containsIgnoreCase(
+                    cqlCompilerException.getMessage(),
+                    "mismatched input 'display' expecting 'from'"))
         .toList();
   }
 }
