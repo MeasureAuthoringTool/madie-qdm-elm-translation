@@ -167,23 +167,22 @@ public class CqlConversionService extends CqlTooling {
    */
   public void validateRetrieve(CqlTranslator cqlTranslator) {
     List<Retrieve> retrieves = cqlTranslator.toRetrieves();
-    if (CollectionUtils.isEmpty(cqlTranslator.toRetrieves())) {
-      return;
-    }
-    List<CqlCompilerException> exceptions =
-        retrieves.stream()
-            .filter(
-                retrieve ->
-                    retrieve.getCodes() == null || retrieve.getCodes() instanceof CodeSystemRef)
-            .map(
-                retrieve -> {
-                  TrackBack trackable = retrieve.getTrackbacks().get(0);
-                  return new org.cqframework.cql.cql2elm.CqlCompilerException(
-                      "Retrieves must contain a code or value set filter", trackable);
-                })
-            .toList();
-    if (!CollectionUtils.isEmpty(exceptions)) {
-      cqlTranslator.getExceptions().addAll(exceptions);
+    if (!CollectionUtils.isEmpty(cqlTranslator.toRetrieves())) {
+      List<CqlCompilerException> exceptions =
+          retrieves.stream()
+              .filter(
+                  retrieve ->
+                      retrieve.getCodes() == null || retrieve.getCodes() instanceof CodeSystemRef)
+              .map(
+                  retrieve -> {
+                    TrackBack trackable = retrieve.getTrackbacks().get(0);
+                    return new org.cqframework.cql.cql2elm.CqlCompilerException(
+                        "Retrieves must contain a code or value set filter", trackable);
+                  })
+              .toList();
+      if (!CollectionUtils.isEmpty(exceptions)) {
+        cqlTranslator.getExceptions().addAll(exceptions);
+      }
     }
   }
 
