@@ -30,12 +30,15 @@ define "Get Encounter From Code Retrieve":
 define "Get Encounter from Code Declaration":
   ["Encounter, Performed": code ~ "Acute Pharyngitis Code"]
 
+// invalid
 define "Get Encounter from CodeSystem Declaration":
   ["Encounter, Performed": code in "SNOMEDCT"]
 
+// invalid
 define "Get Diagnosis from CodeSystem Declaration":
   ["Diagnosis": "SNOMEDCT"]
 
+// invalid
 define "Retrieve with no filter":
  ["Encounter, Performed"] ValidEncounter
     where ValidEncounter.relevantPeriod during "Measurement Period"
