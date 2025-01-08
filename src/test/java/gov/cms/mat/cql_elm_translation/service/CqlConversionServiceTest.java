@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
@@ -12,6 +13,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
+import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
@@ -265,5 +267,53 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .filter(library -> library.getElmJson().contains("DataCriteriaRetrivalTest"))
             .findFirst();
     assertThat(matchingLib.get().getName(), is(equalTo("DataCriteriaRetrivalTest")));
+  }
+
+  @Test
+  void testValidateRetrieveWithNoCodeOrValueSetFoundShouldRaiseErrors() {
+    String cql = getData("/cql_retrieve.cql");
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData(cql)
+            .showWarnings(false)
+            .annotations(false)
+            .locators(true)
+            .disableListDemotion(true)
+            .disableListPromotion(true)
+            .disableMethodInvocation(true)
+            .validateUnits(false)
+            .resultTypes(true)
+            .build();
+
+    CqlTranslator cqlTranslator =
+        TranslationResource.getInstance(true).buildTranslator(requestData);
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+    service.validateRetrieve(cqlTranslator);
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(3)));
+    assertThat(
+        cqlTranslator.getExceptions().get(0).getMessage(),
+        is(equalTo("Retrieves must contain a code or value set filter")));
+  }
+
+  @Test
+  void testValidateRetrieveIfNoRetrieveFoundShouldNotRaiseErrors() {
+    RequestData requestData =
+        RequestData.builder()
+            .cqlData("")
+            .showWarnings(false)
+            .annotations(false)
+            .locators(true)
+            .disableListDemotion(true)
+            .disableListPromotion(true)
+            .disableMethodInvocation(true)
+            .validateUnits(false)
+            .resultTypes(true)
+            .build();
+
+    CqlTranslator cqlTranslator =
+        TranslationResource.getInstance(true).buildTranslator(requestData);
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+    service.validateRetrieve(cqlTranslator);
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
   }
 }
