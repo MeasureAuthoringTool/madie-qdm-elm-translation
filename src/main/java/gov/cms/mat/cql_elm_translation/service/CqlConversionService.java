@@ -176,7 +176,7 @@ public class CqlConversionService extends CqlTooling {
               .map(
                   retrieve -> {
                     TrackBack trackable = retrieve.getTrackbacks().get(0);
-                    return new org.cqframework.cql.cql2elm.CqlCompilerException(
+                    return new CqlCompilerException(
                         "Retrieves must contain a code or value set filter", trackable);
                   })
               .toList();
