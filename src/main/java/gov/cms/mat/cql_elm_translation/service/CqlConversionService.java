@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
@@ -16,7 +17,10 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
+import org.cqframework.cql.elm.tracking.TrackBack;
+import org.hl7.elm.r1.CodeSystemRef;
 import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
@@ -105,6 +109,7 @@ public class CqlConversionService extends CqlTooling {
         new MadieCqlValidator().checkNoDuplicateIncludes(cqlTranslator, includes);
       }
     }
+    validateRetrieve(cqlTranslator);
   }
 
   public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
@@ -151,6 +156,34 @@ public class CqlConversionService extends CqlTooling {
       log.error("Error occurred while building the translated library artifacts: ", e);
       throw new InternalServerException(
           "An error occurred while building translated artifacts for library " + name);
+    }
+  }
+
+  /**
+   * This method validate retrieves for presence of value set or code filter. If one doesn't have
+   * it, create a CqlCompilerException and add it to the compiler exceptions
+   *
+   * @param cqlTranslator - an instance of CqlTranslator
+   */
+  public void validateRetrieve(CqlTranslator cqlTranslator) {
+    List<Retrieve> retrieves = cqlTranslator.toRetrieves();
+    if (CollectionUtils.isEmpty(cqlTranslator.toRetrieves())) {
+      return;
+    }
+    List<CqlCompilerException> exceptions =
+        retrieves.stream()
+            .filter(
+                retrieve ->
+                    retrieve.getCodes() == null || retrieve.getCodes() instanceof CodeSystemRef)
+            .map(
+                retrieve -> {
+                  TrackBack trackable = retrieve.getTrackbacks().get(0);
+                  return new org.cqframework.cql.cql2elm.CqlCompilerException(
+                      "Retrieves must contain a code or value set filter", trackable);
+                })
+            .toList();
+    if (!CollectionUtils.isEmpty(exceptions)) {
+      cqlTranslator.getExceptions().addAll(exceptions);
     }
   }
 
