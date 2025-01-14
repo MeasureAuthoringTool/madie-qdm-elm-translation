@@ -177,7 +177,7 @@
       <version>2.11.0</version>
     </dependency>
 
-    <!--  openAPIu updated for springBoot 3  -->
+    <!--  openAPI updated for springBoot 3  -->
     <dependency>
       <groupId>org.springdoc</groupId>
       <artifactId>springdoc-openapi-starter-webmvc-ui</artifactId>
