@@ -1,7 +1,9 @@
 package gov.cms.mat.cql_elm_translation.service.support;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 import gov.cms.mat.fhir.rest.dto.MatCqlConversionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -9,7 +11,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.elm.tracking.TrackBack;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -18,20 +19,26 @@ public class CqlExceptionErrorProcessor {
   private static final ObjectMapper mapper = new ObjectMapper();
 
   private final List<CqlCompilerException> cqlErrors;
+  private final List<CqlCompilerException> cqlTranslatorExternalErrors;
   private final String json;
 
   /**
    * Transforms CqlTranslatorException to MatCqlConversionException and prepend with
    * "errorExceptions" object to the translator.json
    */
-  public CqlExceptionErrorProcessor(List<CqlCompilerException> cqlErrors, String json) {
+  public CqlExceptionErrorProcessor(
+      List<CqlCompilerException> cqlErrors,
+      List<CqlCompilerException> cqlTranslatorExternalErrors,
+      String json) {
     this.cqlErrors = cqlErrors;
+    this.cqlTranslatorExternalErrors = cqlTranslatorExternalErrors;
     this.json = json;
   }
 
-  public String process() {
+  public String addExceptionsToJson() {
     try {
-      if (CollectionUtils.isEmpty(cqlErrors)) {
+      if (CollectionUtils.isEmpty(cqlErrors)
+          && CollectionUtils.isEmpty(cqlTranslatorExternalErrors)) {
         return json;
       } else {
         return addErrorsToJson();
@@ -44,13 +51,14 @@ public class CqlExceptionErrorProcessor {
   }
 
   private String addErrorsToJson() throws JsonProcessingException {
-    mapper.readTree(json);
-
+    JsonNode rootNode = mapper.readTree(json);
     List<MatCqlConversionException> matErrors = buildMatErrors();
-    String jsonToInsert = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(matErrors);
 
-    return json.replaceFirst(
-        "\n", Matcher.quoteReplacement("\n  \"errorExceptions\":" + jsonToInsert + ",\n"));
+    ObjectNode updatedNode = (ObjectNode) rootNode;
+    updatedNode.set("errorExceptions", mapper.valueToTree(matErrors));
+    updatedNode.set("externalErrors", mapper.valueToTree(cqlTranslatorExternalErrors));
+
+    return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(updatedNode);
   }
 
   private List<MatCqlConversionException> buildMatErrors() {

@@ -9,6 +9,7 @@ import static org.mockito.ArgumentMatchers.any;
 
 import java.io.UncheckedIOException;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -40,15 +41,25 @@ class CqlConversionControllerTest implements ResourceFileUtil {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
     CqlConversionPayload payload = CqlConversionPayload.builder().json(result).build();
-    Mockito.when(cqlConversionService.processCqlDataWithErrors(any(RequestData.class)))
+    Mockito.when(cqlConversionService.translateCqlToElm(any(RequestData.class)))
         .thenReturn(payload);
 
     CqlConversionPayload cqlConversionPayload =
         cqlConversionController.cqlToElmJson(
-            cqlData, null, true, true, true, true, true, true, true, true, "test");
+            cqlData,
+            null,
+            CqlCompilerException.ErrorSeverity.Info,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            "test");
 
     assertEquals(result, cqlConversionPayload.getJson());
-    Mockito.verify(cqlConversionService).processCqlDataWithErrors(any());
+    Mockito.verify(cqlConversionService).translateCqlToElm(any());
   }
 
   @Test
