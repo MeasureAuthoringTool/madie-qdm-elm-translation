@@ -84,7 +84,7 @@ public abstract class CqlTooling {
     RequestData requestData =
         RequestData.builder()
             .cqlData(cql)
-            .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Error)
             .signatures(LibraryBuilder.SignatureLevel.All)
             .annotations(true)
             .locators(true)
