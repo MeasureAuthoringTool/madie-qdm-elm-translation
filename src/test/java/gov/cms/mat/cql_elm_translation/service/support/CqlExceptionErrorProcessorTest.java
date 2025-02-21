@@ -54,7 +54,7 @@ class CqlExceptionErrorProcessorTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcess_NoErrors_ReturnsOriginalJson() {
+  void testProcessNoErrorsReturnsOriginalJson() {
     CqlExceptionErrorProcessor processor =
         new CqlExceptionErrorProcessor(List.of(), List.of(), inputJson);
     String resultJson = processor.addExceptionsToJson();
@@ -62,7 +62,7 @@ class CqlExceptionErrorProcessorTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcess_WithErrors_FormatsCorrectly() throws Exception {
+  void testProcessWithErrorsFormatsCorrectly() throws Exception {
     CqlExceptionErrorProcessor processor =
         new CqlExceptionErrorProcessor(cqlErrors, List.of(), inputJson);
     String resultJson = processor.addExceptionsToJson();
@@ -81,7 +81,7 @@ class CqlExceptionErrorProcessorTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcess_WithExternalErrors_FormatsCorrectly() throws Exception {
+  void testProcessWithExternalErrorsFormatsCorrectly() throws Exception {
     CqlExceptionErrorProcessor processor =
         new CqlExceptionErrorProcessor(List.of(), cqlTranslatorExternalErrors, inputJson);
     String resultJson = processor.addExceptionsToJson();
