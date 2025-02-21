@@ -11,6 +11,7 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import java.io.UncheckedIOException;
 
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -41,16 +42,26 @@ class CqlConversionControllerTest implements ResourceFileUtil {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
     CqlConversionPayload payload = CqlConversionPayload.builder().json(result).build();
-    Mockito.when(
-            cqlConversionService.processCqlDataWithErrors(any(RequestData.class), anyBoolean()))
+    Mockito.when(cqlConversionService.translateCqlToElm(any(RequestData.class), anyBoolean()))
         .thenReturn(payload);
 
     CqlConversionPayload cqlConversionPayload =
         cqlConversionController.cqlToElmJson(
-            cqlData, null, true, true, true, true, true, true, true, true, true, "test");
+            cqlData,
+            null,
+            CqlCompilerException.ErrorSeverity.Info,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            true,
+            "test");
 
     assertEquals(result, cqlConversionPayload.getJson());
-    Mockito.verify(cqlConversionService).processCqlDataWithErrors(any(), anyBoolean());
+    Mockito.verify(cqlConversionService).translateCqlToElm(any(), anyBoolean());
   }
 
   @Test

@@ -19,7 +19,6 @@ import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -67,7 +66,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
     requestData =
         RequestData.builder()
-            .showWarnings(true)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
             .annotations(true)
             .locators(true)
             .disableListDemotion(true)
@@ -77,9 +76,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .resultTypes(true)
             .build();
   }
-
-  @Before
-  void before() {}
 
   @Test
   void testProcessCqlDataWithErrors() {
@@ -92,7 +88,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -125,7 +121,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -151,7 +147,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -187,7 +183,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -253,7 +249,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data, true);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -302,7 +298,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.processCqlDataWithErrors(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data, false);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -384,6 +380,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     RequestData requestData =
         RequestData.builder()
             .cqlData(cqlData)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
             .signatures(LibraryBuilder.SignatureLevel.Overloads)
             .annotations(Boolean.TRUE)
             .locators(Boolean.TRUE)
@@ -425,6 +422,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     RequestData requestData =
         RequestData.builder()
             .cqlData(cqlData)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
             .signatures(LibraryBuilder.SignatureLevel.Overloads)
             .annotations(Boolean.TRUE)
             .locators(Boolean.TRUE)

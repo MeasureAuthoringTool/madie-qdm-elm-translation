@@ -8,10 +8,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerOptions;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.elm.r1.ExpressionDef;
@@ -30,7 +27,7 @@ public class EffectiveDataRequirementService {
   private RequestData createDefaultRequestData(String cql) {
     return RequestData.builder()
         .cqlData(cql)
-        .showWarnings(false)
+        .errorSeverity(CqlCompilerException.ErrorSeverity.Error)
         .annotations(true)
         .locators(true)
         .disableListDemotion(true)
