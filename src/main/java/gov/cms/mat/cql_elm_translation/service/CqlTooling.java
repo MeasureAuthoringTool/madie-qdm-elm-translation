@@ -11,6 +11,7 @@ import gov.cms.mat.cql.elements.UsingProperties;
 
 import lombok.RequiredArgsConstructor;
 import org.apache.commons.collections4.CollectionUtils;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
@@ -83,7 +84,7 @@ public abstract class CqlTooling {
     RequestData requestData =
         RequestData.builder()
             .cqlData(cql)
-            .showWarnings(false)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Error)
             .signatures(LibraryBuilder.SignatureLevel.All)
             .annotations(true)
             .locators(true)

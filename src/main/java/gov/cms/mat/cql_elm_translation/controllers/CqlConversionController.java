@@ -12,6 +12,7 @@ import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,11 +35,21 @@ public class CqlConversionController {
   private final CqlConversionService cqlConversionService;
   private final CqlLibraryService cqlLibraryService;
 
+  /**
+   * Input Params errorSeverity - Info includes Info, Warnings and Errors errorSeverity - Warning
+   * includes Info, Warnings and Errors errorSeverity - Errors includes Info and Errors
+   *
+   * <p>Returns JSON and XML format of translated ELM. JSON has the following Structure
+   * ElmTranslation = { errorExceptions: ElmTranslationError[]; externalErrors:
+   * ElmTranslationExternalError[]; library: ElmTranslationLibrary; } errorExceptions - Any Errors
+   * caught while translating externalErrors - Any External Errors caught while translating, which
+   * are not part of input CQL library - Translated ELM
+   */
   @PutMapping(path = "/cql", consumes = "text/plain", produces = "application/elm+json")
   public CqlConversionPayload cqlToElmJson(
       @RequestBody String cqlData,
       @RequestParam(required = false) LibraryBuilder.SignatureLevel signatures,
-      @RequestParam(defaultValue = "false") Boolean showWarnings,
+      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity,
       @RequestParam(defaultValue = "true") Boolean annotations,
       @RequestParam(defaultValue = "true") Boolean locators,
       @RequestParam(value = "disable-list-demotion", defaultValue = "true")
@@ -54,7 +65,7 @@ public class CqlConversionController {
     RequestData requestData =
         RequestData.builder()
             .cqlData(cqlData)
-            .showWarnings(showWarnings)
+            .errorSeverity(errorSeverity)
             .signatures(signatures)
             .annotations(annotations)
             .locators(locators)
@@ -67,14 +78,7 @@ public class CqlConversionController {
 
     cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
-    CqlConversionPayload cqlConversionPayload =
-        cqlConversionService.processCqlDataWithErrors(requestData);
-    // Todo Do we need to remove empty annotations from library object, Also why are we removing
-    // translatorOptions from annotations, Could be MAT specific.
-    TranslatorOptionsRemover remover = new TranslatorOptionsRemover(cqlConversionPayload.getJson());
-    String cleanedJson = remover.clean();
-    cqlConversionPayload.setJson(cleanedJson);
-    return cqlConversionPayload;
+    return cqlConversionService.translateCqlToElm(requestData);
   }
 
   /**
@@ -82,7 +86,10 @@ public class CqlConversionController {
    * "translatorOptions":
    * "DisableMethodInvocation,EnableLocators,DisableListPromotion,EnableDetailedErrors,
    * EnableAnnotations,DisableListDemotion", "type": "CqlToElmInfo" },
+   *
+   * <p>Deprecated - We do not want to transform Annotation in anyway which are part of ELM
    */
+  @Deprecated
   static class TranslatorOptionsRemover {
     final String json;
 

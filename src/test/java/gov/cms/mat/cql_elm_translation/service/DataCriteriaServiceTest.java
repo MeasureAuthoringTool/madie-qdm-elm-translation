@@ -15,6 +15,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationReso
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -59,7 +60,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     requestData =
         RequestData.builder()
             .cqlData(cql)
-            .showWarnings(false)
+            .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
             .signatures(LibraryBuilder.SignatureLevel.All)
             .annotations(true)
             .locators(true)

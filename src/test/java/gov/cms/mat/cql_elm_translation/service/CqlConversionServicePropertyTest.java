@@ -7,6 +7,7 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
@@ -118,8 +119,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   void testProcessCqlDataWithErrors() throws JsonProcessingException {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
-    CqlConversionPayload cqlConversionPayload =
-        cqlConversionService.processCqlDataWithErrors(requestData);
+    CqlConversionPayload cqlConversionPayload = cqlConversionService.translateCqlToElm(requestData);
     String elmJson = cqlConversionPayload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode rootNode = objectMapper.readTree(elmJson);
@@ -175,6 +175,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   private RequestData buildRequestData() {
     return RequestData.builder()
         .cqlData(cqlData)
+        .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
         .signatures(signatureLevel)
         .annotations(annotations)
         .locators(locators)
