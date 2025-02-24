@@ -11,7 +11,6 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.SimpleIncludeDef;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.exceptions.MissingContextException;
 import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerException;
-import gov.cms.mat.cql_elm_translation.service.filters.AnnotationErrorFilter;
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
 
@@ -55,8 +54,7 @@ public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
 
-  public CqlConversionPayload processCqlDataWithErrors(
-      RequestData requestData, boolean checkContext) {
+  public CqlConversionPayload translateCqlToElm(RequestData requestData, boolean checkContext) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
     Pattern pattern = Pattern.compile("using .*version '[0-9]\\.[0-9](\\.[0-9])?'");
     Matcher matcher = pattern.matcher(requestData.getCqlData());
@@ -77,18 +75,19 @@ public class CqlConversionService extends CqlTooling {
       processNoContextError(cqlTranslator, requestData.getCqlData());
     }
 
-    List<CqlCompilerException> cqlTranslatorExceptions =
-        processErrors(
-            requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.getExceptions());
-
-    AnnotationErrorFilter annotationErrorFilter =
-        new AnnotationErrorFilter(
-            requestData.getCqlData(), requestData.isShowWarnings(), cqlTranslator.toJson());
-
-    String processedJson = annotationErrorFilter.filter();
+    CqlTranslatorExceptionFilter cqlTranslatorExceptionFilter =
+        new CqlTranslatorExceptionFilter(
+            requestData.getCqlData(),
+            requestData.getErrorSeverity(),
+            cqlTranslator.getExceptions());
+    cqlTranslatorExceptionFilter.generateCqlExceptions();
 
     String jsonWithErrors =
-        new CqlExceptionErrorProcessor(cqlTranslatorExceptions, processedJson).process();
+        new CqlExceptionErrorProcessor(
+                cqlTranslatorExceptionFilter.getErrorExceptions(),
+                cqlTranslatorExceptionFilter.getExternalErrors(),
+                cqlTranslator.toJson())
+            .addExceptionsToJson();
     if (noModelVersion) {
       // Does jsonWithErrors contain "Model and version don't exist"
       // Looking for both the original error in cqlTranslatorException
@@ -99,11 +98,11 @@ public class CqlConversionService extends CqlTooling {
         JSONArray errorFound =
             jsonContext.read(
                 "$.errorExceptions[?(@.message==\"Model Type and version are required\")]");
-        if (errorFound.size() == 0) {
+        if (errorFound.isEmpty()) {
           log.error(
               "cqlTranslatorException: There was a problem finding Model and version, "
                   + "but the error wasn't correctly reported by cqlTranslator?");
-          log.warn("Error list {}", cqlTranslatorExceptions);
+          log.warn("Error list {}", cqlTranslatorExceptionFilter.getErrorExceptions());
         }
       } catch (Exception e) {
         log.info("Model missing, but likely an empty CQL file");
@@ -180,13 +179,6 @@ public class CqlConversionService extends CqlTooling {
     StringWriter writer = new StringWriter();
     ElmLibraryWriterFactory.getWriter(contentType.mimeType()).write(library, writer);
     return writer.getBuffer().toString();
-  }
-
-  private List<CqlCompilerException> processErrors(
-      String cqlData, boolean showWarnings, List<CqlCompilerException> cqlTranslatorExceptions) {
-    logErrors(cqlTranslatorExceptions);
-    return new CqlTranslatorExceptionFilter(cqlData, showWarnings, cqlTranslatorExceptions)
-        .filter();
   }
 
   private void logErrors(List<CqlCompilerException> exceptions) {
