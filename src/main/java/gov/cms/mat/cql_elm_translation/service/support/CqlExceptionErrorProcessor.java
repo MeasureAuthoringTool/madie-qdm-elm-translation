@@ -52,17 +52,18 @@ public class CqlExceptionErrorProcessor {
 
   private String addErrorsToJson() throws JsonProcessingException {
     JsonNode rootNode = mapper.readTree(json);
-    List<MatCqlConversionException> matErrors = buildMatErrors();
 
     ObjectNode updatedNode = (ObjectNode) rootNode;
-    updatedNode.set("errorExceptions", mapper.valueToTree(matErrors));
-    updatedNode.set("externalErrors", mapper.valueToTree(cqlTranslatorExternalErrors));
+    updatedNode.set("errorExceptions", mapper.valueToTree(buildMatErrors(cqlErrors)));
+    updatedNode.set(
+        "externalErrors", mapper.valueToTree(buildMatErrors(cqlTranslatorExternalErrors)));
 
     return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(updatedNode);
   }
 
-  private List<MatCqlConversionException> buildMatErrors() {
-    return cqlErrors.stream().map(this::createDto).collect(Collectors.toList());
+  private List<MatCqlConversionException> buildMatErrors(
+      List<CqlCompilerException> cqlCompilerExceptions) {
+    return cqlCompilerExceptions.stream().map(this::createDto).collect(Collectors.toList());
   }
 
   private MatCqlConversionException createDto(CqlCompilerException cqlException) {
@@ -81,10 +82,11 @@ public class CqlExceptionErrorProcessor {
     MatCqlConversionException matCqlConversionException = new MatCqlConversionException();
     matCqlConversionException.setErrorSeverity(cqlTranslatorException.getSeverity().name());
 
-    matCqlConversionException.setType(
-        cqlTranslatorException.toString().contains("org.cqframework.cql.cql2elm.CqlSyntaxException")
-            ? "parsing"
-            : null);
+    if (cqlTranslatorException
+        .toString()
+        .contains("org.cqframework.cql.cql2elm.CqlSyntaxException")) {
+      matCqlConversionException.setType("parsing");
+    }
 
     log.debug("cqlTranslatorException:" + cqlTranslatorException.getMessage());
     try {

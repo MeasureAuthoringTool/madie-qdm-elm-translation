@@ -6,7 +6,6 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
 
 import java.io.UncheckedIOException;
 
@@ -42,7 +41,7 @@ class CqlConversionControllerTest implements ResourceFileUtil {
     String cqlData = getData("/cv_populations.cql");
     String result = getData("/cv_populations.json");
     CqlConversionPayload payload = CqlConversionPayload.builder().json(result).build();
-    Mockito.when(cqlConversionService.translateCqlToElm(any(RequestData.class), anyBoolean()))
+    Mockito.when(cqlConversionService.translateCqlToElm(any(RequestData.class)))
         .thenReturn(payload);
 
     CqlConversionPayload cqlConversionPayload =
@@ -57,11 +56,10 @@ class CqlConversionControllerTest implements ResourceFileUtil {
             true,
             true,
             true,
-            true,
             "test");
 
     assertEquals(result, cqlConversionPayload.getJson());
-    Mockito.verify(cqlConversionService).translateCqlToElm(any(), anyBoolean());
+    Mockito.verify(cqlConversionService).translateCqlToElm(any());
   }
 
   @Test

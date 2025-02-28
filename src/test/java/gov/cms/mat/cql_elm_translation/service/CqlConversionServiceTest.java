@@ -88,7 +88,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.translateCqlToElm(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -121,7 +121,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.translateCqlToElm(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -147,7 +147,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.translateCqlToElm(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -183,7 +183,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.translateCqlToElm(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -249,7 +249,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.translateCqlToElm(data, true);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
@@ -298,7 +298,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.translateCqlToElm(data, false);
+    CqlConversionPayload payload = service.translateCqlToElm(data);
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();

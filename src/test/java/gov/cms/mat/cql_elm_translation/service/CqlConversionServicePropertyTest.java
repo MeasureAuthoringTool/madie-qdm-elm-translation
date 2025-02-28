@@ -106,8 +106,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   void testProcessCqlDataWithErrors() throws JsonProcessingException {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
-    CqlConversionPayload cqlConversionPayload =
-        cqlConversionService.translateCqlToElm(requestData, true);
+    CqlConversionPayload cqlConversionPayload = cqlConversionService.translateCqlToElm(requestData);
     String elmJson = cqlConversionPayload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
     JsonNode rootNode = objectMapper.readTree(elmJson);
