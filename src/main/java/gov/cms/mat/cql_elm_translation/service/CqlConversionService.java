@@ -54,7 +54,7 @@ public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
 
-  public CqlConversionPayload translateCqlToElm(RequestData requestData) {
+  public CqlConversionPayload translateCqlToElm(RequestData requestData, boolean checkContext) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql
     Pattern pattern = Pattern.compile("using .*version '[0-9]\\.[0-9](\\.[0-9])?'");
     Matcher matcher = pattern.matcher(requestData.getCqlData());
@@ -71,7 +71,9 @@ public class CqlConversionService extends CqlTooling {
     // measure CQL
     processForLibraryRulesExceptions(cqlTranslator, requestData.getCqlData());
 
-    processNoContextError(cqlTranslator, requestData.getCqlData());
+    if (checkContext) {
+      processNoContextError(cqlTranslator, requestData.getCqlData());
+    }
 
     CqlTranslatorExceptionFilter cqlTranslatorExceptionFilter =
         new CqlTranslatorExceptionFilter(

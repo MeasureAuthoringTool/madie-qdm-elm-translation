@@ -59,6 +59,7 @@ public class CqlConversionController {
           Boolean disableMethodInvocation,
       @RequestParam(value = "validate-units", defaultValue = "true") Boolean validateUnits,
       @RequestParam(value = "result-types", defaultValue = "true") Boolean resultTypes,
+      @RequestParam(value = "checkContext", defaultValue = "false") Boolean checkContext,
       @RequestHeader("Authorization") String accessToken) {
 
     RequestData requestData =
@@ -76,7 +77,7 @@ public class CqlConversionController {
             .build();
     cqlLibraryService.setUpLibrarySourceProvider(cqlData, accessToken);
 
-    return cqlConversionService.translateCqlToElm(requestData);
+    return cqlConversionService.translateCqlToElm(requestData, checkContext);
   }
 
   /**
