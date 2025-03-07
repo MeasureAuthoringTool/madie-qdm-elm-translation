@@ -5,6 +5,7 @@ import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import org.apache.http.HttpStatus;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -39,7 +40,7 @@ public class CqlToolsControllerMvcTest {
     var p = CqlBuilderLookup.Lookup.builder().name("Parameter").logic("abc").build();
     var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
     var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
-    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString()))
+    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString(), CqlCompilerException.ErrorSeverity.Error))
         .thenReturn(
             CqlBuilderLookup.builder()
                 .parameters(Set.of(p))
