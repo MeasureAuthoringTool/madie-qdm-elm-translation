@@ -22,6 +22,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -40,7 +41,8 @@ public class CqlToolsControllerMvcTest {
     var p = CqlBuilderLookup.Lookup.builder().name("Parameter").logic("abc").build();
     var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
     var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
-    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString(), CqlCompilerException.ErrorSeverity.Error))
+    when(cqlParsingService.getCqlBuilderLookups(
+            anyString(), anyString(), eq(CqlCompilerException.ErrorSeverity.Error)))
         .thenReturn(
             CqlBuilderLookup.builder()
                 .parameters(Set.of(p))
@@ -55,6 +57,8 @@ public class CqlToolsControllerMvcTest {
                     .with(user(TEST_USER_ID))
                     .with(csrf())
                     .header(HttpHeaders.AUTHORIZATION, TEST_USER_ID)
+                    .queryParam(
+                        "errorSeverity", String.valueOf(CqlCompilerException.ErrorSeverity.Error))
                     .content("test cql")
                     .contentType(MediaType.TEXT_PLAIN_VALUE))
             .andReturn();
