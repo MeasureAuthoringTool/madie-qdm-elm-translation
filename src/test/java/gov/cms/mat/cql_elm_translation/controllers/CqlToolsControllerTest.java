@@ -68,7 +68,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     TreeSet<SourceDataCriteria> sdcSet = new TreeSet<SourceDataCriteria>();
     sdcSet.add(sdc);
     when(dataCriteriaService.getRelevantElements(
-            any(Measure.class), anyString(), eq(CqlCompilerException.ErrorSeverity.Info)))
+            any(Measure.class), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(sdcSet);
     var result =
         cqlToolsController.getRelevantElements(
@@ -91,7 +91,8 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     Map<String, Set<CQLDefinition>> definitionCallstacks = new HashMap<>();
     definitionCallstacks.put("test", allDefinitions);
     when(cqlParsingService.getDefinitionCallstacks(
-            anyString(), anyString(), eq(CqlCompilerException.ErrorSeverity.Info)))
+            anyString(), anyString(),
+            any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(definitionCallstacks);
 
     ResponseEntity<Map<String, Set<CQLDefinition>>> result =
@@ -107,7 +108,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
     var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
     when(cqlParsingService.getCqlBuilderLookups(
-            anyString(), anyString(), eq(CqlCompilerException.ErrorSeverity.Error)))
+            anyString(), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(
             CqlBuilderLookup.builder()
                 .parameters(Set.of(p))
