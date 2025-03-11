@@ -21,6 +21,7 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
@@ -40,7 +41,8 @@ public class CqlToolsControllerMvcTest {
     var p = CqlBuilderLookup.Lookup.builder().name("Parameter").logic("abc").build();
     var d = CqlBuilderLookup.Lookup.builder().name("Definition").logic("abcd").build();
     var f = CqlBuilderLookup.Lookup.builder().name("Function").logic("abcdef").build();
-    when(cqlParsingService.getCqlBuilderLookups(anyString(), anyString(), CqlCompilerException.ErrorSeverity.Error))
+    when(cqlParsingService.getCqlBuilderLookups(
+            anyString(), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(
             CqlBuilderLookup.builder()
                 .parameters(Set.of(p))

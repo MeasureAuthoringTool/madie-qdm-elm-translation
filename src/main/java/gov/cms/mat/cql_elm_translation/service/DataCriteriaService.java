@@ -28,7 +28,8 @@ public class DataCriteriaService extends CqlTooling {
 
   private final CqlLibraryService cqlLibraryService;
 
-  public Set<SourceDataCriteria> getRelevantElements(Measure measure, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
+  public Set<SourceDataCriteria> getRelevantElements(
+      Measure measure, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
     if (StringUtils.isBlank(measure.getCql())) {
       log.info("Data criteria not found as cql is blank");
       return Collections.emptySet();
@@ -36,7 +37,8 @@ public class DataCriteriaService extends CqlTooling {
 
     Set<String> measureDefinitions = getUsedDefinitionsFromMeasure(measure);
     CQLTools cqlTools =
-        parseCql(measure.getCql(), accessToken, cqlLibraryService, measureDefinitions, errorSeverity);
+        parseCql(
+            measure.getCql(), accessToken, cqlLibraryService, measureDefinitions, errorSeverity);
     List<SourceDataCriteria> sourceDataCriteria = getSourceDataCriteria(cqlTools);
 
     Set<String> allUsedDefinitions = new HashSet<>(measureDefinitions);

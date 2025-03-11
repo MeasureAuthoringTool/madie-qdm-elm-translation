@@ -29,9 +29,9 @@ public class CqlToolsController {
   // testcase builder
   @PutMapping("/cql/relevant-elements")
   public ResponseEntity<Set<SourceDataCriteria>> getRelevantElements(
-      @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken,
-      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity
-      ) {
+      @RequestBody Measure measure,
+      @RequestHeader("Authorization") String accessToken,
+      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity) {
     return ResponseEntity.ok()
         .contentType(MediaType.APPLICATION_JSON)
         .body(dataCriteriaService.getRelevantElements(measure, accessToken, errorSeverity));
@@ -39,10 +39,11 @@ public class CqlToolsController {
 
   @PutMapping("/cql/callstacks")
   public ResponseEntity<Map<String, Set<CQLDefinition>>> getDefinitionCallstack(
-      @RequestBody String cql, @RequestHeader("Authorization") String accessToken,
-      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity
-      ) {
-    return ResponseEntity.ok(cqlParsingService.getDefinitionCallstacks(cql, accessToken, errorSeverity));
+      @RequestBody String cql,
+      @RequestHeader("Authorization") String accessToken,
+      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity) {
+    return ResponseEntity.ok(
+        cqlParsingService.getDefinitionCallstacks(cql, accessToken, errorSeverity));
   }
 
   @PutMapping(
@@ -50,9 +51,10 @@ public class CqlToolsController {
       produces = MediaType.APPLICATION_JSON_VALUE,
       consumes = MediaType.TEXT_PLAIN_VALUE)
   public ResponseEntity<CqlBuilderLookup> getCqlBuilderLookups(
-      @RequestBody String cql, @RequestHeader("Authorization") String accessToken,
-      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity
-  ) {
-    return ResponseEntity.ok(cqlParsingService.getCqlBuilderLookups(cql, accessToken, errorSeverity));
+      @RequestBody String cql,
+      @RequestHeader("Authorization") String accessToken,
+      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity) {
+    return ResponseEntity.ok(
+        cqlParsingService.getCqlBuilderLookups(cql, accessToken, errorSeverity));
   }
 }

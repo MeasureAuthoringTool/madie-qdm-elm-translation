@@ -36,7 +36,8 @@ public class CqlParsingService extends CqlTooling {
    * @param accessToken Requesting User's Okta Bearer token
    * @return CqlBuilderLookup -> building blocks for CQL Definition UI builder
    */
-  public CqlBuilderLookup getCqlBuilderLookups(String cql, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
+  public CqlBuilderLookup getCqlBuilderLookups(
+      String cql, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
     if (StringUtils.isBlank(cql)) {
       return null;
     }
@@ -130,7 +131,8 @@ public class CqlParsingService extends CqlTooling {
    *     will not appear as a Key.
    *     <p>Values: Set of CQL Definition Objects that are referenced in the Key CQL Definition.
    */
-  public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(String cql, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
+  public Map<String, Set<CQLDefinition>> getDefinitionCallstacks(
+      String cql, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
     CQLTools cqlTools = parseCql(cql, accessToken, cqlLibraryService, null, errorSeverity);
     Map<String, Set<String>> nodeGraph = cqlTools.getCallstack();
     Set<String> keys = nodeGraph.keySet();
