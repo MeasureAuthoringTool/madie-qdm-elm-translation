@@ -110,12 +110,13 @@ public class CqlConversionService extends CqlTooling {
     validateRetrieve(cqlTranslator);
   }
 
-  public List<TranslatedLibrary> getTranslatedLibrariesForCql(String cql, String accessToken)
+  public List<TranslatedLibrary> getTranslatedLibrariesForCql(
+      String cql, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity)
       throws IOException {
     if (StringUtils.isBlank(cql)) {
       return Collections.emptyList();
     }
-    CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService);
+    CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService, errorSeverity);
     TranslatedLibrary translatedMeasureLib =
         buildTranslatedLibrary(translator.getTranslatedLibrary().getLibrary(), cql);
     Map<VersionedIdentifier, CompiledLibrary> includedLibraries =

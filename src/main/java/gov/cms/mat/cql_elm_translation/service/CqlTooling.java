@@ -30,7 +30,9 @@ public abstract class CqlTooling {
       CqlLibraryService cqlLibraryService,
       Set<String> parentExpressions) {
     // Run Translator to compile libraries
-    CqlTranslator cqlTranslator = runTranslator(cql, accessToken, cqlLibraryService);
+    CqlTranslator cqlTranslator =
+        runTranslator(
+            cql, accessToken, cqlLibraryService, CqlCompilerException.ErrorSeverity.Error);
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
     cqlTranslator
         .getTranslatedLibraries()
@@ -79,12 +81,15 @@ public abstract class CqlTooling {
   }
 
   protected CqlTranslator runTranslator(
-      String cql, String accessToken, CqlLibraryService cqlLibraryService) {
+      String cql,
+      String accessToken,
+      CqlLibraryService cqlLibraryService,
+      CqlCompilerException.ErrorSeverity errorSeverity) {
     cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
     RequestData requestData =
         RequestData.builder()
             .cqlData(cql)
-            .errorSeverity(CqlCompilerException.ErrorSeverity.Error)
+            .errorSeverity(errorSeverity)
             .signatures(LibraryBuilder.SignatureLevel.All)
             .annotations(true)
             .locators(true)

@@ -12,6 +12,7 @@ import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -31,10 +32,12 @@ public class CqlToolsController {
 
   @PutMapping("/cql/elm")
   public ResponseEntity<List<TranslatedLibrary>> getLibraryElms(
-      @RequestBody String cql, @RequestHeader("Authorization") String accessToken) {
+      @RequestBody String cql,
+      @RequestHeader("Authorization") String accessToken,
+      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity) {
     try {
       return ResponseEntity.status(HttpStatus.OK)
-          .body(cqlConversionService.getTranslatedLibrariesForCql(cql, accessToken));
+          .body(cqlConversionService.getTranslatedLibrariesForCql(cql, accessToken, errorSeverity));
     } catch (IOException e) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }

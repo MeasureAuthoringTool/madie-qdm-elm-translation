@@ -26,6 +26,7 @@ import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
 import gov.cms.mat.cql_elm_translation.dto.CqlLookups;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 
+import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -74,9 +75,12 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     TranslatedLibrary translatedLibrary2 =
         TranslatedLibrary.builder().cql("cql 2").elmJson("elm json 2").elmXml("elm xml 2").build();
 
-    when(cqlConversionService.getTranslatedLibrariesForCql(anyString(), anyString()))
+    when(cqlConversionService.getTranslatedLibrariesForCql(
+            anyString(), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(List.of(translatedLibrary1, translatedLibrary2));
-    var result = cqlToolsController.getLibraryElms("test cql", "john");
+    var result =
+        cqlToolsController.getLibraryElms(
+            "test cql", "john", CqlCompilerException.ErrorSeverity.Error);
     List<TranslatedLibrary> libraries = result.getBody();
     assertThat(libraries.size(), is(equalTo(2)));
     assertThat(libraries.get(0).getCql(), is(equalTo(translatedLibrary1.getCql())));
@@ -89,9 +93,12 @@ class CqlToolsControllerTest implements ResourceFileUtil {
 
   @Test
   void testGetLibraryElmsThrowsException() throws IOException {
-    when(cqlConversionService.getTranslatedLibrariesForCql(anyString(), anyString()))
+    when(cqlConversionService.getTranslatedLibrariesForCql(
+            anyString(), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenThrow(IOException.class);
-    var result = cqlToolsController.getLibraryElms("test cql", "john");
+    var result =
+        cqlToolsController.getLibraryElms(
+            "test cql", "john", CqlCompilerException.ErrorSeverity.Error);
     List<TranslatedLibrary> libraries = result.getBody();
     assertNull(libraries);
   }

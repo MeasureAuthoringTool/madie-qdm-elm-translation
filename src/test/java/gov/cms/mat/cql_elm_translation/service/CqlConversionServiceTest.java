@@ -197,7 +197,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
         .when(cqlLibraryService)
         .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
 
-    List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
+    List<TranslatedLibrary> libraries =
+        service.getTranslatedLibrariesForCql(
+            cql, "token", CqlCompilerException.ErrorSeverity.Error);
     AtomicBoolean foundAMatch = new AtomicBoolean();
     var matchingLib =
         libraries.stream()
@@ -251,7 +253,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Test
   void testGetElmForBlankCql() throws IOException {
-    List<TranslatedLibrary> elms = service.getTranslatedLibrariesForCql(null, "token");
+    List<TranslatedLibrary> elms =
+        service.getTranslatedLibrariesForCql(
+            null, "token", CqlCompilerException.ErrorSeverity.Error);
     assertThat(elms.size(), is(equalTo(0)));
   }
 
@@ -262,7 +266,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
         .when(cqlLibraryService)
         .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
 
-    List<TranslatedLibrary> libraries = service.getTranslatedLibrariesForCql(cql, "token");
+    List<TranslatedLibrary> libraries =
+        service.getTranslatedLibrariesForCql(
+            cql, "token", CqlCompilerException.ErrorSeverity.Error);
     var matchingLib =
         libraries.stream()
             .filter(library -> library.getElmJson().contains("DataCriteriaRetrivalTest"))
