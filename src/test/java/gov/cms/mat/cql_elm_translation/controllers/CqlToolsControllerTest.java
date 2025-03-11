@@ -91,8 +91,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     Map<String, Set<CQLDefinition>> definitionCallstacks = new HashMap<>();
     definitionCallstacks.put("test", allDefinitions);
     when(cqlParsingService.getDefinitionCallstacks(
-            anyString(), anyString(),
-            any(CqlCompilerException.ErrorSeverity.class)))
+            anyString(), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
         .thenReturn(definitionCallstacks);
 
     ResponseEntity<Map<String, Set<CQLDefinition>>> result =
