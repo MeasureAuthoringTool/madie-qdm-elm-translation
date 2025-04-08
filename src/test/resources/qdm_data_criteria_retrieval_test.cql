@@ -18,7 +18,7 @@ parameter "Measurement Period" Interval<DateTime>
 context Patient
 
 define "Qualifying Encounters":
-  ( ["Encounter, Performed": "Encounter Inpatient"]
+  ( Global."Inpatient Encounter"
     union ["Encounter, Performed": "Clinical Examples"] ) Encounter
     where Encounter.relevantPeriod ends during "Measurement Period"
 

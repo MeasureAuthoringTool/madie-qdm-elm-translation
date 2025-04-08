@@ -59,25 +59,39 @@ public class DataCriteriaService extends CqlTooling {
             cqlTools
                 .getExpressionNameToValuesetDataTypeMap()
                 .get(def)
-                .forEach((expression, valueSet) -> values.add(expression));
+                .forEach(
+                    (valueSet, dataElements) ->
+                        values.addAll(createRetrieves(dataElements, valueSet)));
           }
+
           if (!MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap())
               && !MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap().get(def))) {
             cqlTools
                 .getExpressionNameToCodeDataTypeMap()
                 .get(def)
-                .forEach((expression, valueSet) -> values.add(expression));
+                .forEach(
+                    (code, dataElements) -> values.addAll(createRetrieves(dataElements, code)));
           }
         });
 
     Set<SourceDataCriteria> relevantSet = new TreeSet<>();
     sourceDataCriteria.stream()
-        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getName()))
-        .forEach(
-            src -> {
-              relevantSet.add(src);
-            });
+        // collect if dataElement + ": " + valueSet combination is being used
+        .filter(sourceDataCriterion -> values.contains(sourceDataCriterion.getDescription()))
+        .forEach(relevantSet::add);
     return relevantSet;
+  }
+
+  private Set<String> createRetrieves(Set<String> dataElements, String valueSetOrCode) {
+    String[] parts = valueSetOrCode.split("\\|");
+    // if the code/value set is from included library e.g.
+    // 'IncludedLibraryTest-0.1.000|IncludeTest|Ambulatory'
+    // then we need to get the last part of the string e.g. 'Ambulatory'
+    String finalValueSetOrCode = parts.length > 1 ? parts[parts.length - 1] : valueSetOrCode;
+    return dataElements.stream()
+        // dataElement + ": " + Code is the unique combination
+        .map(dataElement -> dataElement + ": " + finalValueSetOrCode)
+        .collect(Collectors.toSet());
   }
 
   private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
