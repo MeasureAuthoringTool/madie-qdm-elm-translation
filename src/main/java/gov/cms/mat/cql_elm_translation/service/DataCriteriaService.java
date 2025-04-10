@@ -90,7 +90,7 @@ public class DataCriteriaService extends CqlTooling {
     String finalValueSetOrCode = parts.length > 1 ? parts[parts.length - 1] : valueSetOrCode;
     return dataElements.stream()
         // dataElement + ": " + Code is the unique combination
-        .map(dataElement -> dataElement + ": " + finalValueSetOrCode)
+        .map(dataElement -> getCriteriaType(dataElement).title() + ": " + finalValueSetOrCode)
         .collect(Collectors.toSet());
   }
 
