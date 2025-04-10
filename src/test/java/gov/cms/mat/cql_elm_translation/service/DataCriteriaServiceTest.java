@@ -195,7 +195,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         dataCriteriaService.getRelevantElements(measure, token);
 
     // source data criteria for value set
-    assertThat(relevantElements.size(), is(equalTo(2)));
+    assertThat(relevantElements.size(), is(equalTo(3)));
     SourceDataCriteria firstData = ((TreeSet<SourceDataCriteria>) relevantElements).first();
     assertThat(firstData.getOid(), is(equalTo("2.16.840.1.113883.3.666.5.307")));
     assertThat(firstData.getTitle(), is(equalTo("Encounter Inpatient")));
@@ -205,11 +205,18 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     assertFalse(firstData.isDrc());
 
     // source data criteria for direct reference code
-    SourceDataCriteria secondData = ((TreeSet<SourceDataCriteria>) relevantElements).last();
+    SourceDataCriteria secondData = relevantElements.stream().toList().get(1);
     assertTrue(secondData.isDrc());
     assertThat(secondData.getTitle(), is(equalTo("Clinical Examples")));
     assertThat(secondData.getType(), is(equalTo("EncounterPerformed")));
     assertThat(secondData.getDescription(), is(equalTo("Encounter, Performed: Clinical Examples")));
+
+    // source data criteria for direct reference code
+    SourceDataCriteria thirdData = ((TreeSet<SourceDataCriteria>) relevantElements).last();
+    assertThat(thirdData.getTitle(), is(equalTo("Clinical Examples")));
+    assertThat(thirdData.getType(), is(equalTo("MedicationAdministered")));
+    assertThat(
+        thirdData.getDescription(), is(equalTo("Medication, Administered: Clinical Examples")));
   }
 
   @Test
