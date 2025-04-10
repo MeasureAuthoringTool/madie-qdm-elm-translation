@@ -19,7 +19,8 @@ context Patient
 
 define "Qualifying Encounters":
   ( Global."Inpatient Encounter"
-    union ["Encounter, Performed": "Clinical Examples"] ) Encounter
+    union ["Encounter, Performed": "Clinical Examples"]
+    union ["Medication, Not Administered": "Clinical Examples"] ) Encounter
     where Encounter.relevantPeriod ends during "Measurement Period"
 
 define "Non Elective Inpatient Encounter":
