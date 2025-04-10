@@ -211,7 +211,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     assertThat(secondData.getType(), is(equalTo("EncounterPerformed")));
     assertThat(secondData.getDescription(), is(equalTo("Encounter, Performed: Clinical Examples")));
 
-    // source data criteria for direct reference code
+    // source data criteria for negated data element
     SourceDataCriteria thirdData = ((TreeSet<SourceDataCriteria>) relevantElements).last();
     assertThat(thirdData.getTitle(), is(equalTo("Clinical Examples")));
     assertThat(thirdData.getType(), is(equalTo("MedicationAdministered")));
