@@ -97,7 +97,7 @@ public class EffectiveDataRequirementService {
     return effectiveDataRequirements;
   }
 
-  private boolean isAllowedExpressionType(ExpressionDef ed) {
+  protected boolean isAllowedExpressionType(ExpressionDef ed) {
     return !(ed instanceof FunctionDef)
         || ((ed instanceof FunctionDef)
             && ((FunctionDef) ed).isExternal() != null
