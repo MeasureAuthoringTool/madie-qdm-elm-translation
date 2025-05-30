@@ -98,8 +98,10 @@ public class EffectiveDataRequirementService {
   }
 
   private boolean isAllowedExpressionType(ExpressionDef ed) {
-    return !(ed instanceof FunctionDef) ||
-            ((ed instanceof FunctionDef) && ((FunctionDef)ed).isExternal() != null && !((FunctionDef)ed).isExternal().booleanValue());
+    return !(ed instanceof FunctionDef)
+        || ((ed instanceof FunctionDef)
+            && ((FunctionDef) ed).isExternal() != null
+            && !((FunctionDef) ed).isExternal().booleanValue());
   }
 
   public String getEffectiveDataRequirementsStr(org.hl7.fhir.r5.model.Library r5Library) {
