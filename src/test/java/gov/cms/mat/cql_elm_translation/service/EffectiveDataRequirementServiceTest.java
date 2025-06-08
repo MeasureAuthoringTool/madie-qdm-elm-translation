@@ -146,7 +146,7 @@ class EffectiveDataRequirementServiceTest {
             cqlLibraryDetails, false, testAccessToken);
     assertEquals(r5Library.getId(), "effective-data-requirements");
     assertEquals(
-        "http://hl7.org/fhir/us/cqfmeasures/StructureDefinition/cqfm-directReferenceCode",
+        "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
         r5Library.getExtension().get(0).getUrl());
   }
 
