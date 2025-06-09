@@ -18,6 +18,8 @@ import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
 import java.util.stream.Collectors;
 
+import static org.cqframework.cql.elm.requirements.fhir.utilities.SpecificationLevel.US_QM_STU5;
+
 @Slf4j
 @Service
 @RequiredArgsConstructor
@@ -62,6 +64,7 @@ public class EffectiveDataRequirementService {
     libraryManager.getCompiledLibraries().put(translatedLibrary.getIdentifier(), translatedLibrary);
 
     var dqReqTrans = new DataRequirementsProcessor();
+    dqReqTrans.setSpecificationLevel(US_QM_STU5);
     CqlCompilerOptions options = CqlCompilerOptions.defaultOptions();
     options.setCollapseDataRequirements(true); // removing duplicate data requirements
     options.setSignatureLevel(LibraryBuilder.SignatureLevel.Overloads);
