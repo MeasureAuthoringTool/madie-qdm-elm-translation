@@ -1,5 +1,5 @@
 ## Use AWS AL2 + Corretto base image
-FROM amazoncorretto:17-al2-jdk
+FROM amazoncorretto:17-al2023-jdk
 
 COPY target/*.jar app.jar
 
