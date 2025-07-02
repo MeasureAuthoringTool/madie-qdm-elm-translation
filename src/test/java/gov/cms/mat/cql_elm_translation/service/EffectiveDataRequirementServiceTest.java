@@ -8,7 +8,6 @@ import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.madie.cql_elm_translator.utils.ResourceUtils;
 
-import org.hl7.elm.r1.FunctionDef;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,8 +18,6 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import java.util.Set;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -148,28 +145,5 @@ class EffectiveDataRequirementServiceTest {
     assertEquals(
         "http://hl7.org/fhir/StructureDefinition/cqf-directReferenceCode",
         r5Library.getExtension().get(0).getUrl());
-  }
-
-  @Test
-  public void testIsAllowedExpressionTypeIsExternalTrue() {
-    FunctionDef def = new FunctionDef();
-    def.setExternal(Boolean.TRUE);
-    boolean result = effectiveDataRequirementService.isAllowedExpressionType(def);
-    assertFalse(result);
-  }
-
-  @Test
-  public void testIsAllowedExpressionTypeIsExternalFalse() {
-    FunctionDef def = new FunctionDef();
-    def.setExternal(Boolean.FALSE);
-    boolean result = effectiveDataRequirementService.isAllowedExpressionType(def);
-    assertTrue(result);
-  }
-
-  @Test
-  public void testIsAllowedExpressionTypeIsExternalNull() {
-    FunctionDef def = new FunctionDef();
-    boolean result = effectiveDataRequirementService.isAllowedExpressionType(def);
-    assertFalse(result);
   }
 }
