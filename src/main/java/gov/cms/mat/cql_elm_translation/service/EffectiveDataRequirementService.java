@@ -12,7 +12,6 @@ import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.elm.r1.ExpressionDef;
-import org.hl7.elm.r1.FunctionDef;
 import org.springframework.stereotype.Service;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
@@ -73,7 +72,6 @@ public class EffectiveDataRequirementService {
     if (libraryDetails.getExpressions() == null) {
       libraryDetails.setExpressions(
           translatedLibrary.getLibrary().getStatements().getDef().stream()
-              .filter(expressionDef -> isAllowedExpressionType(expressionDef))
               .map(ExpressionDef::getName)
               .filter(defName -> !StringUtils.equalsIgnoreCase(defName, "patient"))
               .collect(Collectors.toSet()));
@@ -90,13 +88,6 @@ public class EffectiveDataRequirementService {
 
     effectiveDataRequirements.setId("effective-data-requirements");
     return effectiveDataRequirements;
-  }
-
-  protected boolean isAllowedExpressionType(ExpressionDef ed) {
-    return !(ed instanceof FunctionDef)
-        || ((ed instanceof FunctionDef)
-            && ((FunctionDef) ed).isExternal() != null
-            && !((FunctionDef) ed).isExternal().booleanValue());
   }
 
   public String getEffectiveDataRequirementsStr(org.hl7.fhir.r5.model.Library r5Library) {
