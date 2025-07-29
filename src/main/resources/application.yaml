@@ -28,9 +28,6 @@ madie:
       baseUrl: ${CQL_LIBRARY_SERVICE_URL:http://localhost:8082/api}
       cql:
         uri: /cql-libraries/cql
-  translatorVersion:
-      currentVersion: ${CURRENT_TRANSLATOR_VERSION:3.27.0}
-      mostRecentVersion: ${MOST_RECENT_TRANSLATOR_VERSION:3.27.0}
 
 springdoc:
   swagger-ui:
