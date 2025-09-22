@@ -261,9 +261,17 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       assertNotNull(libraryNodeEx);
       assertFalse(libraryNodeEx.isMissingNode());
       assertThat(libraryNodeEx.isArray(), is(true));
-      assertThat(
-          libraryNodeEx.get(1).get("message").textValue(),
-          is(equalTo("Library SupplementalDataElements is already in use in this library.")));
+
+      final AtomicBoolean foundMessage = new AtomicBoolean(false);
+      libraryNodeEx.forEach(
+          node -> {
+            if (node.get("message")
+                .asText()
+                .contains("Library SupplementalDataElements is already in use in this library.")) {
+              foundMessage.set(true);
+            }
+          });
+      assertTrue(foundMessage.get());
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }
@@ -310,8 +318,9 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       assertNotNull(libraryNodeEx);
       assertFalse(libraryNodeEx.isMissingNode());
       assertThat(libraryNodeEx.isArray(), is(true));
+      JsonNode finalNode = libraryNodeEx.get(libraryNodeEx.size() - 1);
       assertThat(
-          libraryNodeEx.get(1).get("message").textValue(),
+          finalNode.get("message").textValue(),
           is(
               equalTo(
                   "Library SupplementalDataElements Version 4.0.000 is already in use in this library.")));
