@@ -109,11 +109,16 @@ public abstract class CqlTooling {
   protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
-    return TranslationResource.getInstance(
-            usingProperties != null
-                && ("FHIR".equals(usingProperties.getLibraryType())
-                    || "QICore".equals(usingProperties.getLibraryType())))
-        .buildTranslator(requestData);
+    boolean isFhir =
+        usingProperties != null
+            && ("FHIR".equals(usingProperties.getLibraryType())
+                || "QICore".equals(usingProperties.getLibraryType()));
+    // for now, we are treating QICore v7.0.0 the same as FHIR
+    if (isFhir && usingProperties.getVersion().equalsIgnoreCase("7.0.0")) {
+      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+    } else {
+      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+    }
   }
 
   private Set<String> getParentExpressions(String cql) {
