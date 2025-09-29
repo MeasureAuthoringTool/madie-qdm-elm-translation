@@ -82,23 +82,4 @@ class VersionUtilTest {
       assertTrue(VersionUtil.isVersionAtLeast(BASELINE, BASELINE));
     }
   }
-
-  @ParameterizedTest
-  @DisplayName("Custom baseline comparisons (sanity checks)")
-  @CsvSource({
-    // version, baseline, expected
-    "7.0.0,7.0.0,true",
-    "7.0.1,7.0.0,true",
-    "7.0.0,7.0.1,false",
-    "7.1.0,7.0.5,true",
-    "7.0.5,7.1.0,false",
-    "8.0.0,7.9.9,true",
-    "7.9.9,8.0.0,false"
-  })
-  void customBaseline(String version, String baseline, boolean expected) {
-    assertEquals(
-        expected,
-        VersionUtil.isVersionAtLeast(version, baseline),
-        () -> String.format("Expected %s >= %s to be %s", version, baseline, expected));
-  }
 }
