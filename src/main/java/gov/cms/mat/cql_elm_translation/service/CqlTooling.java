@@ -8,7 +8,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
-
+import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +27,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class CqlTooling {
+  private static final String MIN_FHIR_VERSION = "7.0.0";
+
   protected CQLTools parseCql(
       String cql,
       String accessToken,
@@ -113,10 +115,10 @@ public abstract class CqlTooling {
         usingProperties != null
             && ("FHIR".equals(usingProperties.getLibraryType())
                 || "QICore".equals(usingProperties.getLibraryType()));
-    // Treat any QICore/FHIR version >= 7.0.0 the same way (previously only 7.0.0)
+    // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
     if (isFhir
         && usingProperties.getVersion() != null
-        && isVersionAtLeast(usingProperties.getVersion(), "7.0.0")) {
+        && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
       return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
     } else {
       return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
@@ -132,47 +134,5 @@ public abstract class CqlTooling {
     cqlModel.setContext("Patient");
 
     return cqlModel.getExpressionListFromCqlModel();
-  }
-
-  // Helper to determine if provided version is >= baseline (semantic-like: major.minor.patch)
-  private boolean isVersionAtLeast(String version, String baseline) {
-    int[] vA = parseVersion(version);
-    int[] vB = parseVersion(baseline);
-    for (int i = 0; i < 3; i++) {
-      if (vA[i] > vB[i]) {
-        return true;
-      }
-      if (vA[i] < vB[i]) {
-        return false;
-      }
-      ;
-    }
-    return true; // equal
-  }
-
-  // Extract up to first three numeric components of a version string. Missing parts default to 0.
-  private int[] parseVersion(String version) {
-    int[] nums = new int[] {0, 0, 0};
-    if (version == null || version.isBlank()) {
-      return nums;
-    }
-    // Split on non-digit separators, but we only care about the first three numeric groups.
-    // This will handle inputs like "7", "7.0", "7.0.1", "7.0.1-RC1", "8.0.0", etc.
-    String[] parts = version.split("[^0-9]+");
-    int idx = 0;
-    for (String p : parts) {
-      if (p.isEmpty()) {
-        continue;
-      }
-      try {
-        nums[idx++] = Integer.parseInt(p);
-      } catch (NumberFormatException e) {
-        // ignore malformed segment
-      }
-      if (idx == 3) {
-        break;
-      }
-    }
-    return nums;
   }
 }
