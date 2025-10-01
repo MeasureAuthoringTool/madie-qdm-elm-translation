@@ -8,7 +8,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
-
+import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
@@ -27,6 +27,8 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class CqlTooling {
+  private static final String MIN_FHIR_VERSION = "7.0.0";
+
   protected CQLTools parseCql(
       String cql,
       String accessToken,
@@ -109,11 +111,19 @@ public abstract class CqlTooling {
   protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
-    return TranslationResource.getInstance(
-            usingProperties != null
-                && ("FHIR".equals(usingProperties.getLibraryType())
-                    || "QICore".equals(usingProperties.getLibraryType())))
-        .buildTranslator(requestData);
+    boolean isFhir =
+        usingProperties != null
+            && ("FHIR".equals(usingProperties.getLibraryType())
+                || "QICore".equals(usingProperties.getLibraryType())
+                || "USCore".equals(usingProperties.getLibraryType()));
+    // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
+    if (isFhir
+        && usingProperties.getVersion() != null
+        && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
+      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+    } else {
+      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+    }
   }
 
   private Set<String> getParentExpressions(String cql) {
