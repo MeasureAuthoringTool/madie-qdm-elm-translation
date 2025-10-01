@@ -114,7 +114,8 @@ public abstract class CqlTooling {
     boolean isFhir =
         usingProperties != null
             && ("FHIR".equals(usingProperties.getLibraryType())
-                || "QICore".equals(usingProperties.getLibraryType()));
+                || "QICore".equals(usingProperties.getLibraryType())
+                || "USCore".equals(usingProperties.getLibraryType()));
     // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
     if (isFhir
         && usingProperties.getVersion() != null
