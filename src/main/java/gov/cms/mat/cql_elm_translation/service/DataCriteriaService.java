@@ -21,8 +21,10 @@ public class DataCriteriaService {
   private final EffectiveDataRequirementService effectiveDataRequirementService;
 
   public Set<RelevantElement> getRelevantElements(Measure measure, String accessToken) {
-    if (StringUtils.isBlank(measure.getCql())) {
-      log.info("Data criteria not found as cql is blank");
+    if (measure == null
+        || StringUtils.isBlank(measure.getCql())
+        || CollectionUtils.isEmpty(measure.getGroups())) {
+      log.info("Relevant Elements not found as either measure or cql or groups is null.");
       return Collections.emptySet();
     }
 
@@ -50,9 +52,6 @@ public class DataCriteriaService {
   }
 
   private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
-    if (CollectionUtils.isEmpty(measure.getGroups())) {
-      return Set.of();
-    }
     Set<String> usedDefinitions = new HashSet<>();
     measure
         .getGroups()

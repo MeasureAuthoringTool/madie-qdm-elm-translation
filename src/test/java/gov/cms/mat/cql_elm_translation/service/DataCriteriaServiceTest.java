@@ -135,4 +135,10 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         dataCriteriaService.getRelevantElements(measure, token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
+
+  @Test
+  void testGetRelevantElementsWhenNullMeasure() {
+    Set<RelevantElement> sourceDataCriteria = dataCriteriaService.getRelevantElements(null, token);
+    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
 }
