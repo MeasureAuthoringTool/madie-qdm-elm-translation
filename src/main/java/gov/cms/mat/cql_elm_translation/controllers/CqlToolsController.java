@@ -23,8 +23,6 @@ public class CqlToolsController {
   private final DataCriteriaService dataCriteriaService;
   private final CqlParsingService cqlParsingService;
 
-  // QDM specific now but we would need one for QICore as well in future while building QICore
-  // testcase builder
   @PutMapping("/cql/relevant-elements")
   public ResponseEntity<Set<RelevantElement>> getRelevantElements(
       @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
