@@ -26,12 +26,9 @@ public class CqlToolsController {
   @PutMapping("/cql/relevant-elements")
   public ResponseEntity<Set<RelevantElement>> getRelevantElements(
       @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
-    long startNanos = System.nanoTime();
-    Set<RelevantElement> relevantElements =
-        dataCriteriaService.getRelevantElements(measure, accessToken);
-    long durationNanos = System.nanoTime() - startNanos;
-    log.info("getRelevantElements execution time: {} seconds", durationNanos / 1_000_000_000.0);
-    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(relevantElements);
+    return ResponseEntity.ok()
+        .contentType(MediaType.APPLICATION_JSON)
+        .body(dataCriteriaService.getRelevantElements(measure, accessToken));
   }
 
   @PutMapping("/cql/callstacks")
