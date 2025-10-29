@@ -127,4 +127,12 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
         dataCriteriaService.getRelevantElements(measure, token);
     assertThat(sourceDataCriteria.size(), is(equalTo(0)));
   }
+
+  @Test
+  void testGetRelevantElementsWhenNoGroupsPresent() {
+    Measure measure = Measure.builder().cql(cql).build();
+    Set<RelevantElement> sourceDataCriteria =
+        dataCriteriaService.getRelevantElements(measure, token);
+    assertThat(sourceDataCriteria.size(), is(equalTo(0)));
+  }
 }

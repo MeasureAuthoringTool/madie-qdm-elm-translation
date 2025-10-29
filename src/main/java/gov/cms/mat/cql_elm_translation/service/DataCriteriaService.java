@@ -36,7 +36,7 @@ public class DataCriteriaService {
     Library library =
         effectiveDataRequirementService.getEffectiveDataRequirements(
             libraryDetails, true, accessToken);
-    if (CollectionUtils.isEmpty(library.getDataRequirement())) {
+    if (library == null || CollectionUtils.isEmpty(library.getDataRequirement())) {
       return Set.of();
     }
     return library.getDataRequirement().stream()
@@ -50,7 +50,7 @@ public class DataCriteriaService {
   }
 
   private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
-    if (measure == null || org.springframework.util.CollectionUtils.isEmpty(measure.getGroups())) {
+    if (CollectionUtils.isEmpty(measure.getGroups())) {
       return Set.of();
     }
     Set<String> usedDefinitions = new HashSet<>();
@@ -66,7 +66,7 @@ public class DataCriteriaService {
                           usedDefinitions.add(population.getDefinition());
                         }
                       });
-              if (!CollectionUtils.isEmpty(group.getMeasureObservations())) {
+              if (CollectionUtils.isNotEmpty(group.getMeasureObservations())) {
                 group
                     .getMeasureObservations()
                     .forEach(
@@ -76,7 +76,7 @@ public class DataCriteriaService {
                           }
                         });
               }
-              if (!CollectionUtils.isEmpty(group.getStratifications())) {
+              if (CollectionUtils.isNotEmpty(group.getStratifications())) {
                 group
                     .getStratifications()
                     .forEach(
