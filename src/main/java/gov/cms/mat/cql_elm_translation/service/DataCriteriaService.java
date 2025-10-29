@@ -1,21 +1,13 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
 import gov.cms.madie.models.measure.Measure;
-import gov.cms.mat.cql_elm_translation.data.DataElementDescriptor;
-import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.utils.cql.QdmDatatypeUtil;
-import gov.cms.madie.cql_elm_translator.utils.cql.data.DataCriteria;
-import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
-import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
-import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLCode;
-import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLValueSet;
+import gov.cms.mat.cql_elm_translation.dto.RelevantElement;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.codec.digest.DigestUtils;
-import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.hl7.fhir.r5.model.Library;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -24,63 +16,37 @@ import java.util.stream.Collectors;
 @Slf4j
 @Service
 @RequiredArgsConstructor
-public class DataCriteriaService extends CqlTooling {
+public class DataCriteriaService {
 
-  private final CqlLibraryService cqlLibraryService;
+  private final EffectiveDataRequirementService effectiveDataRequirementService;
 
-  public Set<SourceDataCriteria> getRelevantElements(
-      Measure measure, String accessToken, CqlCompilerException.ErrorSeverity errorSeverity) {
+  public Set<RelevantElement> getRelevantElements(Measure measure, String accessToken) {
     if (StringUtils.isBlank(measure.getCql())) {
       log.info("Data criteria not found as cql is blank");
       return Collections.emptySet();
     }
 
-    Set<String> measureDefinitions = getUsedDefinitionsFromMeasure(measure);
-    CQLTools cqlTools =
-        parseCql(
-            measure.getCql(), accessToken, cqlLibraryService, measureDefinitions, errorSeverity);
-    List<SourceDataCriteria> sourceDataCriteria = getSourceDataCriteria(cqlTools);
-
-    Set<String> allUsedDefinitions = new HashSet<>(measureDefinitions);
-    // add used definitions
-    for (var entry : cqlTools.getUsedDefinitions().entrySet()) {
-      allUsedDefinitions.add(entry.getKey());
-      allUsedDefinitions.addAll(entry.getValue());
+    Set<String> usedDefinitions = getUsedDefinitionsFromMeasure(measure);
+    CqlLibraryDetails libraryDetails =
+        CqlLibraryDetails.builder()
+            .libraryName(measure.getCqlLibraryName())
+            .cql(measure.getCql())
+            .expressions(usedDefinitions)
+            .build();
+    Library library =
+        effectiveDataRequirementService.getEffectiveDataRequirements(
+            libraryDetails, true, accessToken);
+    if (CollectionUtils.isEmpty(library.getDataRequirement())) {
+      return Set.of();
     }
-    // add used functions
-    for (var entry : cqlTools.getUsedFunctions().entrySet()) {
-      allUsedDefinitions.add(entry.getKey());
-      allUsedDefinitions.addAll(entry.getValue());
-    }
-
-    // Combines explicitly called definitions with any in the tree
-    Set<String> values = new HashSet<>();
-    allUsedDefinitions.forEach(
-        def -> {
-          if (!MapUtils.isEmpty(cqlTools.getExpressionNameToValuesetDataTypeMap())
-              && !MapUtils.isEmpty(cqlTools.getExpressionNameToValuesetDataTypeMap().get(def))) {
-            cqlTools
-                .getExpressionNameToValuesetDataTypeMap()
-                .get(def)
-                .forEach((expression, valueSet) -> values.add(expression));
-          }
-          if (!MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap())
-              && !MapUtils.isEmpty(cqlTools.getExpressionNameToCodeDataTypeMap().get(def))) {
-            cqlTools
-                .getExpressionNameToCodeDataTypeMap()
-                .get(def)
-                .forEach((expression, valueSet) -> values.add(expression));
-          }
-        });
-
-    Set<SourceDataCriteria> relevantSet = new TreeSet<>();
-    sourceDataCriteria.stream()
-        .filter(sourceDataCriteria1 -> values.contains(sourceDataCriteria1.getName()))
-        .forEach(
-            src -> {
-              relevantSet.add(src);
-            });
-    return relevantSet;
+    return library.getDataRequirement().stream()
+        .map(
+            dataRequirement ->
+                RelevantElement.builder()
+                    .type(dataRequirement.getType().getDisplay())
+                    .profile(dataRequirement.getProfile().get(0).getValue())
+                    .build())
+        .collect(Collectors.toSet());
   }
 
   private Set<String> getUsedDefinitionsFromMeasure(Measure measure) {
@@ -128,103 +94,5 @@ public class DataCriteriaService extends CqlTooling {
         .getRiskAdjustments()
         .forEach(defDescPair -> usedDefinitions.add(defDescPair.getDefinition()));
     return usedDefinitions;
-  }
-
-  public List<SourceDataCriteria> getSourceDataCriteria(CQLTools cqlTools) {
-    DataCriteria dataCriteria = cqlTools.getDataCriteria();
-    Map<CQLValueSet, Set<String>> criteriaWithValueSet =
-        dataCriteria.getDataCriteriaWithValueSets();
-
-    Map<CQLCode, Set<String>> criteriaWithCodes = dataCriteria.getDataCriteriaWithCodes();
-    if (MapUtils.isEmpty(criteriaWithValueSet) && MapUtils.isEmpty(criteriaWithCodes)) {
-      log.info("Data criteria not found for given cql");
-      return Collections.emptyList();
-    }
-    // data criteria from value sets
-    List<SourceDataCriteria> valueSetCriteria =
-        criteriaWithValueSet.entrySet().stream()
-            .map(
-                criteria ->
-                    buildSourceDataCriteriasForValueSet(criteria.getKey(), criteria.getValue()))
-            .flatMap(Collection::stream)
-            .collect(Collectors.toList());
-
-    // data criteria from direct reference codes
-    List<SourceDataCriteria> codeCriteria =
-        criteriaWithCodes.entrySet().stream()
-            .map(
-                criteria -> buildSourceDataCriteriasForCode(criteria.getKey(), criteria.getValue()))
-            .flatMap(Collection::stream)
-            .toList();
-
-    valueSetCriteria.addAll(codeCriteria);
-    return valueSetCriteria;
-  }
-
-  private Set<SourceDataCriteria> buildSourceDataCriteriasForCode(
-      CQLCode code, Set<String> dataTypes) {
-    // return nothing if datatype is missing..otherwise we'll get an NPE in buildCriteriaType
-    if (CollectionUtils.isEmpty(dataTypes)) {
-      return Set.of();
-    }
-    return dataTypes.stream()
-        .map(
-            dataType -> {
-              DataElementDescriptor descriptor = getCriteriaType(dataType);
-              String name = splitByPipeAndGetLast(code.getName());
-              return SourceDataCriteria.builder()
-                  // generate fake oid for drc, as it doesn't have one: e.g.id='71802-3',
-                  // codeSystemName='LOINC', codeSystemVersion='null'
-                  .oid(
-                      "drc-"
-                          + DigestUtils.md5Hex(
-                              code.getCodeSystemName()
-                                  + code.getId()
-                                  + code.getCodeSystemVersion()))
-                  .title(name)
-                  .description(descriptor.title() + ": " + name)
-                  .type(descriptor.dataType())
-                  .drc(true)
-                  .codeId(code.getId())
-                  .name(code.getName())
-                  .build();
-            })
-        .collect(Collectors.toSet());
-  }
-
-  private Set<SourceDataCriteria> buildSourceDataCriteriasForValueSet(
-      CQLValueSet valueSet, Set<String> dataTypes) {
-    // return nothing if datatype is missing..otherwise we'll get an NPE in buildCriteriaType
-    if (CollectionUtils.isEmpty(dataTypes)) {
-      return Set.of();
-    }
-    return dataTypes.stream()
-        .map(
-            dataType -> {
-              DataElementDescriptor descriptor = getCriteriaType(dataType);
-              String name = splitByPipeAndGetLast(valueSet.getName());
-              String oid = valueSet.getOid();
-              return SourceDataCriteria.builder()
-                  .oid(oid)
-                  .title(name)
-                  .description(descriptor.title() + ": " + name)
-                  .type(descriptor.dataType())
-                  .name(valueSet.getName())
-                  .build();
-            })
-        .collect(Collectors.toSet());
-  }
-
-  private String splitByPipeAndGetLast(String criteria) {
-    String[] parts = criteria.split("\\|");
-    // get last part
-    return parts[parts.length - 1];
-  }
-
-  DataElementDescriptor getCriteriaType(String dataType) {
-    return QdmDatatypeUtil.isValidNegation(dataType)
-        ? QdmDatatypeUtil.getDescriptorForNegation(dataType)
-        : new DataElementDescriptor(
-            dataType.replace(",", "").replace(" ", "").replace("Not", ""), dataType);
   }
 }

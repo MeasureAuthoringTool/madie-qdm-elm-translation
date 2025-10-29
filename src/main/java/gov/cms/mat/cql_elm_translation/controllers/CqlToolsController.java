@@ -2,8 +2,7 @@ package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
-import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
+import gov.cms.mat.cql_elm_translation.dto.RelevantElement;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
@@ -22,19 +21,19 @@ import java.util.*;
 public class CqlToolsController {
 
   private final DataCriteriaService dataCriteriaService;
-  private final CqlConversionService cqlConversionService;
   private final CqlParsingService cqlParsingService;
 
   // QDM specific now but we would need one for QICore as well in future while building QICore
   // testcase builder
   @PutMapping("/cql/relevant-elements")
-  public ResponseEntity<Set<SourceDataCriteria>> getRelevantElements(
-      @RequestBody Measure measure,
-      @RequestHeader("Authorization") String accessToken,
-      @RequestParam(defaultValue = "Info") CqlCompilerException.ErrorSeverity errorSeverity) {
-    return ResponseEntity.ok()
-        .contentType(MediaType.APPLICATION_JSON)
-        .body(dataCriteriaService.getRelevantElements(measure, accessToken, errorSeverity));
+  public ResponseEntity<Set<RelevantElement>> getRelevantElements(
+      @RequestBody Measure measure, @RequestHeader("Authorization") String accessToken) {
+    long startNanos = System.nanoTime();
+    Set<RelevantElement> relevantElements =
+        dataCriteriaService.getRelevantElements(measure, accessToken);
+    long durationNanos = System.nanoTime() - startNanos;
+    log.info("getRelevantElements execution time: {} seconds", durationNanos / 1_000_000_000.0);
+    return ResponseEntity.ok().contentType(MediaType.APPLICATION_JSON).body(relevantElements);
   }
 
   @PutMapping("/cql/callstacks")
