@@ -7,9 +7,9 @@ import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -33,7 +33,7 @@ class EffectiveDataRequirementControllerMVCTest {
 
   @Autowired private MockMvc mockMvc;
 
-  @MockBean EffectiveDataRequirementService effectiveDataRequirementService;
+  @MockitoBean EffectiveDataRequirementService effectiveDataRequirementService;
 
   @Mock org.hl7.fhir.r5.model.Library r5Libray;
 
