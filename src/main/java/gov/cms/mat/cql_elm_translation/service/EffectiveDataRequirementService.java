@@ -50,7 +50,9 @@ public class EffectiveDataRequirementService {
   @Cacheable(
       value = "effectiveDataRequirementsCache",
       key =
-          "#libraryDetails.cql.hashCode() + '_' + #recursive + '_' + (#libraryDetails.expressions != null ? #libraryDetails.expressions.hashCode() : 'null')")
+          "#libraryDetails.cql.hashCode() + '_' + #recursive + '_' + "
+              + "(#libraryDetails.expressions != null ? "
+              + "#libraryDetails.expressions.hashCode() : 'null')")
   public org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
       CqlLibraryDetails libraryDetails, boolean recursive, String accessToken) {
 
