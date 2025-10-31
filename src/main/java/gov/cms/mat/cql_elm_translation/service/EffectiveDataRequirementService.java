@@ -12,6 +12,7 @@ import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.elm.requirements.fhir.DataRequirementsProcessor;
 import org.hl7.elm.r1.ExpressionDef;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
@@ -46,6 +47,10 @@ public class EffectiveDataRequirementService {
    * @param accessToken- used by MadieLibrarySourceProvider to make calls to cql-library-services
    * @return effective data requirement of type R5 library
    */
+  @Cacheable(
+      value = "effectiveDataRequirementsCache",
+      key =
+          "#libraryDetails.cql.hashCode() + '_' + #recursive + '_' + (#libraryDetails.expressions != null ? #libraryDetails.expressions.hashCode() : 'null')")
   public org.hl7.fhir.r5.model.Library getEffectiveDataRequirements(
       CqlLibraryDetails libraryDetails, boolean recursive, String accessToken) {
 
