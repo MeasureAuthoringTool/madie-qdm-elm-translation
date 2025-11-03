@@ -1,24 +1,17 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import static org.hamcrest.CoreMatchers.equalTo;
-import static org.hamcrest.CoreMatchers.is;
-import static org.hamcrest.CoreMatchers.nullValue;
+import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
-import java.util.TreeSet;
+import java.util.*;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.mat.cql_elm_translation.dto.RelevantElement;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.tools.formatter.CqlFormatterVisitor;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -29,8 +22,6 @@ import org.springframework.http.ResponseEntity;
 
 import gov.cms.madie.models.measure.Measure;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
-import gov.cms.madie.cql_elm_translator.dto.SourceDataCriteria;
-import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
@@ -40,10 +31,7 @@ class CqlToolsControllerTest implements ResourceFileUtil {
 
   @InjectMocks private CqlToolsController cqlToolsController;
   @Mock private DataCriteriaService dataCriteriaService;
-  @Mock private CqlConversionService cqlConversionService;
-
   @Mock private CqlParsingService cqlParsingService;
-  @Mock private CqlFormatterVisitor cqlFormatterVisitor;
 
   private Set<CQLDefinition> allDefinitions;
 
@@ -65,26 +53,28 @@ class CqlToolsControllerTest implements ResourceFileUtil {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     Measure measure = Measure.builder().cql(cql).build();
     String token = "john";
-    var sdc = SourceDataCriteria.builder().oid("1.2.3").description("EP: Test").title("EP").build();
-    TreeSet<SourceDataCriteria> sdcSet = new TreeSet<SourceDataCriteria>();
-    sdcSet.add(sdc);
-    when(dataCriteriaService.getRelevantElements(
-            any(Measure.class), anyString(), any(CqlCompilerException.ErrorSeverity.class)))
-        .thenReturn(sdcSet);
-    var result =
-        cqlToolsController.getRelevantElements(
-            measure, token, CqlCompilerException.ErrorSeverity.Info);
-    SourceDataCriteria sourceDataCriteria =
-        ((TreeSet<SourceDataCriteria>) result.getBody()).first();
-    assertThat(sourceDataCriteria.getOid(), is(equalTo(sdc.getOid())));
-    assertThat(sourceDataCriteria.getDescription(), is(equalTo(sdc.getDescription())));
-    assertThat(sourceDataCriteria.getTitle(), is(equalTo(sdc.getTitle())));
-  }
+    var relevantElement1 =
+        RelevantElement.builder()
+            .profile("http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-patient")
+            .type("Patient")
+            .build();
 
-  private boolean inputMatchesOutput(String input, String output) {
-    return input
-        .replaceAll("[\\s\\u0000\\u00a0]", "")
-        .equals(output.replaceAll("[\\s\\u0000\\u00a0]", ""));
+    var relevantElement2 =
+        RelevantElement.builder()
+            .profile(
+                "http://hl7.org/fhir/us/qicore/StructureDefinition/qicore-condition-encounter-diagnosis")
+            .type("Condition")
+            .build();
+    when(dataCriteriaService.getRelevantElements(any(Measure.class), anyString()))
+        .thenReturn(Set.of(relevantElement1, relevantElement2));
+    var result = cqlToolsController.getRelevantElements(measure, token);
+    assertThat(result.getBody(), is(notNullValue()));
+    Set<RelevantElement> relevantElements = result.getBody();
+    assertThat(relevantElements.size(), is(equalTo(2)));
+
+    // Convert to list for reliable ordering or check that both elements exist
+    assertThat(relevantElements, hasItem(relevantElement1));
+    assertThat(relevantElements, hasItem(relevantElement2));
   }
 
   @Test

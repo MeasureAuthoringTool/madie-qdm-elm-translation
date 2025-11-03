@@ -11,8 +11,8 @@ import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfigurat
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.support.SimpleCacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -21,15 +21,18 @@ import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
+import com.github.benmanes.caffeine.cache.Caffeine;
+
 import jakarta.annotation.PostConstruct;
 
-import java.util.List;
 import java.util.TimeZone;
+import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
 @Import({CqlLibraryService.class, RestTemplate.class})
+@EnableCaching
 public class CqlElmTranslationApplication {
 
   public static void main(String[] args) {
@@ -45,8 +48,12 @@ public class CqlElmTranslationApplication {
 
   @Bean
   public CacheManager cacheManager() {
-    SimpleCacheManager cacheManager = new SimpleCacheManager();
-    cacheManager.setCaches(List.of(new ConcurrentMapCache("cqlLibraries")));
+    CaffeineCacheManager cacheManager =
+        new CaffeineCacheManager("cqlLibraries", "effectiveDataRequirementsCache");
+    cacheManager.setCaffeine(
+        Caffeine.newBuilder()
+            .expireAfterWrite(1, TimeUnit.HOURS) // Cache expires after 1 hour
+            .maximumSize(50)); // Maximum 50 entries
     return cacheManager;
   }
 

@@ -1,7 +1,6 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
-import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import org.apache.http.HttpStatus;
@@ -9,9 +8,9 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 
@@ -30,9 +29,8 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @WebMvcTest({CqlToolsController.class})
 public class CqlToolsControllerMvcTest {
   private static final String TEST_USER_ID = "john_doe";
-  @MockBean private DataCriteriaService dataCriteriaService;
-  @MockBean private CqlConversionService cqlConversionService;
-  @MockBean private CqlParsingService cqlParsingService;
+  @MockitoBean private DataCriteriaService dataCriteriaService;
+  @MockitoBean private CqlParsingService cqlParsingService;
 
   @Autowired private MockMvc mockMvc;
 
