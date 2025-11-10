@@ -134,6 +134,12 @@
       <version>${cqframework.version}</version>
     </dependency>
 
+    <dependency>
+      <groupId>info.cqframework</groupId>
+      <artifactId>cqf-fhir-npm</artifactId>
+      <version>${cqframework.version}</version>
+    </dependency>
+
     <!--  Dependencies for R4, R5, and hapi-fhir all need to have the same
 		version # or classes will turn up undefined  -->
     <dependency>
