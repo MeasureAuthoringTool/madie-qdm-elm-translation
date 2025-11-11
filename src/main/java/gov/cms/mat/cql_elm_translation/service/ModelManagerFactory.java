@@ -43,7 +43,7 @@ public class ModelManagerFactory implements ILoggingService {
     log.info("Initializing ModelManagerFactory");
 
     try {
-      // List all resources/igs
+      // igs live in resources/igs directory
       var igsDir = ModelManagerFactory.class.getClassLoader().getResource("igs");
       if (igsDir != null) {
         var uri = igsDir.toURI();
@@ -94,7 +94,7 @@ public class ModelManagerFactory implements ILoggingService {
         });
   }
 
-  protected ModelManager buildModelManager(ModelIdentifier identifier, String igFilepath) {
+  private ModelManager buildModelManager(ModelIdentifier identifier, String igFilepath) {
     ModelManager modelManager = new ModelManager();
     modelManager
         .getModelInfoLoader()
