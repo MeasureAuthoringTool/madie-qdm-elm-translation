@@ -2,26 +2,19 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.cql.model.ModelIdentifier;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
 import org.mockito.junit.jupiter.MockitoExtension;
 
 import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("Enabled this test case when issue with resolving USCore dependency is fixed.")
 @ExtendWith(MockitoExtension.class)
 public class ModelManagerFactoryTest {
 
-  private static ModelManagerFactory modelManagerFactory;
-
-  @BeforeAll
-  static void setUp() {
-    modelManagerFactory = new ModelManagerFactory();
-  }
+  @InjectMocks private static ModelManagerFactory modelManagerFactory;
 
   @Test
   void testConstructorInitializesSuccessfully() {

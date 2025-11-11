@@ -1,0 +1,27 @@
+{
+  "resourceType": "ImplementationGuide",
+  "id": "cms.fhir.us.test.madieig",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\"><p>cms.fhir.us.test.madieig</p></div>"
+  },
+  "url": "http://madie.cms.gov/fhir/us/madieig/ImplementationGuide/cms.fhir.us.test.madieig",
+  "version": "0.1.0",
+  "name": "cms.fhir.us.madieig",
+  "title": "MADiE IG",
+  "status": "draft",
+  "experimental": false,
+  "date": "2025-10-27",
+  "publisher": "CMS",
+  "contact": [],
+  "description": "This Test IG",
+  "jurisdiction": [],
+  "dependsOn": [
+    {
+      "uri": "http://hl7.org/fhir/ImplementationGuide/test",
+      "packageId": "hl7.fhir.us.test",
+      "version": "1.0.0",
+      "id": "test"
+    }
+  ]
+}
