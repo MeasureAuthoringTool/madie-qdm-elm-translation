@@ -7,6 +7,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.fhir.npm.LibraryLoader;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
+import org.cqframework.fhir.npm.NpmPackageManagerException;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
@@ -14,10 +15,13 @@ import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
 import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
+import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.Paths;
@@ -26,6 +30,8 @@ import java.nio.file.Files;
 @Slf4j
 @Service
 public class ModelManagerFactory implements ILoggingService {
+
+  private final String fhirCachePath;
 
   private final Map<ModelIdentifier, ModelManager> modelManagers = new ConcurrentHashMap<>();
 
@@ -39,8 +45,9 @@ public class ModelManagerFactory implements ILoggingService {
     logger.debug(message);
   }
 
-  public ModelManagerFactory() {
+  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath) {
     log.info("Initializing ModelManagerFactory");
+    this.fhirCachePath = fhirCachePath;
 
     try {
       // igs live in resources/igs directory
@@ -60,16 +67,24 @@ public class ModelManagerFactory implements ILoggingService {
                         .filter(dep -> StringUtils.isNotBlank(dep.getId()))
                         .forEach(
                             dep -> {
-                              ModelIdentifier identifier =
-                                  new ModelIdentifier()
-                                      .withId(dep.getId())
-                                      .withVersion(dep.getVersion());
-                              ModelManager manager = buildModelManager(identifier, fileName);
-                              modelManagers.put(identifier, manager);
-                              log.info(
-                                  "ModelManager created for dependsOn: {}#{}",
-                                  dep.getUri(),
-                                  dep.getVersion());
+                              try {
+                                ModelIdentifier identifier =
+                                    new ModelIdentifier()
+                                        .withId(dep.getId())
+                                        .withVersion(dep.getVersion());
+                                modelManagers.put(
+                                    identifier, buildModelManager(identifier, fileName));
+                                log.info(
+                                    "ModelManager created for dependsOn: {}#{}",
+                                    dep.getUri(),
+                                    dep.getVersion());
+                              } catch (IOException | NpmPackageManagerException e) {
+                                log.info(
+                                    "Error occurred and failed to created ModelManager created for dependsOn: {}#{}",
+                                    dep.getUri(),
+                                    dep.getVersion(),
+                                    e);
+                              }
                             });
                   }
                 });
@@ -94,7 +109,8 @@ public class ModelManagerFactory implements ILoggingService {
         });
   }
 
-  private ModelManager buildModelManager(ModelIdentifier identifier, String igFilepath) {
+  private ModelManager buildModelManager(ModelIdentifier identifier, String igFilepath)
+      throws IOException {
     ModelManager modelManager = new ModelManager();
     modelManager
         .getModelInfoLoader()
@@ -115,9 +131,15 @@ public class ModelManagerFactory implements ILoggingService {
     return (ImplementationGuide) convertor.convertResource(igResource);
   }
 
-  private ModelInfoProvider buildNpmModelInfoProvider(String igPath) {
+  private ModelInfoProvider buildNpmModelInfoProvider(String igPath) throws IOException {
     ImplementationGuide implementationGuide = loadImplementationGuide(igPath);
-    NpmPackageManager packageManager = new NpmPackageManager(implementationGuide);
+    FilesystemPackageCacheManager.Builder fspcmBuilder =
+        new FilesystemPackageCacheManager.Builder();
+    if (StringUtils.isNotBlank(fhirCachePath)) {
+      fspcmBuilder = fspcmBuilder.withCacheFolder(fhirCachePath);
+    }
+    FilesystemPackageCacheManager fspcm = fspcmBuilder.build();
+    NpmPackageManager packageManager = new NpmPackageManager(implementationGuide, fspcm);
     LibraryLoader reader = new LibraryLoader("5.0");
     return new NpmModelInfoProvider(packageManager.getNpmList(), reader, this);
   }
