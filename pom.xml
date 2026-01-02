@@ -15,6 +15,7 @@
 
   <properties>
     <cqframework.version>3.29.0</cqframework.version>
+    <hapi.fhir.version>8.6.1</hapi.fhir.version>
     <jackson.version>2.17.2</jackson.version>
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
@@ -145,7 +146,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r4</artifactId>
-      <version>8.4.0</version>
+      <version>${hapi.fhir.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -157,7 +158,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-structures-r5</artifactId>
-      <version>8.4.0</version>
+      <version>${hapi.fhir.version}</version>
       <exclusions>
         <exclusion>
           <artifactId>okhttp</artifactId>
@@ -169,7 +170,7 @@
     <dependency>
       <groupId>ca.uhn.hapi.fhir</groupId>
       <artifactId>hapi-fhir-converter</artifactId>
-      <version>8.4.0</version>
+      <version>${hapi.fhir.version}</version>
     </dependency>
 
     <dependency>
