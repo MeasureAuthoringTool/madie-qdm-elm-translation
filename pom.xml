@@ -212,7 +212,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>2.1.5-SNAPSHOT</version>
+      <version>2.1.6-SNAPSHOT</version>
     </dependency>
 
     <dependency>
