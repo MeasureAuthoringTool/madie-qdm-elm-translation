@@ -89,6 +89,22 @@ class FhirUtilTest {
   }
 
   @Test
+  void getMostSpecificFhirModelShouldIgnoreUnknownModelAndReturnQiCore() {
+    // given
+    UsingProperties notFhir = Mockito.mock(UsingProperties.class);
+    Mockito.when(notFhir.getLibraryType()).thenReturn("NotAModel");
+    UsingProperties qicore = Mockito.mock(UsingProperties.class);
+    Mockito.when(qicore.getLibraryType()).thenReturn("QICore");
+    List<UsingProperties> list = Arrays.asList(notFhir, qicore);
+
+    // when
+    UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
+
+    // then
+    assertThat(result, is(equalTo(qicore)));
+  }
+
+  @Test
   void getMostSpecificFhirModelShouldReturnNullForNullOrEmptyList() {
     // given
     // no mocks needed
