@@ -14,7 +14,7 @@ import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerExcep
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
 
-import lombok.RequiredArgsConstructor;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
@@ -49,10 +49,13 @@ import java.util.regex.Pattern;
 
 @Service
 @Slf4j
-@RequiredArgsConstructor
 public class CqlConversionService extends CqlTooling {
 
   private static final String LOG_MESSAGE_TEMPLATE = "ErrorSeverity: %s, Message: %s";
+
+  public CqlConversionService(ModelManagerFactory modelManagerFactory, FhirUtil fhirUtil) {
+    super(modelManagerFactory, fhirUtil);
+  }
 
   public CqlConversionPayload translateCqlToElm(RequestData requestData, boolean checkContext) {
     // verify the presence of ^using .*version '[0-9]\.[0-9]\.[0-9]'$ on the cql

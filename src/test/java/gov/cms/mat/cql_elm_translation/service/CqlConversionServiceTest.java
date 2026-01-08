@@ -12,6 +12,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -54,6 +55,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Mock RestTemplate restTemplate;
   @Mock private CqlLibraryService cqlLibraryService;
+  @Mock private FhirUtil fhirUtil;
   // private CqlLibraryService cqlLibraryService = new
   // CqlLibraryService(restTemplate);
   @InjectMocks private CqlConversionService service;

@@ -9,6 +9,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CqlParsingServiceTest implements ResourceFileUtil {
   @Mock private CqlLibraryService cqlLibraryService;
+  @Mock ModelManagerFactory modelManagerFactory;
+  @Mock FhirUtil fhirUtil;
   @InjectMocks private CqlParsingService cqlParsingService;
 
   private static final String TOKEN = "John Doe";

@@ -7,7 +7,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.DefinitionContent;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
-import lombok.RequiredArgsConstructor;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
@@ -24,9 +24,16 @@ import static java.util.stream.Collectors.toSet;
 
 @Slf4j
 @Service
-@RequiredArgsConstructor
 public class CqlParsingService extends CqlTooling {
   private final CqlLibraryService cqlLibraryService;
+
+  public CqlParsingService(
+      ModelManagerFactory modelManagerFactory,
+      FhirUtil fhirUtil,
+      CqlLibraryService cqlLibraryService) {
+    super(modelManagerFactory, fhirUtil);
+    this.cqlLibraryService = cqlLibraryService;
+  }
 
   /**
    * Parses the CQL and collect all CQL building blocks irrespective of used or unused(including for

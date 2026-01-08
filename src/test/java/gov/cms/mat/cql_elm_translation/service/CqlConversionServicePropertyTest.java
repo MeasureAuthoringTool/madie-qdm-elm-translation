@@ -7,11 +7,16 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Iterator;
 
@@ -20,8 +25,14 @@ import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
+@ExtendWith(MockitoExtension.class)
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
-  CqlConversionService cqlConversionService = new CqlConversionService();
+
+  @Mock ModelManagerFactory modelManagerFactory;
+
+  @Mock FhirUtil fhirUtil;
+
+  @InjectMocks CqlConversionService cqlConversionService;
 
   String cqlData;
   LibraryBuilder.SignatureLevel signatureLevel;
@@ -43,8 +54,6 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     disableMethodInvocation = Boolean.TRUE;
     validateUnits = Boolean.TRUE;
     resultTypes = Boolean.TRUE;
-
-    cqlConversionService = new CqlConversionService();
   }
 
   @Test

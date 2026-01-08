@@ -72,8 +72,15 @@ public class ModelManagerFactory implements ILoggingService {
                                     new ModelIdentifier()
                                         .withId(dep.getId())
                                         .withVersion(dep.getVersion());
-                                modelManagers.put(
-                                    identifier, buildModelManager(identifier, fileName));
+                                ModelManager modelManager = buildModelManager(identifier, fileName);
+                                modelManagers.put(identifier, modelManager);
+                                if (StringUtils.isNotBlank(identifier.getSystem())) {
+                                  modelManagers.put(
+                                      new ModelIdentifier()
+                                          .withId(identifier.getId())
+                                          .withVersion(identifier.getVersion()),
+                                      modelManager);
+                                }
                                 log.info(
                                     "ModelManager created for dependsOn: {}#{}",
                                     dep.getUri(),
@@ -116,6 +123,7 @@ public class ModelManagerFactory implements ILoggingService {
         .getModelInfoLoader()
         .registerModelInfoProvider(buildNpmModelInfoProvider(igFilepath), true);
     modelManager.resolveModel(identifier);
+    log.info("ModelManager built and model resolved for model: {}", identifier);
     return modelManager;
   }
 
