@@ -13,14 +13,12 @@ public class FhirUtil {
   private static final ModelNode FHIR = new ModelNode("FHIR", null);
   private static final ModelNode USCORE = new ModelNode("USCORE", FHIR);
   private static final ModelNode QICORE = new ModelNode("QICORE", USCORE);
-  private static final ModelNode MCODE = new ModelNode("MCODE", FHIR);
   private static final Map<String, ModelNode> MODEL_MAP = new HashMap<>();
 
   static {
     MODEL_MAP.put(FHIR.getName(), FHIR);
     MODEL_MAP.put(USCORE.getName(), USCORE);
     MODEL_MAP.put(QICORE.getName(), QICORE);
-    MODEL_MAP.put(MCODE.getName(), MCODE);
   }
 
   /**
@@ -67,9 +65,10 @@ public class FhirUtil {
 
   private int getDepth(ModelNode node) {
     int depth = 0;
-    while (node.getParent() != null) {
+    ModelNode checkNode = node;
+    while (checkNode.getParent() != null) {
       depth++;
-      node = node.getParent();
+      checkNode = checkNode.getParent();
     }
     return depth;
   }

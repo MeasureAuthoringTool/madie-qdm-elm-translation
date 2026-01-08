@@ -15,7 +15,7 @@ class FhirUtilTest {
   private final FhirUtil fhirUtil = new FhirUtil();
 
   @Test
-  void isFhirModel_shouldReturnTrueForFhirModels() {
+  void isFhirModelShouldReturnTrueForFhirModels() {
     // given
     // no mocks needed
 
@@ -23,17 +23,15 @@ class FhirUtilTest {
     boolean fhir = fhirUtil.isFhirModel("FHIR");
     boolean uscore = fhirUtil.isFhirModel("uscore");
     boolean qicore = fhirUtil.isFhirModel("QICORE");
-    boolean mcode = fhirUtil.isFhirModel("mcode");
 
     // then
     assertThat(fhir, is(true));
     assertThat(uscore, is(true));
     assertThat(qicore, is(true));
-    assertThat(mcode, is(true));
   }
 
   @Test
-  void isFhirModel_shouldReturnFalseForUnknownModels() {
+  void isFhirModelShouldReturnFalseForUnknownModels() {
     // given
     // no mocks needed
 
@@ -45,7 +43,7 @@ class FhirUtilTest {
   }
 
   @Test
-  void isFhirModel_shouldReturnFalseForNullOrEmpty() {
+  void isFhirModelShouldReturnFalseForNullOrEmpty() {
     // given
     // no mocks needed
 
@@ -59,7 +57,7 @@ class FhirUtilTest {
   }
 
   @Test
-  void getMostSpecificFhirModel_shouldReturnMostSpecific() {
+  void getMostSpecificFhirModelShouldReturnMostSpecific() {
     // given
     UsingProperties fhir = Mockito.mock(UsingProperties.class);
     Mockito.when(fhir.getLibraryType()).thenReturn("FHIR");
@@ -67,20 +65,17 @@ class FhirUtilTest {
     Mockito.when(uscore.getLibraryType()).thenReturn("USCore");
     UsingProperties qicore = Mockito.mock(UsingProperties.class);
     Mockito.when(qicore.getLibraryType()).thenReturn("QICore");
-    UsingProperties mcode = Mockito.mock(UsingProperties.class);
-    Mockito.when(mcode.getLibraryType()).thenReturn("mcode");
-    List<UsingProperties> list = Arrays.asList(fhir, uscore, qicore, mcode);
+    List<UsingProperties> list = Arrays.asList(fhir, uscore, qicore);
 
     // when
     UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
 
     // then
-    // QICore, USCore, and mCODE are at the same depth, so any of them is valid
-    assertThat(result, anyOf(is(qicore), is(uscore), is(mcode)));
+    assertThat(result, is(equalTo(qicore)));
   }
 
   @Test
-  void getMostSpecificFhirModel_shouldReturnNullIfNoneMatch() {
+  void getMostSpecificFhirModelShouldReturnNullIfNoneMatch() {
     // given
     UsingProperties notFhir = Mockito.mock(UsingProperties.class);
     Mockito.when(notFhir.getLibraryType()).thenReturn("NotAModel");
@@ -94,7 +89,7 @@ class FhirUtilTest {
   }
 
   @Test
-  void getMostSpecificFhirModel_shouldReturnNullForNullOrEmptyList() {
+  void getMostSpecificFhirModelShouldReturnNullForNullOrEmptyList() {
     // given
     // no mocks needed
 
