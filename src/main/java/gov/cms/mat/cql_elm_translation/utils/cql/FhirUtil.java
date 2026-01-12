@@ -1,6 +1,12 @@
 package gov.cms.mat.cql_elm_translation.utils.cql;
 
+import ca.uhn.fhir.context.FhirContext;
 import gov.cms.mat.cql.elements.UsingProperties;
+import gov.cms.mat.cql_elm_translation.service.ModelManagerFactory;
+import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
+import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
+import org.hl7.fhir.r4.model.Resource;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -71,5 +77,17 @@ public class FhirUtil {
       checkNode = checkNode.getParent();
     }
     return depth;
+  }
+
+  public ImplementationGuide loadImplementationGuide(String resourcePath) {
+    Resource igResource =
+        (Resource)
+            FhirContext.forR4Cached()
+                .newJsonParser()
+                .parseResource(
+                    ModelManagerFactory.class.getClassLoader().getResourceAsStream(resourcePath));
+
+    VersionConvertor_40_50 convertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
+    return (ImplementationGuide) convertor.convertResource(igResource);
   }
 }

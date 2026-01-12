@@ -114,7 +114,7 @@ public abstract class CqlTooling {
     return processCqlData(requestData);
   }
 
-  public CqlTranslator processCqlData(RequestData requestData) {
+  protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties =
         fhirUtil.getMostSpecificFhirModel(cqlTextParser.getAllUsings());
