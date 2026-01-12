@@ -30,6 +30,7 @@ import org.springframework.web.client.RestTemplate;
 import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Constructor;
 import java.nio.file.Files;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,12 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import org.cqframework.cql.cql2elm.ModelManager;
+import org.hl7.cql.model.ModelIdentifier;
+import gov.cms.mat.cql.elements.UsingProperties;
+import static org.hamcrest.Matchers.notNullValue;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
@@ -56,8 +63,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Mock RestTemplate restTemplate;
   @Mock private CqlLibraryService cqlLibraryService;
   @Mock private FhirUtil fhirUtil;
-  // private CqlLibraryService cqlLibraryService = new
-  // CqlLibraryService(restTemplate);
+  @Mock private ModelManagerFactory modelManagerFactory;
   @InjectMocks private CqlConversionService service;
 
   private static RequestData requestData;
@@ -456,5 +462,109 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(exceptions);
     assertFalse(
         "Measure CQL must contain a Context.".equalsIgnoreCase(exceptions.get(0).getMessage()));
+  }
+
+  @Test
+  void givenFhirModelWhenProcessCqlDataThenReturnsTranslatorWithModelManager() {
+    // given
+    String cql = "using FHIR version '7.0.0'";
+    RequestData data = requestData.toBuilder().cqlData(cql).build();
+    ModelManager modelManager = mock(ModelManager.class);
+    UsingProperties usingProperties = createUsingProperties("FHIR", "7.0.0");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    lenient()
+        .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
+        .thenReturn(modelManager);
+    // when
+    CqlTranslator translator = service.processCqlData(data);
+    // then
+    assertThat(translator, is(notNullValue()));
+    assertThat(translator.getTranslatedLibrary(), is(notNullValue()));
+  }
+
+  @Test
+  void givenNonFhirModelWhenProcessCqlDataThenReturnsTranslatorWithoutModelManager() {
+    // given
+    String cql = "using QDM version '5.6'";
+    RequestData data = requestData.toBuilder().cqlData(cql).build();
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+    // when
+    CqlTranslator translator = service.processCqlData(data);
+    // then
+    assertThat(translator, is(notNullValue()));
+    assertThat(translator.getTranslatedLibrary(), is(notNullValue()));
+  }
+
+  @Test
+  void givenNullCqlWhenProcessCqlDataThenReturnsNull() {
+    // given
+    RequestData data = requestData.toBuilder().cqlData(null).build();
+    // when
+    CqlTranslator translator = service.processCqlData(data);
+    // then
+    assertNull(translator);
+  }
+
+  @Test
+  void givenBlankCqlWhenProcessCqlDataThenReturnsNull() {
+    // given
+    RequestData data = requestData.toBuilder().cqlData("").build();
+    // when
+    CqlTranslator translator = service.processCqlData(data);
+    // then
+    assertNull(translator);
+  }
+
+  @Test
+  void givenNullRequestDataWhenProcessCqlDataThenReturnsNull() {
+    // when
+    CqlTranslator translator = service.processCqlData(null);
+    // then
+    assertNull(translator);
+  }
+
+  @Test
+  void givenFhirModelWithOldVersionWhenProcessCqlDataThenReturnsTranslatorWithoutModelManager() {
+    // given
+    String cql = "using FHIR version '4.0.1'";
+    RequestData data = requestData.toBuilder().cqlData(cql).build();
+    UsingProperties usingProperties = createUsingProperties("FHIR", "4.0.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    // when
+    CqlTranslator translator = service.processCqlData(data);
+    // then
+    assertThat(translator, is(notNullValue()));
+    assertThat(translator.getTranslatedLibrary(), is(notNullValue()));
+  }
+
+  @Test
+  void givenModelManagerFactoryThrowsWhenProcessCqlDataThenThrowsOrHandlesException() {
+    // given
+    String cql = "using FHIR version '7.0.0'";
+    RequestData data = requestData.toBuilder().cqlData(cql).build();
+    UsingProperties usingProperties = createUsingProperties("FHIR", "7.0.0");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    lenient()
+        .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
+        .thenThrow(new RuntimeException("error"));
+    // when/then
+    try {
+      service.processCqlData(data);
+      fail("Expected exception");
+    } catch (RuntimeException ex) {
+      assertThat(ex.getMessage(), is("error"));
+    }
+  }
+
+  private UsingProperties createUsingProperties(String libraryType, String version) {
+    try {
+      Constructor<UsingProperties> ctor =
+          UsingProperties.class.getDeclaredConstructor(
+              String.class, String.class, String.class, String.class);
+      ctor.setAccessible(true);
+      return ctor.newInstance(libraryType, version, null, null);
+    } catch (Exception e) {
+      throw new RuntimeException(e);
+    }
   }
 }

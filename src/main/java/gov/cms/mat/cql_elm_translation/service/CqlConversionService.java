@@ -146,6 +146,13 @@ public class CqlConversionService extends CqlTooling {
     }
   }
 
+  public CqlTranslator processCqlData(RequestData requestData) {
+    if (requestData == null || StringUtils.isBlank(requestData.getCqlData())) {
+      return null;
+    }
+    return super.processCqlData(requestData);
+  }
+
   public TranslatedLibrary buildTranslatedLibrary(
       CompiledLibrary compiledLibrary, Map<String, String> cqlMap) {
     if (compiledLibrary == null) {
