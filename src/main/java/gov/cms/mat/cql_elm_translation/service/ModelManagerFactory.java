@@ -30,8 +30,6 @@ import java.nio.file.Files;
 @Service
 public class ModelManagerFactory implements ILoggingService {
 
-  private final FhirUtil fhirUtil;
-
   private final String fhirCachePath;
 
   private final Map<ModelIdentifier, ModelManager> modelManagers = new ConcurrentHashMap<>();
@@ -49,7 +47,6 @@ public class ModelManagerFactory implements ILoggingService {
   public ModelManagerFactory(
       @Value("${madie.fhir-cache}") String fhirCachePath, @Autowired final FhirUtil fhirUtil) {
     log.info("Initializing ModelManagerFactory");
-    this.fhirUtil = fhirUtil;
     this.fhirCachePath = fhirCachePath;
 
     try {
