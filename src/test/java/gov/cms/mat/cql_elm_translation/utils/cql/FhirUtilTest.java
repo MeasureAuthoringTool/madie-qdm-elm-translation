@@ -1,15 +1,19 @@
 package gov.cms.mat.cql_elm_translation.utils.cql;
 
 import gov.cms.mat.cql.elements.UsingProperties;
+import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
+import static org.mockito.Mockito.when;
 
 class FhirUtilTest {
   private final FhirUtil fhirUtil = new FhirUtil();
@@ -60,11 +64,11 @@ class FhirUtilTest {
   void getMostSpecificFhirModelShouldReturnMostSpecific() {
     // given
     UsingProperties fhir = Mockito.mock(UsingProperties.class);
-    Mockito.when(fhir.getLibraryType()).thenReturn("FHIR");
+    when(fhir.getLibraryType()).thenReturn("FHIR");
     UsingProperties uscore = Mockito.mock(UsingProperties.class);
-    Mockito.when(uscore.getLibraryType()).thenReturn("USCore");
+    when(uscore.getLibraryType()).thenReturn("USCore");
     UsingProperties qicore = Mockito.mock(UsingProperties.class);
-    Mockito.when(qicore.getLibraryType()).thenReturn("QICore");
+    when(qicore.getLibraryType()).thenReturn("QICore");
     List<UsingProperties> list = Arrays.asList(fhir, uscore, qicore);
 
     // when
@@ -78,7 +82,7 @@ class FhirUtilTest {
   void getMostSpecificFhirModelShouldReturnNullIfNoneMatch() {
     // given
     UsingProperties notFhir = Mockito.mock(UsingProperties.class);
-    Mockito.when(notFhir.getLibraryType()).thenReturn("NotAModel");
+    when(notFhir.getLibraryType()).thenReturn("NotAModel");
     List<UsingProperties> list = Collections.singletonList(notFhir);
 
     // when
@@ -92,9 +96,9 @@ class FhirUtilTest {
   void getMostSpecificFhirModelShouldIgnoreUnknownModelAndReturnQiCore() {
     // given
     UsingProperties notFhir = Mockito.mock(UsingProperties.class);
-    Mockito.when(notFhir.getLibraryType()).thenReturn("NotAModel");
+    when(notFhir.getLibraryType()).thenReturn("NotAModel");
     UsingProperties qicore = Mockito.mock(UsingProperties.class);
-    Mockito.when(qicore.getLibraryType()).thenReturn("QICore");
+    when(qicore.getLibraryType()).thenReturn("QICore");
     List<UsingProperties> list = Arrays.asList(notFhir, qicore);
 
     // when
@@ -116,5 +120,108 @@ class FhirUtilTest {
     // then
     assertThat(nullResult, is(nullValue()));
     assertThat(emptyResult, is(nullValue()));
+  }
+
+  @Test
+  void getMostSpecificFhirModelShouldSkipNullEntriesAndChooseSpecific() {
+    // given
+    UsingProperties qicore = Mockito.mock(UsingProperties.class);
+    when(qicore.getLibraryType()).thenReturn("QICore");
+    List<UsingProperties> list = Arrays.asList(null, qicore);
+
+    // when
+    UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
+
+    // then
+    assertThat(result, is(equalTo(qicore)));
+  }
+
+  @Test
+  void getMostSpecificFhirModelShouldSkipEntriesWithNullLibraryType() {
+    // given
+    UsingProperties nullType = Mockito.mock(UsingProperties.class);
+    when(nullType.getLibraryType()).thenReturn(null);
+    UsingProperties qicore = Mockito.mock(UsingProperties.class);
+    when(qicore.getLibraryType()).thenReturn("QICore");
+    List<UsingProperties> list = Arrays.asList(nullType, qicore);
+
+    // when
+    UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
+
+    // then
+    assertThat(result, is(equalTo(qicore)));
+  }
+
+  @Test
+  void getMostSpecificFhirModelShouldKeepFirstMostSpecificWhenLessSpecificFollows() {
+    // given
+    UsingProperties qicore = Mockito.mock(UsingProperties.class);
+    when(qicore.getLibraryType()).thenReturn("QICore");
+    UsingProperties uscore = Mockito.mock(UsingProperties.class);
+    when(uscore.getLibraryType()).thenReturn("USCore");
+    List<UsingProperties> list = Arrays.asList(qicore, uscore);
+
+    // when
+    UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
+
+    // then
+    assertThat(result, is(equalTo(qicore)));
+  }
+
+  @Test
+  void getMostSpecificFhirModelShouldKeepFirstMostSpecificWhenLessSpecificFollowsZZZ() {
+    // given
+    UsingProperties qicore = Mockito.mock(UsingProperties.class);
+    when(qicore.getLibraryType()).thenReturn("OtherModel");
+    UsingProperties uscore = Mockito.mock(UsingProperties.class);
+    when(uscore.getLibraryType()).thenReturn("USCore");
+    UsingProperties bad = Mockito.mock(UsingProperties.class);
+    when(bad.getLibraryType()).thenReturn("BadModel");
+    List<UsingProperties> list = Arrays.asList(qicore, uscore, bad);
+    Object map = ReflectionTestUtils.getField(FhirUtil.class, "MODEL_MAP");
+    if (map instanceof Map) {
+      Map<String, ModelNode> modelMap = (Map<String, ModelNode>) map;
+      modelMap.put("BADMODEL", new ModelNode("BADMODEL", null));
+    }
+
+    // when
+    UsingProperties result = fhirUtil.getMostSpecificFhirModel(list);
+
+    // then
+    assertThat(result, is(equalTo(uscore)));
+  }
+
+  @Test
+  void loadImplementationGuideShouldReturnGuideWithExpectedAttributes() {
+    // given
+    String resourcePath = "igs/qicore-7-madie-ig.json";
+
+    // when
+    ImplementationGuide implementationGuide = fhirUtil.loadImplementationGuide(resourcePath);
+
+    // then
+    assertThat(implementationGuide, is(notNullValue()));
+    assertThat(implementationGuide.getId(), is(equalTo("ImplementationGuide/cms.fhir.us.madieig")));
+    assertThat(
+        implementationGuide.getUrl(),
+        is(
+            equalTo(
+                "http://madie.cms.gov/fhir/us/madieig/ImplementationGuide/cms.fhir.us.madieig")));
+    assertThat(implementationGuide.getContactFirstRep().getName(), is(equalTo("CMS")));
+  }
+
+  @Test
+  void loadImplementationGuideShouldIncludeDependencies() {
+    // given
+    String resourcePath = "igs/qicore-7-madie-ig.json";
+
+    // when
+    ImplementationGuide implementationGuide = fhirUtil.loadImplementationGuide(resourcePath);
+
+    // then
+    assertThat(implementationGuide.getDependsOn(), hasSize(greaterThanOrEqualTo(2)));
+    assertThat(
+        implementationGuide.getDependsOn().get(0).getPackageId(),
+        is(equalTo("hl7.fhir.us.qicore")));
   }
 }
