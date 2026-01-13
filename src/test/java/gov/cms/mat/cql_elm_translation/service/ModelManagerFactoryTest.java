@@ -15,7 +15,6 @@ import static org.hamcrest.CoreMatchers.*;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import org.junit.jupiter.api.BeforeEach;
-import org.mockito.Mockito;
 import static org.mockito.Mockito.doReturn;
 
 import java.io.File;
@@ -43,7 +42,7 @@ public class ModelManagerFactoryTest {
     if (!file.exists()) {
       FileUtils.forceMkdir(file);
     }
-    Mockito.reset(fhirUtil);
+    reset(fhirUtil);
     modelManagerFactory = new ModelManagerFactory("fake-cache", fhirUtil);
   }
 
@@ -200,12 +199,13 @@ public class ModelManagerFactoryTest {
     dep.setVersion("1.0.0");
     ig.setDependsOn(List.of(dep));
     when(fhirUtil.loadImplementationGuide(anyString())).thenReturn(ig);
-    ModelManagerFactory factory = Mockito.spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
-    doReturn(Mockito.mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
+    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+    doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
     try {
       factory.processImplementationGuide(ig);
     } catch (IllegalArgumentException e) {
       // expected
+      fail("processImplementationGuide should handle exceptions internally and not throw");
     }
   }
 
@@ -214,7 +214,7 @@ public class ModelManagerFactoryTest {
     ImplementationGuide ig = new ImplementationGuide();
     ig.setId("TestIG");
     ig.setVersion("1.0.0");
-    ModelManagerFactory factory = Mockito.spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
     factory.processImplementationGuide(ig);
     // No dependencies, so knownModelIdentifiers should be empty
     assertThat(factory.getKnownModelIdentifiers().size(), is(0));
@@ -229,8 +229,8 @@ public class ModelManagerFactoryTest {
     dep.setId("DepIG");
     dep.setVersion("1.0.0");
     ig.setDependsOn(List.of(dep));
-    ModelManagerFactory factory = Mockito.spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
-    doReturn(Mockito.mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
+    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+    doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
     factory.processImplementationGuide(ig);
     // Only dependency ModelIdentifier should be present
     assertThat(
@@ -247,7 +247,7 @@ public class ModelManagerFactoryTest {
     ImplementationGuideDependsOnComponent dep = new ImplementationGuideDependsOnComponent();
     // No id or version set on dependency
     ig.setDependsOn(List.of(dep));
-    ModelManagerFactory factory = Mockito.spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
     factory.processImplementationGuide(ig);
     // Malformed dependency, so knownModelIdentifiers should be empty
     assertThat(factory.getKnownModelIdentifiers().size(), is(0));

@@ -557,14 +557,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   private UsingProperties createUsingProperties(String libraryType, String version) {
-    try {
-      Constructor<UsingProperties> ctor =
-          UsingProperties.class.getDeclaredConstructor(
-              String.class, String.class, String.class, String.class);
-      ctor.setAccessible(true);
-      return ctor.newInstance(libraryType, version, null, null);
-    } catch (Exception e) {
-      throw new RuntimeException(e);
-    }
+    return UsingProperties.builder().libraryType(libraryType).version(version).build();
   }
 }
