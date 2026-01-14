@@ -8,6 +8,8 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
+import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +18,9 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.cql.model.ModelIdentifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,6 +31,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Slf4j
 public abstract class CqlTooling {
+
+  private final ModelManagerFactory modelManagerFactory;
+  private final FhirUtil fhirUtil;
   private static final String MIN_FHIR_VERSION = "7.0.0";
 
   protected CQLTools parseCql(
@@ -110,19 +117,21 @@ public abstract class CqlTooling {
 
   protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
-    UsingProperties usingProperties = cqlTextParser.getUsing();
-    boolean isFhir =
-        usingProperties != null
-            && ("FHIR".equals(usingProperties.getLibraryType())
-                || "QICore".equals(usingProperties.getLibraryType())
-                || "USCore".equals(usingProperties.getLibraryType()));
+    UsingProperties usingProperties =
+        fhirUtil.getMostSpecificFhirModel(cqlTextParser.getAllUsings());
     // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
-    if (isFhir
-        && usingProperties.getVersion() != null
+    if (usingProperties == null) {
+      throw new UnsupportedModelException();
+    } else if (usingProperties.getVersion() != null
         && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
-      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+      ModelIdentifier modelIdentifier =
+          new ModelIdentifier()
+              .withId(usingProperties.getLibraryType())
+              .withVersion(usingProperties.getVersion());
+      ModelManager modelManager = modelManagerFactory.getModelManager(modelIdentifier);
+      return TranslationResource.getInstance(modelManager, true).buildTranslator(requestData);
     } else {
-      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+      return TranslationResource.getInstance(true).buildTranslator(requestData);
     }
   }
 

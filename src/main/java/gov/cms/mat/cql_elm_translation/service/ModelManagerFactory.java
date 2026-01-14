@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import ca.uhn.fhir.context.FhirContext;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -10,18 +10,17 @@ import org.cqframework.fhir.npm.NpmPackageManager;
 import org.cqframework.fhir.npm.NpmPackageManagerException;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
-import org.hl7.fhir.convertors.advisors.impl.BaseAdvisor_40_50;
-import org.hl7.fhir.convertors.conv40_50.VersionConvertor_40_50;
-import org.hl7.fhir.r4.model.Resource;
 import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.nio.file.Paths;
@@ -45,7 +44,8 @@ public class ModelManagerFactory implements ILoggingService {
     logger.debug(message);
   }
 
-  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath) {
+  public ModelManagerFactory(
+      @Value("${madie.fhir-cache}") String fhirCachePath, @Autowired final FhirUtil fhirUtil) {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
 
@@ -61,36 +61,43 @@ public class ModelManagerFactory implements ILoggingService {
             .forEach(
                 path -> {
                   String fileName = "igs/" + path.getFileName().toString();
-                  ImplementationGuide ig = loadImplementationGuide(fileName);
-                  if (ig != null && ig.hasDependsOn()) {
-                    ig.getDependsOn().stream()
-                        .filter(dep -> StringUtils.isNotBlank(dep.getId()))
-                        .forEach(
-                            dep -> {
-                              try {
-                                ModelIdentifier identifier =
-                                    new ModelIdentifier()
-                                        .withId(dep.getId())
-                                        .withVersion(dep.getVersion());
-                                modelManagers.put(
-                                    identifier, buildModelManager(identifier, fileName));
-                                log.info(
-                                    "ModelManager created for dependsOn: {}#{}",
-                                    dep.getUri(),
-                                    dep.getVersion());
-                              } catch (IOException | NpmPackageManagerException e) {
-                                log.info(
-                                    "Error occurred and failed to created ModelManager created for dependsOn: {}#{}",
-                                    dep.getUri(),
-                                    dep.getVersion(),
-                                    e);
-                              }
-                            });
-                  }
+                  ImplementationGuide ig = fhirUtil.loadImplementationGuide(fileName);
+                  processImplementationGuide(ig);
                 });
       }
     } catch (Exception e) {
       log.error("Error initializing ModelManagerFactory IGs", e);
+    }
+  }
+
+  public void processImplementationGuide(ImplementationGuide ig) {
+    if (ig != null && ig.hasDependsOn()) {
+      ig.getDependsOn().stream()
+          .filter(dep -> StringUtils.isNotBlank(dep.getId()))
+          .forEach(
+              dep -> {
+                try {
+                  ModelIdentifier identifier =
+                      new ModelIdentifier().withId(dep.getId()).withVersion(dep.getVersion());
+                  ModelManager modelManager = buildModelManager(identifier, ig);
+                  modelManagers.put(identifier, modelManager);
+                  if (StringUtils.isNotBlank(identifier.getSystem())) {
+                    modelManagers.put(
+                        new ModelIdentifier()
+                            .withId(identifier.getId())
+                            .withVersion(identifier.getVersion()),
+                        modelManager);
+                  }
+                  log.info(
+                      "ModelManager created for dependsOn: {}#{}", dep.getUri(), dep.getVersion());
+                } catch (IOException | NpmPackageManagerException e) {
+                  log.info(
+                      "Error occurred and failed to created ModelManager created for dependsOn: {}#{}",
+                      dep.getUri(),
+                      dep.getVersion(),
+                      e);
+                }
+              });
     }
   }
 
@@ -109,30 +116,30 @@ public class ModelManagerFactory implements ILoggingService {
         });
   }
 
-  private ModelManager buildModelManager(ModelIdentifier identifier, String igFilepath)
-      throws IOException {
+  public List<ModelIdentifier> getKnownModelIdentifiers() {
+    return this.modelManagers.keySet().stream()
+        .map(
+            modelIdentifier ->
+                new ModelIdentifier()
+                    .withId(modelIdentifier.getId())
+                    .withVersion(modelIdentifier.getVersion())
+                    .withSystem(modelIdentifier.getSystem()))
+        .toList();
+  }
+
+  protected ModelManager buildModelManager(
+      ModelIdentifier identifier, ImplementationGuide implementationGuide) throws IOException {
     ModelManager modelManager = new ModelManager();
     modelManager
         .getModelInfoLoader()
-        .registerModelInfoProvider(buildNpmModelInfoProvider(igFilepath), true);
+        .registerModelInfoProvider(buildNpmModelInfoProvider(implementationGuide), true);
     modelManager.resolveModel(identifier);
+    log.info("ModelManager built and model resolved for model: {}", identifier);
     return modelManager;
   }
 
-  private ImplementationGuide loadImplementationGuide(String resourcePath) {
-    Resource igResource =
-        (Resource)
-            FhirContext.forR4Cached()
-                .newJsonParser()
-                .parseResource(
-                    ModelManagerFactory.class.getClassLoader().getResourceAsStream(resourcePath));
-
-    VersionConvertor_40_50 convertor = new VersionConvertor_40_50(new BaseAdvisor_40_50());
-    return (ImplementationGuide) convertor.convertResource(igResource);
-  }
-
-  private ModelInfoProvider buildNpmModelInfoProvider(String igPath) throws IOException {
-    ImplementationGuide implementationGuide = loadImplementationGuide(igPath);
+  private ModelInfoProvider buildNpmModelInfoProvider(ImplementationGuide implementationGuide)
+      throws IOException {
     FilesystemPackageCacheManager.Builder fspcmBuilder =
         new FilesystemPackageCacheManager.Builder();
     if (StringUtils.isNotBlank(fhirCachePath)) {

@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.mat.cql.CqlTextParser;
+import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
@@ -9,6 +10,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -31,6 +33,8 @@ import static org.mockito.Mockito.*;
 @ExtendWith(MockitoExtension.class)
 public class CqlParsingServiceTest implements ResourceFileUtil {
   @Mock private CqlLibraryService cqlLibraryService;
+  @Mock ModelManagerFactory modelManagerFactory;
+  @Mock FhirUtil fhirUtil;
   @InjectMocks private CqlParsingService cqlParsingService;
 
   private static final String TOKEN = "John Doe";
@@ -49,6 +53,8 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
+    when(fhirUtil.getMostSpecificFhirModel(anyList()))
+        .thenReturn(UsingProperties.builder().libraryType("QICore").build());
     Map<String, Set<CQLDefinition>> definitionCallstacks =
         cqlParsingService.getDefinitionCallstacks(
             qiCoreMeasureCql, TOKEN, CqlCompilerException.ErrorSeverity.Info);

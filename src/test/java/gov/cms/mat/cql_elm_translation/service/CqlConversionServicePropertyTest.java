@@ -5,13 +5,19 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
+import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
+import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Iterator;
 
@@ -19,9 +25,17 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
+@ExtendWith(MockitoExtension.class)
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
-  CqlConversionService cqlConversionService = new CqlConversionService();
+
+  @Mock ModelManagerFactory modelManagerFactory;
+
+  @Mock FhirUtil fhirUtil;
+
+  @InjectMocks CqlConversionService cqlConversionService;
 
   String cqlData;
   LibraryBuilder.SignatureLevel signatureLevel;
@@ -43,8 +57,6 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
     disableMethodInvocation = Boolean.TRUE;
     validateUnits = Boolean.TRUE;
     resultTypes = Boolean.TRUE;
-
-    cqlConversionService = new CqlConversionService();
   }
 
   @Test
@@ -106,6 +118,8 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   void testProcessCqlDataWithErrors() throws JsonProcessingException {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
+    when(fhirUtil.getMostSpecificFhirModel(anyList()))
+        .thenReturn(UsingProperties.builder().libraryType("FHIR").version("4.0.1").build());
     CqlConversionPayload cqlConversionPayload =
         cqlConversionService.translateCqlToElm(requestData, true);
     String elmJson = cqlConversionPayload.getJson();
@@ -157,6 +171,8 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   private CqlTranslator buildCqlTranslator() {
     RequestData requestData = buildRequestData();
+    when(fhirUtil.getMostSpecificFhirModel(anyList()))
+        .thenReturn(UsingProperties.builder().libraryType("FHIR").version("4.0.1").build());
     return cqlConversionService.processCqlData(requestData);
   }
 
