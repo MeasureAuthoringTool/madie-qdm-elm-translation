@@ -15,7 +15,7 @@ import java.util.HashMap;
 
 @Component
 public class FhirUtil {
-  // Future-proof for additional model support
+  // Future-proof for additional FHIR model support
   private static final ModelNode FHIR = new ModelNode("FHIR", null);
   private static final ModelNode USCORE = new ModelNode("USCORE", FHIR);
   private static final ModelNode QICORE = new ModelNode("QICORE", USCORE);

@@ -8,6 +8,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
+import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
 import lombok.RequiredArgsConstructor;
@@ -118,10 +119,10 @@ public abstract class CqlTooling {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties =
         fhirUtil.getMostSpecificFhirModel(cqlTextParser.getAllUsings());
-    boolean isFhir = usingProperties != null;
     // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
-    if (isFhir
-        && usingProperties.getVersion() != null
+    if (usingProperties == null) {
+      throw new UnsupportedModelException();
+    } else if (usingProperties.getVersion() != null
         && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
       ModelIdentifier modelIdentifier =
           new ModelIdentifier()
@@ -130,7 +131,7 @@ public abstract class CqlTooling {
       ModelManager modelManager = modelManagerFactory.getModelManager(modelIdentifier);
       return TranslationResource.getInstance(modelManager, true).buildTranslator(requestData);
     } else {
-      return TranslationResource.getInstance(isFhir).buildTranslator(requestData);
+      return TranslationResource.getInstance(true).buildTranslator(requestData);
     }
   }
 

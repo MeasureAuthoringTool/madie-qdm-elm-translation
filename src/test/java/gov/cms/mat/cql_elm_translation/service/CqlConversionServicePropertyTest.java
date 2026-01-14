@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
+import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
@@ -24,6 +25,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.anyList;
+import static org.mockito.Mockito.when;
 
 @ExtendWith(MockitoExtension.class)
 class CqlConversionServicePropertyTest implements ResourceFileUtil {
@@ -115,6 +118,8 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   void testProcessCqlDataWithErrors() throws JsonProcessingException {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
+    when(fhirUtil.getMostSpecificFhirModel(anyList()))
+        .thenReturn(UsingProperties.builder().libraryType("FHIR").version("4.0.1").build());
     CqlConversionPayload cqlConversionPayload =
         cqlConversionService.translateCqlToElm(requestData, true);
     String elmJson = cqlConversionPayload.getJson();
@@ -166,6 +171,8 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   private CqlTranslator buildCqlTranslator() {
     RequestData requestData = buildRequestData();
+    when(fhirUtil.getMostSpecificFhirModel(anyList()))
+        .thenReturn(UsingProperties.builder().libraryType("FHIR").version("4.0.1").build());
     return cqlConversionService.processCqlData(requestData);
   }
 

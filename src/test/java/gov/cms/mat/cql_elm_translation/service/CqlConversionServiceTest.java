@@ -10,6 +10,7 @@ import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
+import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
@@ -22,10 +23,12 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.web.client.RestTemplate;
+import org.junit.jupiter.api.BeforeEach;
 
 import java.io.File;
 import java.io.IOException;
@@ -55,6 +58,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.cql.model.ModelIdentifier;
 import gov.cms.mat.cql.elements.UsingProperties;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
@@ -84,6 +88,15 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .build();
   }
 
+  @BeforeEach
+  void setUpFhirDefaults() {
+    UsingProperties defaultUsing = createUsingProperties("FHIR", "7.0.0");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(defaultUsing);
+    lenient()
+        .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
+        .thenReturn(mock(ModelManager.class));
+  }
+
   @Test
   void testProcessCqlDataWithErrors() {
     String cqlData;
@@ -94,6 +107,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock for FHIR 4.0.1
+    UsingProperties fhir401Using = createUsingProperties("FHIR", "4.0.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(fhir401Using);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     CqlConversionPayload payload = service.translateCqlToElm(data, true);
     assertNotNull(payload);
@@ -119,6 +137,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Test
   void testProcessCqlDataWithErrorsNonSupportedModel() {
+    // given
     String cqlData;
     File inputCqlFile = new File(this.getClass().getResource("/non_supported_model.cql").getFile());
 
@@ -127,20 +146,19 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock to return null for non-FHIR model
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    CqlConversionPayload payload = service.translateCqlToElm(data, true);
-    assertNotNull(payload);
-    String resultJson = payload.getJson();
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertFalse(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+
+    // when/then
+    UnsupportedModelException exception =
+        assertThrows(UnsupportedModelException.class, () -> service.translateCqlToElm(data, true));
+
+    assertThat(
+        exception.getMessage(),
+        containsString("Only FHIR-based models are supported at this time"));
   }
 
   @Test
@@ -153,6 +171,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock for QICore 4.1.1
+    UsingProperties qicoreUsing = createUsingProperties("QICore", "4.1.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(qicoreUsing);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     CqlConversionPayload payload = service.translateCqlToElm(data, false);
     assertNotNull(payload);
@@ -179,6 +202,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Test
   void testProcessCqlDataWithErrorsMissingModel() {
+    // given
     String cqlData;
     File inputCqlFile = new File(this.getClass().getResource("/missing-model.cql").getFile());
     try {
@@ -186,33 +210,22 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock to return null for missing model
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.translateCqlToElm(data, false);
-    assertNotNull(payload);
-    String resultJson = payload.getJson();
-    ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
 
-      assertFalse(libraryNode.isMissingNode());
-      final AtomicBoolean foundMessage = new AtomicBoolean(Boolean.FALSE);
-      libraryNode.forEach(
-          node ->
-              foundMessage.set(
-                  foundMessage.get()
-                      || node.get("message")
-                          .asText()
-                          .contains("Model Type and version are required")));
-      assertTrue(foundMessage.get());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+    // when/then
+    UnsupportedModelException exception =
+        assertThrows(UnsupportedModelException.class, () -> service.translateCqlToElm(data, false));
+
+    assertThat(
+        exception.getMessage(),
+        containsString("Only FHIR-based models are supported at this time"));
   }
 
   @Test
@@ -252,6 +265,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock for QICore 4.1.1
+    UsingProperties qicoreUsing = createUsingProperties("QICore", "4.1.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(qicoreUsing);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
@@ -309,6 +327,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock for QICore 4.1.1
+    UsingProperties qicoreUsing = createUsingProperties("QICore", "4.1.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(qicoreUsing);
+
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
@@ -389,6 +412,10 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       throw new UncheckedIOException(e);
     }
 
+    // Override default mock for QICore 4.1.1
+    UsingProperties qicoreUsing = createUsingProperties("QICore", "4.1.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(qicoreUsing);
+
     VersionedIdentifier identifier = new VersionedIdentifier();
     identifier.setId("FHIRHelpers");
     identifier.setVersion("4.1.000");
@@ -430,6 +457,10 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (IOException e) {
       throw new UncheckedIOException(e);
     }
+
+    // Override default mock for QICore 4.1.1
+    UsingProperties qicoreUsing = createUsingProperties("QICore", "4.1.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(qicoreUsing);
 
     VersionedIdentifier identifier = new VersionedIdentifier();
     identifier.setId("FHIRHelpers");
@@ -482,16 +513,20 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void givenNonFhirModelWhenProcessCqlDataThenReturnsTranslatorWithoutModelManager() {
+  void givenNonFhirModelWhenProcessCqlDataThenThrowsUnsupportedModelException() {
     // given
     String cql = "using QDM version '5.6'";
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+
     // when
-    CqlTranslator translator = service.processCqlData(data);
+    Executable action = () -> service.processCqlData(data);
+
     // then
-    assertThat(translator, is(notNullValue()));
-    assertThat(translator.getTranslatedLibrary(), is(notNullValue()));
+    UnsupportedModelException exception = assertThrows(UnsupportedModelException.class, action);
+    assertThat(
+        exception.getMessage(),
+        containsString("Only FHIR-based models are supported at this time"));
   }
 
   @Test
