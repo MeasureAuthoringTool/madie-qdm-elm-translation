@@ -14,6 +14,8 @@ import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import static org.hamcrest.Matchers.containsString;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
@@ -54,5 +56,8 @@ class GlobalExceptionHandlerTest {
         .andExpect(
             jsonPath("$.message")
                 .value(containsString("Only FHIR-based models are supported at this time")));
+
+    // Verify the service was called and threw the expected exception
+    verify(cqlConversionService, times(1)).translateCqlToElm(any(), anyBoolean());
   }
 }
