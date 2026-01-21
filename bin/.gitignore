@@ -1,0 +1,41 @@
+HELP.md
+target/
+!**/src/main/**
+!**/src/test/**
+*.bak
+*.tmp
+
+### STS ###
+.apt_generated
+.classpath
+.factorypath
+.project
+.settings
+.springBeans
+.sts4-cache
+.DS_Store
+
+### IntelliJ IDEA ###
+.idea
+*.iws
+*.iml
+*.ipr
+
+### NetBeans ###
+/nbproject/private/
+/nbbuild/
+/dist/
+/nbdist/
+/.nb-gradle/
+build/
+
+### VS Code ###
+.vscode/
+
+.mvn
+.jpb
+
+
+**/*.log
+*.gz
+.dccache

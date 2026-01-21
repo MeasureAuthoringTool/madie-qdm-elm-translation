@@ -1,0 +1,1480 @@
+{
+  "errorExceptions" : [ {
+    "startLine" : 5,
+    "startChar" : 1,
+    "endLine" : 5,
+    "endChar" : 56,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Model Type and version are required"
+  }, {
+    "startLine" : 6,
+    "startChar" : 1,
+    "endLine" : 6,
+    "endChar" : 66,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Model Type and version are required"
+  }, {
+    "startLine" : 7,
+    "startChar" : 1,
+    "endLine" : 7,
+    "endChar" : 69,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Model Type and version are required"
+  }, {
+    "startLine" : 22,
+    "startChar" : 3,
+    "endLine" : 22,
+    "endChar" : 5,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve identifier SDE in the current library."
+  }, {
+    "startLine" : 22,
+    "startChar" : 7,
+    "endLine" : 22,
+    "endChar" : 21,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Member SDE Ethnicity not found for type null."
+  }, {
+    "startLine" : 25,
+    "startChar" : 3,
+    "endLine" : 25,
+    "endChar" : 5,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve identifier SDE in the current library."
+  }, {
+    "startLine" : 25,
+    "startChar" : 7,
+    "endLine" : 25,
+    "endChar" : 17,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Member SDE Payer not found for type null."
+  }, {
+    "startLine" : 28,
+    "startChar" : 3,
+    "endLine" : 28,
+    "endChar" : 5,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve identifier SDE in the current library."
+  }, {
+    "startLine" : 28,
+    "startChar" : 7,
+    "endLine" : 28,
+    "endChar" : 16,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Member SDE Race not found for type null."
+  }, {
+    "startLine" : 32,
+    "startChar" : 36,
+    "endLine" : 32,
+    "endChar" : 46,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve library name FHIRHelpers."
+  }, {
+    "startLine" : 32,
+    "startChar" : 19,
+    "endLine" : 32,
+    "endChar" : 67,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'."
+  }, {
+    "startLine" : 40,
+    "startChar" : 29,
+    "endLine" : 40,
+    "endChar" : 41,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve library name FHIRHelpers."
+  }, {
+    "startLine" : 40,
+    "startChar" : 23,
+    "endLine" : 40,
+    "endChar" : 41,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'."
+  }, {
+    "startLine" : 45,
+    "startChar" : 42,
+    "endLine" : 45,
+    "endChar" : 47,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve library name FHIRHelpers."
+  }, {
+    "startLine" : 46,
+    "startChar" : 25,
+    "endLine" : 46,
+    "endChar" : 52,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve library name FHIRHelpers."
+  }, {
+    "startLine" : 45,
+    "startChar" : 25,
+    "endLine" : 46,
+    "endChar" : 52,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not determine signature for invocation of operator System.And."
+  }, {
+    "startLine" : 45,
+    "startChar" : 19,
+    "endLine" : 46,
+    "endChar" : 52,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'."
+  }, {
+    "startLine" : 54,
+    "startChar" : 17,
+    "endLine" : 54,
+    "endChar" : 58,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Could not resolve library name FHIRHelpers."
+  }, {
+    "startLine" : 54,
+    "startChar" : 11,
+    "endLine" : 54,
+    "endChar" : 58,
+    "errorType" : null,
+    "errorSeverity" : "Error",
+    "targetIncludeLibraryId" : "TestCVPopulations",
+    "targetIncludeLibraryVersionId" : "0.0.004",
+    "type" : null,
+    "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'."
+  } ],
+  "library" : {
+    "annotation" : [ {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 5,
+      "startChar" : 1,
+      "endLine" : 5,
+      "endChar" : 56,
+      "message" : "Cannot invoke \"gov.cms.mat.cql.elements.UsingProperties.getVersion()\" because the return value of \"java.lang.ThreadLocal.get()\" is null",
+      "errorType" : "include",
+      "errorSeverity" : "Error",
+      "targetIncludeLibraryId" : "FHIRHelpers",
+      "targetIncludeLibraryVersionId" : "4.0.001",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 6,
+      "startChar" : 1,
+      "endLine" : 6,
+      "endChar" : 66,
+      "message" : "Cannot invoke \"gov.cms.mat.cql.elements.UsingProperties.getVersion()\" because the return value of \"java.lang.ThreadLocal.get()\" is null",
+      "errorType" : "include",
+      "errorSeverity" : "Error",
+      "targetIncludeLibraryId" : "SupplementalDataElementsFHIR4",
+      "targetIncludeLibraryVersionId" : "2.0.000",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 7,
+      "startChar" : 1,
+      "endLine" : 7,
+      "endChar" : 69,
+      "message" : "Cannot invoke \"gov.cms.mat.cql.elements.UsingProperties.getVersion()\" because the return value of \"java.lang.ThreadLocal.get()\" is null",
+      "errorType" : "include",
+      "errorSeverity" : "Error",
+      "targetIncludeLibraryId" : "MATGlobalCommonFunctionsFHIR4",
+      "targetIncludeLibraryVersionId" : "5.0.000",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 22,
+      "startChar" : 3,
+      "endLine" : 22,
+      "endChar" : 5,
+      "message" : "Could not resolve identifier SDE in the current library.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 22,
+      "startChar" : 7,
+      "endLine" : 22,
+      "endChar" : 21,
+      "message" : "Member SDE Ethnicity not found for type null.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 25,
+      "startChar" : 3,
+      "endLine" : 25,
+      "endChar" : 5,
+      "message" : "Could not resolve identifier SDE in the current library.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 25,
+      "startChar" : 7,
+      "endLine" : 25,
+      "endChar" : 17,
+      "message" : "Member SDE Payer not found for type null.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 28,
+      "startChar" : 3,
+      "endLine" : 28,
+      "endChar" : 5,
+      "message" : "Could not resolve identifier SDE in the current library.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 28,
+      "startChar" : 7,
+      "endLine" : 28,
+      "endChar" : 16,
+      "message" : "Member SDE Race not found for type null.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 32,
+      "startChar" : 36,
+      "endLine" : 32,
+      "endChar" : 46,
+      "message" : "Could not resolve library name FHIRHelpers.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 32,
+      "startChar" : 19,
+      "endLine" : 32,
+      "endChar" : 67,
+      "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 40,
+      "startChar" : 29,
+      "endLine" : 40,
+      "endChar" : 41,
+      "message" : "Could not resolve library name FHIRHelpers.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 40,
+      "startChar" : 23,
+      "endLine" : 40,
+      "endChar" : 41,
+      "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 45,
+      "startChar" : 42,
+      "endLine" : 45,
+      "endChar" : 47,
+      "message" : "Could not resolve library name FHIRHelpers.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 46,
+      "startChar" : 25,
+      "endLine" : 46,
+      "endChar" : 52,
+      "message" : "Could not resolve library name FHIRHelpers.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 45,
+      "startChar" : 25,
+      "endLine" : 46,
+      "endChar" : 52,
+      "message" : "Could not determine signature for invocation of operator System.And.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 45,
+      "startChar" : 19,
+      "endLine" : 46,
+      "endChar" : 52,
+      "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 54,
+      "startChar" : 17,
+      "endLine" : 54,
+      "endChar" : 58,
+      "message" : "Could not resolve library name FHIRHelpers.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    }, {
+      "libraryId" : "TestCVPopulations",
+      "libraryVersion" : "0.0.004",
+      "startLine" : 54,
+      "startChar" : 11,
+      "endLine" : 54,
+      "endChar" : 58,
+      "message" : "Expected an expression of type 'System.Boolean', but found an expression of type '<unknown>'.",
+      "errorType" : "semantic",
+      "errorSeverity" : "Error",
+      "type" : "CqlToElmError"
+    } ],
+    "identifier" : {
+      "id" : "TestCVPopulations",
+      "version" : "0.0.004"
+    },
+    "schemaIdentifier" : {
+      "id" : "urn:hl7-org:elm",
+      "version" : "r1"
+    },
+    "usings" : {
+      "def" : [ {
+        "localIdentifier" : "System",
+        "uri" : "urn:hl7-org:elm-types:r1"
+      }, {
+        "localId" : "1",
+        "locator" : "3:1-3:26",
+        "localIdentifier" : "FHIR",
+        "uri" : "http://hl7.org/fhir",
+        "version" : "4.0.1",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "1",
+            "s" : [ {
+              "value" : [ "", "using " ]
+            }, {
+              "s" : [ {
+                "value" : [ "FHIR" ]
+              } ]
+            }, {
+              "value" : [ " version ", "'4.0.1'" ]
+            } ]
+          }
+        } ]
+      } ]
+    },
+    "parameters" : {
+      "def" : [ {
+        "localId" : "10",
+        "locator" : "17:1-17:49",
+        "name" : "Measurement Period",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "10",
+            "s" : [ {
+              "value" : [ "", "parameter ", "\"Measurement Period\"", " " ]
+            }, {
+              "r" : "9",
+              "s" : [ {
+                "value" : [ "Interval<" ]
+              }, {
+                "r" : "8",
+                "s" : [ {
+                  "value" : [ "DateTime" ]
+                } ]
+              }, {
+                "value" : [ ">" ]
+              } ]
+            } ]
+          }
+        } ],
+        "resultTypeSpecifier" : {
+          "type" : "IntervalTypeSpecifier",
+          "pointType" : {
+            "name" : "{urn:hl7-org:elm-types:r1}DateTime",
+            "type" : "NamedTypeSpecifier"
+          }
+        },
+        "parameterTypeSpecifier" : {
+          "localId" : "9",
+          "locator" : "17:32-17:49",
+          "type" : "IntervalTypeSpecifier",
+          "resultTypeSpecifier" : {
+            "type" : "IntervalTypeSpecifier",
+            "pointType" : {
+              "name" : "{urn:hl7-org:elm-types:r1}DateTime",
+              "type" : "NamedTypeSpecifier"
+            }
+          },
+          "pointType" : {
+            "localId" : "8",
+            "locator" : "17:41-17:48",
+            "resultTypeName" : "{urn:hl7-org:elm-types:r1}DateTime",
+            "name" : "{urn:hl7-org:elm-types:r1}DateTime",
+            "type" : "NamedTypeSpecifier"
+          }
+        }
+      } ]
+    },
+    "codeSystems" : {
+      "def" : [ {
+        "localId" : "2",
+        "locator" : "9:1-9:38",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}CodeSystem",
+        "name" : "LOINC",
+        "id" : "http://loinc.org",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "2",
+            "s" : [ {
+              "value" : [ "", "codesystem ", "\"LOINC\"", ": ", "'http://loinc.org'" ]
+            } ]
+          }
+        } ]
+      } ]
+    },
+    "valueSets" : {
+      "def" : [ {
+        "localId" : "3",
+        "locator" : "11:1-11:139",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+        "name" : "Competing Conditions for Respiratory Conditions",
+        "id" : "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.102.12.1017",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "3",
+            "s" : [ {
+              "value" : [ "", "valueset ", "\"Competing Conditions for Respiratory Conditions\"", ": ", "'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.464.1003.102.12.1017'" ]
+            } ]
+          }
+        } ]
+      }, {
+        "localId" : "4",
+        "locator" : "12:1-12:100",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+        "name" : "Encounter Inpatient",
+        "id" : "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "4",
+            "s" : [ {
+              "value" : [ "", "valueset ", "\"Encounter Inpatient\"", ": ", "'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.666.5.307'" ]
+            } ]
+          }
+        } ]
+      }, {
+        "localId" : "5",
+        "locator" : "13:1-13:123",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+        "name" : "Level of Severity of Retinopathy Findings",
+        "id" : "http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1283",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "5",
+            "s" : [ {
+              "value" : [ "", "valueset ", "\"Level of Severity of Retinopathy Findings\"", ": ", "'http://cts.nlm.nih.gov/fhir/ValueSet/2.16.840.1.113883.3.526.3.1283'" ]
+            } ]
+          }
+        } ]
+      } ]
+    },
+    "codes" : {
+      "def" : [ {
+        "localId" : "7",
+        "locator" : "15:1-15:226",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}Code",
+        "name" : "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)",
+        "id" : "71007-9",
+        "display" : "Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "7",
+            "s" : [ {
+              "value" : [ "", "code ", "\"Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)\"", ": ", "'71007-9'", " from " ]
+            }, {
+              "r" : "6",
+              "s" : [ {
+                "value" : [ "\"LOINC\"" ]
+              } ]
+            }, {
+              "value" : [ " display ", "'Functional Assessment of Chronic Illness Therapy - Palliative Care Questionnaire (FACIT-Pal)'" ]
+            } ]
+          }
+        } ],
+        "codeSystem" : {
+          "localId" : "6",
+          "locator" : "15:117-15:123",
+          "resultTypeName" : "{urn:hl7-org:elm-types:r1}CodeSystem",
+          "name" : "LOINC"
+        }
+      } ]
+    },
+    "contexts" : {
+      "def" : [ {
+        "locator" : "19:1-19:15",
+        "name" : "Patient"
+      } ]
+    },
+    "statements" : {
+      "def" : [ {
+        "locator" : "19:1-19:15",
+        "name" : "Patient",
+        "context" : "Patient",
+        "expression" : {
+          "type" : "SingletonFrom",
+          "operand" : {
+            "locator" : "19:1-19:15",
+            "dataType" : "{http://hl7.org/fhir}Patient",
+            "templateId" : "http://hl7.org/fhir/StructureDefinition/Patient",
+            "type" : "Retrieve"
+          }
+        }
+      }, {
+        "localId" : "13",
+        "locator" : "21:1-22:21",
+        "name" : "SDE Ethnicity",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "13",
+            "s" : [ {
+              "value" : [ "", "define ", "\"SDE Ethnicity\"", ":\n  " ]
+            }, {
+              "r" : "12",
+              "s" : [ {
+                "r" : "11",
+                "s" : [ {
+                  "value" : [ "SDE" ]
+                } ]
+              }, {
+                "value" : [ "." ]
+              }, {
+                "r" : "12",
+                "s" : [ {
+                  "value" : [ "\"SDE Ethnicity\"" ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "expression" : {
+          "localId" : "12",
+          "locator" : "22:3-22:21",
+          "type" : "Null"
+        }
+      }, {
+        "localId" : "16",
+        "locator" : "24:1-25:17",
+        "name" : "SDE Payer",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "16",
+            "s" : [ {
+              "value" : [ "", "define ", "\"SDE Payer\"", ":\n  " ]
+            }, {
+              "r" : "15",
+              "s" : [ {
+                "r" : "14",
+                "s" : [ {
+                  "value" : [ "SDE" ]
+                } ]
+              }, {
+                "value" : [ "." ]
+              }, {
+                "r" : "15",
+                "s" : [ {
+                  "value" : [ "\"SDE Payer\"" ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "expression" : {
+          "localId" : "15",
+          "locator" : "25:3-25:17",
+          "type" : "Null"
+        }
+      }, {
+        "localId" : "19",
+        "locator" : "27:1-28:16",
+        "name" : "SDE Race",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "19",
+            "s" : [ {
+              "value" : [ "", "define ", "\"SDE Race\"", ":\n  " ]
+            }, {
+              "r" : "18",
+              "s" : [ {
+                "r" : "17",
+                "s" : [ {
+                  "value" : [ "SDE" ]
+                } ]
+              }, {
+                "value" : [ "." ]
+              }, {
+                "r" : "18",
+                "s" : [ {
+                  "value" : [ "\"SDE Race\"" ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "expression" : {
+          "localId" : "18",
+          "locator" : "28:3-28:16",
+          "type" : "Null"
+        }
+      }, {
+        "localId" : "28",
+        "locator" : "30:1-32:67",
+        "name" : "Initial Population",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "28",
+            "s" : [ {
+              "value" : [ "", "define ", "\"Initial Population\"", ":\n  " ]
+            }, {
+              "r" : "27",
+              "s" : [ {
+                "s" : [ {
+                  "r" : "21",
+                  "s" : [ {
+                    "r" : "20",
+                    "s" : [ {
+                      "r" : "20",
+                      "s" : [ {
+                        "value" : [ "[", "\"Encounter\"", ": " ]
+                      }, {
+                        "s" : [ {
+                          "value" : [ "\"Encounter Inpatient\"" ]
+                        } ]
+                      }, {
+                        "value" : [ "]" ]
+                      } ]
+                    } ]
+                  }, {
+                    "value" : [ " ", "Enc" ]
+                  } ]
+                } ]
+              }, {
+                "value" : [ "\n                  " ]
+              }, {
+                "r" : "26",
+                "s" : [ {
+                  "value" : [ "where " ]
+                }, {
+                  "r" : "25",
+                  "s" : [ {
+                    "r" : "23",
+                    "s" : [ {
+                      "r" : "22",
+                      "s" : [ {
+                        "value" : [ "Enc" ]
+                      } ]
+                    }, {
+                      "value" : [ "." ]
+                    }, {
+                      "r" : "23",
+                      "s" : [ {
+                        "value" : [ "period" ]
+                      } ]
+                    } ]
+                  }, {
+                    "r" : "25",
+                    "value" : [ " ", "ends during", " " ]
+                  }, {
+                    "r" : "24",
+                    "s" : [ {
+                      "value" : [ "\"Measurement Period\"" ]
+                    } ]
+                  } ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "resultTypeSpecifier" : {
+          "type" : "ListTypeSpecifier",
+          "elementType" : {
+            "name" : "{http://hl7.org/fhir}Encounter",
+            "type" : "NamedTypeSpecifier"
+          }
+        },
+        "expression" : {
+          "localId" : "27",
+          "locator" : "31:3-32:67",
+          "type" : "Query",
+          "resultTypeSpecifier" : {
+            "type" : "ListTypeSpecifier",
+            "elementType" : {
+              "name" : "{http://hl7.org/fhir}Encounter",
+              "type" : "NamedTypeSpecifier"
+            }
+          },
+          "source" : [ {
+            "localId" : "21",
+            "locator" : "31:3-31:42",
+            "alias" : "Enc",
+            "resultTypeSpecifier" : {
+              "type" : "ListTypeSpecifier",
+              "elementType" : {
+                "name" : "{http://hl7.org/fhir}Encounter",
+                "type" : "NamedTypeSpecifier"
+              }
+            },
+            "expression" : {
+              "localId" : "20",
+              "locator" : "31:3-31:38",
+              "dataType" : "{http://hl7.org/fhir}Encounter",
+              "templateId" : "http://hl7.org/fhir/StructureDefinition/Encounter",
+              "codeProperty" : "type",
+              "codeComparator" : "in",
+              "type" : "Retrieve",
+              "resultTypeSpecifier" : {
+                "type" : "ListTypeSpecifier",
+                "elementType" : {
+                  "name" : "{http://hl7.org/fhir}Encounter",
+                  "type" : "NamedTypeSpecifier"
+                }
+              },
+              "codes" : {
+                "locator" : "31:17-31:37",
+                "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+                "name" : "Encounter Inpatient",
+                "preserve" : true,
+                "type" : "ValueSetRef"
+              }
+            }
+          } ],
+          "relationship" : [ ],
+          "where" : {
+            "localId" : "26",
+            "locator" : "32:19-32:67",
+            "type" : "Null"
+          }
+        }
+      }, {
+        "localId" : "30",
+        "locator" : "34:1-35:22",
+        "name" : "Measure Population",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "30",
+            "s" : [ {
+              "value" : [ "", "define ", "\"Measure Population\"", ":\n  " ]
+            }, {
+              "r" : "29",
+              "s" : [ {
+                "value" : [ "\"Initial Population\"" ]
+              } ]
+            } ]
+          }
+        } ],
+        "resultTypeSpecifier" : {
+          "type" : "ListTypeSpecifier",
+          "elementType" : {
+            "name" : "{http://hl7.org/fhir}Encounter",
+            "type" : "NamedTypeSpecifier"
+          }
+        },
+        "expression" : {
+          "localId" : "29",
+          "locator" : "35:3-35:22",
+          "name" : "Initial Population",
+          "type" : "ExpressionRef",
+          "resultTypeSpecifier" : {
+            "type" : "ListTypeSpecifier",
+            "elementType" : {
+              "name" : "{http://hl7.org/fhir}Encounter",
+              "type" : "NamedTypeSpecifier"
+            }
+          }
+        }
+      }, {
+        "localId" : "43",
+        "locator" : "37:1-41:19",
+        "name" : "Measure Population Exclusions",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "43",
+            "s" : [ {
+              "value" : [ "", "define ", "\"Measure Population Exclusions\"", ":\n  " ]
+            }, {
+              "r" : "42",
+              "s" : [ {
+                "s" : [ {
+                  "r" : "32",
+                  "s" : [ {
+                    "r" : "31",
+                    "s" : [ {
+                      "s" : [ {
+                        "value" : [ "\"Initial Population\"" ]
+                      } ]
+                    } ]
+                  }, {
+                    "value" : [ " ", "Pop" ]
+                  } ]
+                } ]
+              }, {
+                "value" : [ "\n                  " ]
+              }, {
+                "r" : "41",
+                "s" : [ {
+                  "value" : [ "where " ]
+                }, {
+                  "r" : "41",
+                  "s" : [ {
+                    "value" : [ "exists " ]
+                  }, {
+                    "r" : "40",
+                    "s" : [ {
+                      "value" : [ "( " ]
+                    }, {
+                      "r" : "40",
+                      "s" : [ {
+                        "s" : [ {
+                          "r" : "34",
+                          "s" : [ {
+                            "r" : "33",
+                            "s" : [ {
+                              "s" : [ {
+                                "value" : [ "Pop", ".", "diagnosis" ]
+                              } ]
+                            } ]
+                          }, {
+                            "value" : [ " ", "diag" ]
+                          } ]
+                        } ]
+                      }, {
+                        "value" : [ "\n                      " ]
+                      }, {
+                        "r" : "39",
+                        "s" : [ {
+                          "value" : [ "where " ]
+                        }, {
+                          "r" : "38",
+                          "s" : [ {
+                            "r" : "36",
+                            "s" : [ {
+                              "r" : "35",
+                              "s" : [ {
+                                "value" : [ "diag" ]
+                              } ]
+                            }, {
+                              "value" : [ "." ]
+                            }, {
+                              "r" : "36",
+                              "s" : [ {
+                                "value" : [ "rank" ]
+                              } ]
+                            } ]
+                          }, {
+                            "r" : "37",
+                            "value" : [ " ", "=", " ", "1" ]
+                          } ]
+                        } ]
+                      } ]
+                    }, {
+                      "value" : [ "\n                  )" ]
+                    } ]
+                  } ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "resultTypeSpecifier" : {
+          "type" : "ListTypeSpecifier",
+          "elementType" : {
+            "name" : "{http://hl7.org/fhir}Encounter",
+            "type" : "NamedTypeSpecifier"
+          }
+        },
+        "expression" : {
+          "localId" : "42",
+          "locator" : "38:3-41:19",
+          "type" : "Query",
+          "resultTypeSpecifier" : {
+            "type" : "ListTypeSpecifier",
+            "elementType" : {
+              "name" : "{http://hl7.org/fhir}Encounter",
+              "type" : "NamedTypeSpecifier"
+            }
+          },
+          "source" : [ {
+            "localId" : "32",
+            "locator" : "38:3-38:26",
+            "alias" : "Pop",
+            "resultTypeSpecifier" : {
+              "type" : "ListTypeSpecifier",
+              "elementType" : {
+                "name" : "{http://hl7.org/fhir}Encounter",
+                "type" : "NamedTypeSpecifier"
+              }
+            },
+            "expression" : {
+              "localId" : "31",
+              "locator" : "38:3-38:22",
+              "name" : "Initial Population",
+              "type" : "ExpressionRef",
+              "resultTypeSpecifier" : {
+                "type" : "ListTypeSpecifier",
+                "elementType" : {
+                  "name" : "{http://hl7.org/fhir}Encounter",
+                  "type" : "NamedTypeSpecifier"
+                }
+              }
+            }
+          } ],
+          "relationship" : [ ],
+          "where" : {
+            "localId" : "41",
+            "locator" : "39:19-41:19",
+            "resultTypeName" : "{urn:hl7-org:elm-types:r1}Boolean",
+            "type" : "Exists",
+            "operand" : {
+              "localId" : "40",
+              "locator" : "39:32-41:19",
+              "type" : "Query",
+              "resultTypeSpecifier" : {
+                "type" : "ListTypeSpecifier",
+                "elementType" : {
+                  "name" : "{http://hl7.org/fhir}Encounter.Diagnosis",
+                  "type" : "NamedTypeSpecifier"
+                }
+              },
+              "source" : [ {
+                "localId" : "34",
+                "locator" : "39:34-39:51",
+                "alias" : "diag",
+                "resultTypeSpecifier" : {
+                  "type" : "ListTypeSpecifier",
+                  "elementType" : {
+                    "name" : "{http://hl7.org/fhir}Encounter.Diagnosis",
+                    "type" : "NamedTypeSpecifier"
+                  }
+                },
+                "expression" : {
+                  "localId" : "33",
+                  "locator" : "39:34-39:46",
+                  "path" : "diagnosis",
+                  "scope" : "Pop",
+                  "type" : "Property",
+                  "resultTypeSpecifier" : {
+                    "type" : "ListTypeSpecifier",
+                    "elementType" : {
+                      "name" : "{http://hl7.org/fhir}Encounter.Diagnosis",
+                      "type" : "NamedTypeSpecifier"
+                    }
+                  }
+                }
+              } ],
+              "relationship" : [ ],
+              "where" : {
+                "localId" : "39",
+                "locator" : "40:23-40:41",
+                "type" : "Null"
+              }
+            }
+          }
+        }
+      }, {
+        "localId" : "57",
+        "locator" : "43:1-46:52",
+        "name" : "Valid Encounter",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "57",
+            "s" : [ {
+              "value" : [ "", "define ", "\"Valid Encounter\"", ":\n  " ]
+            }, {
+              "r" : "56",
+              "s" : [ {
+                "s" : [ {
+                  "r" : "45",
+                  "s" : [ {
+                    "r" : "44",
+                    "s" : [ {
+                      "r" : "44",
+                      "s" : [ {
+                        "value" : [ "[", "\"Encounter\"", ": " ]
+                      }, {
+                        "s" : [ {
+                          "value" : [ "\"Encounter Inpatient\"" ]
+                        } ]
+                      }, {
+                        "value" : [ "]" ]
+                      } ]
+                    } ]
+                  }, {
+                    "value" : [ " ", "Encounter" ]
+                  } ]
+                } ]
+              }, {
+                "value" : [ "\n                  " ]
+              }, {
+                "r" : "55",
+                "s" : [ {
+                  "value" : [ "where " ]
+                }, {
+                  "r" : "54",
+                  "s" : [ {
+                    "r" : "49",
+                    "s" : [ {
+                      "r" : "47",
+                      "s" : [ {
+                        "r" : "46",
+                        "s" : [ {
+                          "value" : [ "Encounter" ]
+                        } ]
+                      }, {
+                        "value" : [ "." ]
+                      }, {
+                        "r" : "47",
+                        "s" : [ {
+                          "value" : [ "period" ]
+                        } ]
+                      } ]
+                    }, {
+                      "r" : "49",
+                      "value" : [ " ", "during", " " ]
+                    }, {
+                      "r" : "48",
+                      "s" : [ {
+                        "value" : [ "\"Measurement Period\"" ]
+                      } ]
+                    } ]
+                  }, {
+                    "value" : [ "\n                    and " ]
+                  }, {
+                    "r" : "53",
+                    "s" : [ {
+                      "r" : "51",
+                      "s" : [ {
+                        "r" : "50",
+                        "s" : [ {
+                          "value" : [ "Encounter" ]
+                        } ]
+                      }, {
+                        "value" : [ "." ]
+                      }, {
+                        "r" : "51",
+                        "s" : [ {
+                          "value" : [ "length" ]
+                        } ]
+                      } ]
+                    }, {
+                      "value" : [ " ", ">=", " " ]
+                    }, {
+                      "r" : "52",
+                      "s" : [ {
+                        "value" : [ "24 ", "hours" ]
+                      } ]
+                    } ]
+                  } ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "resultTypeSpecifier" : {
+          "type" : "ListTypeSpecifier",
+          "elementType" : {
+            "name" : "{http://hl7.org/fhir}Encounter",
+            "type" : "NamedTypeSpecifier"
+          }
+        },
+        "expression" : {
+          "localId" : "56",
+          "locator" : "44:3-46:52",
+          "type" : "Query",
+          "resultTypeSpecifier" : {
+            "type" : "ListTypeSpecifier",
+            "elementType" : {
+              "name" : "{http://hl7.org/fhir}Encounter",
+              "type" : "NamedTypeSpecifier"
+            }
+          },
+          "source" : [ {
+            "localId" : "45",
+            "locator" : "44:3-44:48",
+            "alias" : "Encounter",
+            "resultTypeSpecifier" : {
+              "type" : "ListTypeSpecifier",
+              "elementType" : {
+                "name" : "{http://hl7.org/fhir}Encounter",
+                "type" : "NamedTypeSpecifier"
+              }
+            },
+            "expression" : {
+              "localId" : "44",
+              "locator" : "44:3-44:38",
+              "dataType" : "{http://hl7.org/fhir}Encounter",
+              "templateId" : "http://hl7.org/fhir/StructureDefinition/Encounter",
+              "codeProperty" : "type",
+              "codeComparator" : "in",
+              "type" : "Retrieve",
+              "resultTypeSpecifier" : {
+                "type" : "ListTypeSpecifier",
+                "elementType" : {
+                  "name" : "{http://hl7.org/fhir}Encounter",
+                  "type" : "NamedTypeSpecifier"
+                }
+              },
+              "codes" : {
+                "locator" : "44:17-44:37",
+                "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+                "name" : "Encounter Inpatient",
+                "preserve" : true,
+                "type" : "ValueSetRef"
+              }
+            }
+          } ],
+          "relationship" : [ ],
+          "where" : {
+            "localId" : "55",
+            "locator" : "45:19-46:52",
+            "type" : "Null"
+          }
+        }
+      }, {
+        "localId" : "61",
+        "locator" : "48:1-49:26",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}Integer",
+        "name" : "Measure Observation",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "type" : "FunctionDef",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "61",
+            "s" : [ {
+              "value" : [ "", "define function ", "\"Measure Observation\"", "(", "Enc", " " ]
+            }, {
+              "r" : "58",
+              "s" : [ {
+                "value" : [ "\"Encounter\"" ]
+              } ]
+            }, {
+              "value" : [ " ):\n  " ]
+            }, {
+              "r" : "60",
+              "s" : [ {
+                "r" : "60",
+                "s" : [ {
+                  "value" : [ "Count", "(" ]
+                }, {
+                  "r" : "59",
+                  "s" : [ {
+                    "value" : [ "\"Valid Encounter\"" ]
+                  } ]
+                }, {
+                  "value" : [ ")" ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "expression" : {
+          "localId" : "60",
+          "locator" : "49:3-49:26",
+          "resultTypeName" : "{urn:hl7-org:elm-types:r1}Integer",
+          "type" : "Count",
+          "source" : {
+            "localId" : "59",
+            "locator" : "49:9-49:25",
+            "name" : "Valid Encounter",
+            "type" : "ExpressionRef",
+            "resultTypeSpecifier" : {
+              "type" : "ListTypeSpecifier",
+              "elementType" : {
+                "name" : "{http://hl7.org/fhir}Encounter",
+                "type" : "NamedTypeSpecifier"
+              }
+            }
+          }
+        },
+        "operand" : [ {
+          "name" : "Enc",
+          "operandTypeSpecifier" : {
+            "localId" : "58",
+            "locator" : "48:43-48:53",
+            "resultTypeName" : "{http://hl7.org/fhir}Encounter",
+            "name" : "{http://hl7.org/fhir}Encounter",
+            "type" : "NamedTypeSpecifier"
+          }
+        } ]
+      }, {
+        "localId" : "71",
+        "locator" : "52:1-54:58",
+        "resultTypeName" : "{urn:hl7-org:elm-types:r1}Boolean",
+        "name" : "Unused Boolean Definition",
+        "context" : "Patient",
+        "accessLevel" : "Public",
+        "annotation" : [ {
+          "type" : "Annotation",
+          "s" : {
+            "r" : "71",
+            "s" : [ {
+              "value" : [ "", "define ", "\"Unused Boolean Definition\"", ":\n  " ]
+            }, {
+              "r" : "70",
+              "s" : [ {
+                "value" : [ "exists " ]
+              }, {
+                "r" : "69",
+                "s" : [ {
+                  "s" : [ {
+                    "r" : "63",
+                    "s" : [ {
+                      "r" : "62",
+                      "s" : [ {
+                        "r" : "62",
+                        "s" : [ {
+                          "value" : [ "[", "\"Communication\"", ": " ]
+                        }, {
+                          "s" : [ {
+                            "value" : [ "\"Level of Severity of Retinopathy Findings\"" ]
+                          } ]
+                        }, {
+                          "value" : [ "]" ]
+                        } ]
+                      } ]
+                    }, {
+                      "value" : [ " ", "Communication" ]
+                    } ]
+                  } ]
+                }, {
+                  "value" : [ "\n          " ]
+                }, {
+                  "r" : "68",
+                  "s" : [ {
+                    "value" : [ "where " ]
+                  }, {
+                    "r" : "67",
+                    "s" : [ {
+                      "r" : "65",
+                      "s" : [ {
+                        "r" : "64",
+                        "s" : [ {
+                          "value" : [ "Communication" ]
+                        } ]
+                      }, {
+                        "value" : [ "." ]
+                      }, {
+                        "r" : "65",
+                        "s" : [ {
+                          "value" : [ "sent" ]
+                        } ]
+                      } ]
+                    }, {
+                      "value" : [ " in " ]
+                    }, {
+                      "r" : "66",
+                      "s" : [ {
+                        "value" : [ "\"Measurement Period\"" ]
+                      } ]
+                    } ]
+                  } ]
+                } ]
+              } ]
+            } ]
+          }
+        } ],
+        "expression" : {
+          "localId" : "70",
+          "locator" : "53:3-54:58",
+          "resultTypeName" : "{urn:hl7-org:elm-types:r1}Boolean",
+          "type" : "Exists",
+          "operand" : {
+            "localId" : "69",
+            "locator" : "53:10-54:58",
+            "type" : "Query",
+            "resultTypeSpecifier" : {
+              "type" : "ListTypeSpecifier",
+              "elementType" : {
+                "name" : "{http://hl7.org/fhir}Communication",
+                "type" : "NamedTypeSpecifier"
+              }
+            },
+            "source" : [ {
+              "localId" : "63",
+              "locator" : "53:10-53:85",
+              "alias" : "Communication",
+              "resultTypeSpecifier" : {
+                "type" : "ListTypeSpecifier",
+                "elementType" : {
+                  "name" : "{http://hl7.org/fhir}Communication",
+                  "type" : "NamedTypeSpecifier"
+                }
+              },
+              "expression" : {
+                "localId" : "62",
+                "locator" : "53:10-53:71",
+                "dataType" : "{http://hl7.org/fhir}Communication",
+                "templateId" : "http://hl7.org/fhir/StructureDefinition/Communication",
+                "codeProperty" : "reasonCode",
+                "codeComparator" : "in",
+                "type" : "Retrieve",
+                "resultTypeSpecifier" : {
+                  "type" : "ListTypeSpecifier",
+                  "elementType" : {
+                    "name" : "{http://hl7.org/fhir}Communication",
+                    "type" : "NamedTypeSpecifier"
+                  }
+                },
+                "codes" : {
+                  "locator" : "53:28-53:70",
+                  "resultTypeName" : "{urn:hl7-org:elm-types:r1}ValueSet",
+                  "name" : "Level of Severity of Retinopathy Findings",
+                  "preserve" : true,
+                  "type" : "ValueSetRef"
+                }
+              }
+            } ],
+            "relationship" : [ ],
+            "where" : {
+              "localId" : "68",
+              "locator" : "54:11-54:58",
+              "type" : "Null"
+            }
+          }
+        }
+      } ]
+    }
+  },
+  "externalErrors" : [ ]
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE suppressions PUBLIC
+  "-//Checkstyle//DTD SuppressionFilter Configuration 1.2//EN"
+  "https://checkstyle.org/dtds/suppressions_1_2.dtd">
+
+<suppressions>
+  <suppress checks="FileLength"
+    files="gov/cms/mat/cql_elm_translation/utils/cql/"
+  />
+  <suppress checks="MethodLength"
+            files="gov/cms/mat/cql_elm_translation/utils/cql/"
+  />
+  <suppress checks="NeedBraces"
+            files="gov/cms/mat/cql_elm_translation/utils/cql/"
+  />
+</suppressions>
