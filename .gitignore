@@ -34,7 +34,7 @@ build/
 
 .mvn
 .jpb
-
+bin/
 
 **/*.log
 *.gz

@@ -147,7 +147,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     CqlTranslator translator =
-        TranslationResource.getInstance(false)
+        new TranslationResource(false)
             .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
@@ -185,7 +185,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
     doReturn(matGlobalCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
 
-    CqlTranslator translator = TranslationResource.getInstance(false).buildTranslator(requestData);
+    CqlTranslator translator = new TranslationResource(false).buildTranslator(requestData);
     verify(cqlLibraryService).getLibraryCql(any(), any(), any());
     Mockito.doNothing()
         .when(cqlLibraryService)
@@ -244,7 +244,7 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
     CqlTranslator translator =
-        TranslationResource.getInstance(false)
+        new TranslationResource(false)
             .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()

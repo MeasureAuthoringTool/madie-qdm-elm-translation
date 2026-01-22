@@ -292,8 +292,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .resultTypes(true)
             .build();
 
-    CqlTranslator cqlTranslator =
-        TranslationResource.getInstance(true).buildTranslator(requestData);
+    CqlTranslator cqlTranslator = new TranslationResource(true).buildTranslator(requestData);
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
     service.validateRetrieve(cqlTranslator);
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(3)));
@@ -317,8 +316,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             .resultTypes(true)
             .build();
 
-    CqlTranslator cqlTranslator =
-        TranslationResource.getInstance(true).buildTranslator(requestData);
+    CqlTranslator cqlTranslator = new TranslationResource(true).buildTranslator(requestData);
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
     service.validateRetrieve(cqlTranslator);
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
