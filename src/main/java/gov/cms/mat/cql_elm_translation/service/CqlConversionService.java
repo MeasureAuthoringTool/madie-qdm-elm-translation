@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.madie.cql_elm_translator.utils.MadieCqlValidator;
@@ -151,6 +152,13 @@ public class CqlConversionService extends CqlTooling {
       return null;
     }
     return super.processCqlData(requestData);
+  }
+
+  public TranslationResource getTranslationResource(RequestData requestData) {
+    if (requestData == null || StringUtils.isBlank(requestData.getCqlData())) {
+      return null;
+    }
+    return super.getTranslationResource(requestData);
   }
 
   public TranslatedLibrary buildTranslatedLibrary(

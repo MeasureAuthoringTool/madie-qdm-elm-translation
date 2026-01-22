@@ -8,6 +8,7 @@ import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
+import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
@@ -95,6 +96,42 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     lenient()
         .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
         .thenReturn(mock(ModelManager.class));
+  }
+
+  @Test
+  void testGetTranslationResourceReturnsNullForNullRequestData() {
+    // given
+    RequestData nullRequestData = null;
+
+    // when
+    TranslationResource result = service.getTranslationResource(nullRequestData);
+
+    // then
+    assertThat(result, is(equalTo(null)));
+  }
+
+  @Test
+  void testGetTranslationResourceReturnsNullForNullCql() {
+    // given
+    RequestData requestDataWithNullCql = requestData.toBuilder().cqlData(null).build();
+
+    // when
+    TranslationResource result = service.getTranslationResource(requestDataWithNullCql);
+
+    // then
+    assertThat(result, is(equalTo(null)));
+  }
+
+  @Test
+  void testGetTranslationResourceReturnsNullForEmptyCql() {
+    // given
+    RequestData requestDataWithEmptyCql = requestData.toBuilder().cqlData("").build();
+
+    // when
+    TranslationResource result = service.getTranslationResource(requestDataWithEmptyCql);
+
+    // then
+    assertThat(result, is(equalTo(null)));
   }
 
   @Test

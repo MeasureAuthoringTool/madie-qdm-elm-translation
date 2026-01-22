@@ -116,6 +116,11 @@ public abstract class CqlTooling {
   }
 
   protected CqlTranslator processCqlData(RequestData requestData) {
+    TranslationResource translationResource = getTranslationResource(requestData);
+    return translationResource.buildTranslator(requestData);
+  }
+
+  protected TranslationResource getTranslationResource(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties =
         fhirUtil.getMostSpecificFhirModel(cqlTextParser.getAllUsings());
@@ -129,9 +134,9 @@ public abstract class CqlTooling {
               .withId(usingProperties.getLibraryType())
               .withVersion(usingProperties.getVersion());
       ModelManager modelManager = modelManagerFactory.getModelManager(modelIdentifier);
-      return TranslationResource.getInstance(modelManager, true).buildTranslator(requestData);
+      return new TranslationResource(modelManager, true);
     } else {
-      return TranslationResource.getInstance(true).buildTranslator(requestData);
+      return new TranslationResource(true);
     }
   }
 

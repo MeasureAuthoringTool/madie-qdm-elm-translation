@@ -3,7 +3,6 @@ package gov.cms.mat.cql_elm_translation.service;
 import ca.uhn.fhir.context.FhirContext;
 import ca.uhn.fhir.parser.IParser;
 import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
-import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,6 +25,7 @@ import static org.cqframework.cql.elm.requirements.fhir.utilities.SpecificationL
 public class EffectiveDataRequirementService {
   private final FhirContext fhirContextForR5;
   private final CqlLibraryService cqlLibraryService;
+  private final CqlConversionService cqlConversionService;
 
   private RequestData createDefaultRequestData(String cql) {
     return RequestData.builder()
@@ -58,9 +58,8 @@ public class EffectiveDataRequirementService {
 
     // setting up the librarySourceProvider to fetch included libraries
     cqlLibraryService.setUpLibrarySourceProvider(libraryDetails.getCql(), accessToken);
-
-    var translationResource = TranslationResource.getInstance(true);
     RequestData requestData = createDefaultRequestData(libraryDetails.getCql());
+    var translationResource = cqlConversionService.getTranslationResource(requestData);
     CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
     CompiledLibrary translatedLibrary = cqlTranslator.getTranslatedLibrary();
     LibraryManager libraryManager = translationResource.getLibraryManager();
