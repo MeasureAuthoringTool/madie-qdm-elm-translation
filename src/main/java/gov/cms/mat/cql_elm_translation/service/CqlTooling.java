@@ -106,7 +106,7 @@ public abstract class CqlTooling {
   protected CqlTranslator processCqlData(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
-    return TranslationResource.getInstance(
+    return new TranslationResource(
             usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
         .buildTranslator(requestData);
   }
