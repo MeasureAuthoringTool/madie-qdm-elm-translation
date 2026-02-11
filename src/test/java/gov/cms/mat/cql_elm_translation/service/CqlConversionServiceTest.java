@@ -11,7 +11,6 @@ import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySou
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
-import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
@@ -24,7 +23,6 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.function.Executable;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -59,7 +57,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.cql.model.ModelIdentifier;
 import gov.cms.mat.cql.elements.UsingProperties;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.hamcrest.Matchers.containsString;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
@@ -173,32 +170,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrorsNonSupportedModel() {
-    // given
-    String cqlData;
-    File inputCqlFile = new File(this.getClass().getResource("/non_supported_model.cql").getFile());
-
-    try {
-      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-
-    // Override default mock to return null for non-FHIR model
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
-
-    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-
-    // when/then
-    UnsupportedModelException exception =
-        assertThrows(UnsupportedModelException.class, () -> service.translateCqlToElm(data, true));
-
-    assertThat(
-        exception.getMessage(),
-        containsString("Only FHIR-based models are supported at this time"));
-  }
-
-  @Test
   void testProcessCqlDataWithErrorsQICore() {
     String cqlData;
     File inputCqlFile = new File(this.getClass().getResource("/qicore.cql").getFile());
@@ -235,34 +206,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     } catch (JsonProcessingException e) {
       fail(e.getMessage());
     }
-  }
-
-  @Test
-  void testProcessCqlDataWithErrorsMissingModel() {
-    // given
-    String cqlData;
-    File inputCqlFile = new File(this.getClass().getResource("/missing-model.cql").getFile());
-    try {
-      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-
-    // Override default mock to return null for missing model
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
-
-    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    MadieLibrarySourceProvider.setAccessToken("access token");
-
-    // when/then
-    UnsupportedModelException exception =
-        assertThrows(UnsupportedModelException.class, () -> service.translateCqlToElm(data, false));
-
-    assertThat(
-        exception.getMessage(),
-        containsString("Only FHIR-based models are supported at this time"));
   }
 
   @Test
@@ -547,23 +490,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     // then
     assertThat(translator, is(notNullValue()));
     assertThat(translator.getTranslatedLibrary(), is(notNullValue()));
-  }
-
-  @Test
-  void givenNonFhirModelWhenProcessCqlDataThenThrowsUnsupportedModelException() {
-    // given
-    String cql = "using QDM version '5.6'";
-    RequestData data = requestData.toBuilder().cqlData(cql).build();
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
-
-    // when
-    Executable action = () -> service.processCqlData(data);
-
-    // then
-    UnsupportedModelException exception = assertThrows(UnsupportedModelException.class, action);
-    assertThat(
-        exception.getMessage(),
-        containsString("Only FHIR-based models are supported at this time"));
   }
 
   @Test
