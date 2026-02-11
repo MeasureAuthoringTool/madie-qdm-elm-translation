@@ -132,6 +132,73 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
+  void testGetTranslationResourceWithFhirVersion7OrAbove() {
+    // given
+    String cqlData = "using FHIR version '7.0.0'";
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    UsingProperties usingProperties = createUsingProperties("FHIR", "7.0.0");
+    ModelManager modelManager = mock(ModelManager.class);
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    lenient()
+        .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
+        .thenReturn(modelManager);
+
+    // when
+    TranslationResource result = service.getTranslationResource(data);
+
+    // then
+    assertNotNull(result);
+    assertThat(result.getLibraryManager(), is(notNullValue()));
+  }
+
+  @Test
+  void testGetTranslationResourceWithFhirVersionBelow7() {
+    // given
+    String cqlData = "using FHIR version '4.0.1'";
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    UsingProperties usingProperties = createUsingProperties("FHIR", "4.0.1");
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+
+    // when
+    TranslationResource result = service.getTranslationResource(data);
+
+    // then
+    assertNotNull(result);
+    assertThat(result.getLibraryManager(), is(notNullValue()));
+  }
+
+  @Test
+  void testGetTranslationResourceWithNullUsingProperties() {
+    // given
+    String cqlData = "library Test version '1.0.0'";
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+
+    // when
+    TranslationResource result = service.getTranslationResource(data);
+
+    // then
+    assertNotNull(result);
+    assertThat(result.getLibraryManager(), is(notNullValue()));
+  }
+
+  @Test
+  void testGetTranslationResourceWithNullVersion() {
+    // given
+    String cqlData = "using FHIR";
+    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
+    UsingProperties usingProperties = createUsingProperties("FHIR", null);
+    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+
+    // when
+    TranslationResource result = service.getTranslationResource(data);
+
+    // then
+    assertNotNull(result);
+    assertThat(result.getLibraryManager(), is(notNullValue()));
+  }
+
+  @Test
   void testProcessCqlDataWithErrors() {
     String cqlData;
     File inputCqlFile = new File(this.getClass().getResource("/fhir.cql").getFile());
