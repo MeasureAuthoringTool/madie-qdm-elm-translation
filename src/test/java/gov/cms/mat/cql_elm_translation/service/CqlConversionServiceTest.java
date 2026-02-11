@@ -57,6 +57,7 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.hl7.cql.model.ModelIdentifier;
 import gov.cms.mat.cql.elements.UsingProperties;
 import static org.hamcrest.Matchers.notNullValue;
+import static org.mockito.Mockito.when;
 
 @SpringBootTest
 class CqlConversionServiceTest implements ResourceFileUtil {
@@ -138,10 +139,8 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     UsingProperties usingProperties = createUsingProperties("FHIR", "7.0.0");
     ModelManager modelManager = mock(ModelManager.class);
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
-    lenient()
-        .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
-        .thenReturn(modelManager);
+    when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    when(modelManagerFactory.getModelManager(any(ModelIdentifier.class))).thenReturn(modelManager);
 
     // when
     TranslationResource result = service.getTranslationResource(data);
@@ -157,7 +156,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     String cqlData = "using FHIR version '4.0.1'";
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     UsingProperties usingProperties = createUsingProperties("FHIR", "4.0.1");
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
 
     // when
     TranslationResource result = service.getTranslationResource(data);
@@ -172,7 +171,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     // given
     String cqlData = "library Test version '1.0.0'";
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
+    when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(null);
 
     // when
     TranslationResource result = service.getTranslationResource(data);
@@ -188,7 +187,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     String cqlData = "using FHIR";
     RequestData data = requestData.toBuilder().cqlData(cqlData).build();
     UsingProperties usingProperties = createUsingProperties("FHIR", null);
-    lenient().when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
+    when(fhirUtil.getMostSpecificFhirModel(any())).thenReturn(usingProperties);
 
     // when
     TranslationResource result = service.getTranslationResource(data);
