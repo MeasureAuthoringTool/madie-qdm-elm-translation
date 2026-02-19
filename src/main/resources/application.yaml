@@ -3,6 +3,9 @@ server:
   servlet:
     context-path: /api/fhir
 
+cql-translator:
+  version: @cqframework.version@
+
 spring:
   profiles:
     active: local
