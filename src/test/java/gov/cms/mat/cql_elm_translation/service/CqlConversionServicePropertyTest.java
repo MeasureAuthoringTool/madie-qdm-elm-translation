@@ -90,7 +90,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_locators() {
-    String locatorTag = "\"locator\" : ";
+    String locatorTag = "\"locator\":";
 
     String jsonDefault = getJson();
     assertTrue(jsonDefault.contains(locatorTag));
