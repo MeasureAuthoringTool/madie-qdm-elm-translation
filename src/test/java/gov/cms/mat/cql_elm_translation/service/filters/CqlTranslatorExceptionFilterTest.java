@@ -13,7 +13,7 @@ import java.util.Objects;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlCompilerException.ErrorSeverity;
 import org.cqframework.cql.cql2elm.CqlSemanticException;
-import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.cql.cql2elm.tracking.TrackBack;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -42,36 +42,43 @@ public class CqlTranslatorExceptionFilterTest {
     cqlTranslatorExceptions.add(
         new CqlSemanticException(
             "Member relevantDatetime not found for type null.",
+            new TrackBack(versionedIdentifier, 2, 2, 2, 12),
             ErrorSeverity.Error,
-            new TrackBack(versionedIdentifier, 2, 2, 2, 12)));
+            null));
     cqlTranslatorExceptions.add(
         new CqlSemanticException(
             "just warning",
+            new TrackBack(versionedIdentifier, 3, 3, 3, 13),
             ErrorSeverity.Warning,
-            new TrackBack(versionedIdentifier, 3, 3, 3, 13)));
+            null));
     cqlTranslatorExceptions.add(
-        new CqlCompilerException(
+        new CqlSemanticException(
             "org.cqframework.cql.cql2elm.CqlSyntaxException: extraneous input ')' expecting {<EOF>, 'using', 'include', 'public', 'private', 'parameter', 'codesystem', 'valueset', 'code', 'concept', 'define', 'context'}",
-            new TrackBack(versionedIdentifier, 4, 4, 4, 14)));
+            new TrackBack(versionedIdentifier, 4, 4, 4, 14),
+            ErrorSeverity.Error,
+            null));
     cqlTranslatorExceptions.add(
-        new CqlCompilerException(
+        new CqlSemanticException(
             "no viable alternative at input 'define xyz'",
+            new TrackBack(versionedIdentifier, 5, 5, 5, 15),
             ErrorSeverity.Error,
-            new TrackBack(versionedIdentifier, 5, 5, 5, 15)));
+            null));
     cqlTranslatorExceptions.add(
-        new CqlCompilerException(
+        new CqlSemanticException(
             "mismatched input 'display' expecting 'from'",
+            new TrackBack(versionedIdentifier, 6, 6, 6, 16),
             ErrorSeverity.Error,
-            new TrackBack(versionedIdentifier, 6, 6, 6, 16)));
+            null));
 
     VersionedIdentifier includedLibraryIdentifier = new VersionedIdentifier();
     includedLibraryIdentifier.setVersion("7.0.000");
     includedLibraryIdentifier.setId("IncludedLibrary258");
     cqlTranslatorExceptions.add(
-        new CqlCompilerException(
+        new CqlSemanticException(
             "This is an External Error",
+            new TrackBack(includedLibraryIdentifier, 7, 7, 7, 17),
             ErrorSeverity.Error,
-            new TrackBack(includedLibraryIdentifier, 7, 7, 7, 17)));
+            null));
   }
 
   @Test

@@ -20,6 +20,7 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.cql.model.NamespaceManager;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
@@ -68,6 +69,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Mock private CqlLibraryService cqlLibraryService;
   @Mock private FhirUtil fhirUtil;
   @Mock private ModelManagerFactory modelManagerFactory;
+  @Mock private NamespaceManager namespaceManager;
   @InjectMocks private CqlConversionService service;
 
   private static RequestData requestData;
@@ -542,6 +544,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     lenient()
         .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
         .thenReturn(modelManager);
+    lenient().when(modelManager.getNamespaceManager()).thenReturn(namespaceManager);
     // when
     CqlTranslator translator = service.processCqlData(data);
     // then

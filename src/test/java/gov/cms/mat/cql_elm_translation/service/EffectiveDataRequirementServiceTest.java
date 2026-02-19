@@ -11,6 +11,7 @@ import gov.cms.madie.cql_elm_translator.utils.ResourceUtils;
 
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryManager;
+import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.elm.r1.ExpressionDef;
 import org.hl7.elm.r1.Library;
@@ -52,6 +53,7 @@ class EffectiveDataRequirementServiceTest {
   @Mock Library.Usings usings;
   @Mock Library.Statements statements;
   @Mock ExpressionDef expressionDef;
+  @Mock ModelManager modelManager;
 
   @InjectMocks EffectiveDataRequirementService effectiveDataRequirementService;
 
@@ -95,10 +97,10 @@ class EffectiveDataRequirementServiceTest {
     when(translationResource.buildTranslator(any())).thenReturn(cqlTranslator);
     when(translationResource.getLibraryManager()).thenReturn(libraryManager);
     when(cqlTranslator.getTranslatedLibrary()).thenReturn(compiledLibrary);
-    when(cqlTranslator.getTranslatedLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getIdentifier()).thenReturn(versionedIdentifier);
     when(libraryManager.getCompiledLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getLibrary()).thenReturn(elmLibrary);
+    when(libraryManager.getModelManager()).thenReturn(modelManager);
 
     // Mock Library internals
     when(elmLibrary.getUsings()).thenReturn(usings);
@@ -139,10 +141,10 @@ class EffectiveDataRequirementServiceTest {
     when(translationResource.buildTranslator(any())).thenReturn(cqlTranslator);
     when(translationResource.getLibraryManager()).thenReturn(libraryManager);
     when(cqlTranslator.getTranslatedLibrary()).thenReturn(compiledLibrary);
-    when(cqlTranslator.getTranslatedLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getIdentifier()).thenReturn(versionedIdentifier);
     when(libraryManager.getCompiledLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getLibrary()).thenReturn(elmLibrary);
+    when(libraryManager.getModelManager()).thenReturn(modelManager);
 
     // Mock Library internals
     when(elmLibrary.getUsings()).thenReturn(usings);
@@ -197,10 +199,10 @@ class EffectiveDataRequirementServiceTest {
     when(translationResource.buildTranslator(any())).thenReturn(cqlTranslator);
     when(translationResource.getLibraryManager()).thenReturn(libraryManager);
     when(cqlTranslator.getTranslatedLibrary()).thenReturn(compiledLibrary);
-    when(cqlTranslator.getTranslatedLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getIdentifier()).thenReturn(versionedIdentifier);
     when(libraryManager.getCompiledLibraries()).thenReturn(new ConcurrentHashMap<>());
     when(compiledLibrary.getLibrary()).thenReturn(elmLibrary);
+    when(libraryManager.getModelManager()).thenReturn(modelManager);
 
     // Mock Library internals
     when(elmLibrary.getUsings()).thenReturn(usings);

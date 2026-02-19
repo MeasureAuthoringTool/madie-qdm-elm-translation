@@ -11,16 +11,15 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
 import gov.cms.mat.cql_elm_translation.exceptions.UnsupportedModelException;
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
+import kotlinx.io.Source;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 
 import org.apache.commons.collections4.CollectionUtils;
-import org.cqframework.cql.cql2elm.CqlCompilerException;
-import org.cqframework.cql.cql2elm.CqlTranslator;
-import org.cqframework.cql.cql2elm.LibraryBuilder;
-import org.cqframework.cql.cql2elm.ModelManager;
+import org.cqframework.cql.cql2elm.*;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.hl7.cql.model.ModelIdentifier;
+import org.hl7.elm.r1.VersionedIdentifier;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -43,10 +42,13 @@ public abstract class CqlTooling {
       Set<String> parentExpressions,
       CqlCompilerException.ErrorSeverity errorSeverity) {
     // Run Translator to compile libraries
-    CqlTranslator cqlTranslator = runTranslator(cql, accessToken, cqlLibraryService, errorSeverity);
+    RequestData requestData = buildRequestData(cql, accessToken, cqlLibraryService, errorSeverity);
+    TranslationResource translationResource = getTranslationResource(requestData);
+    CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
-    cqlTranslator
-        .getTranslatedLibraries()
+    translationResource
+        .getLibraryManager()
+        .getCompiledLibraries()
         .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
     // if no parentExpressions provided, consider all expressions from main CQL
     Set<String> topLevelExpressions;
@@ -59,7 +61,9 @@ public abstract class CqlTooling {
     CQLTools cqlTools =
         new CQLTools(
             cql,
-            getIncludedLibrariesCql(new MadieLibrarySourceProvider(), cqlTranslator),
+            getIncludedLibrariesCql(
+                new MadieLibrarySourceProvider(),
+                translationResource.getLibraryManager().getCompiledLibraries()),
             topLevelExpressions,
             cqlTranslator,
             translatedLibraries);
@@ -73,17 +77,23 @@ public abstract class CqlTooling {
   }
 
   protected Map<String, String> getIncludedLibrariesCql(
-      MadieLibrarySourceProvider librarySourceProvider, CqlTranslator cqlTranslator) {
+      MadieLibrarySourceProvider librarySourceProvider,
+      Map<VersionedIdentifier, CompiledLibrary> compiledLibraryMap) {
     Map<String, String> includedLibrariesCql = new HashMap<>();
-    for (CompiledLibrary l : cqlTranslator.getTranslatedLibraries().values()) {
+    for (CompiledLibrary l : compiledLibraryMap.values()) {
       try {
+
+        Source librarySource =
+            librarySourceProvider.getLibrarySource(l.getLibrary().getIdentifier());
+        String libraryCql = "";
+        try {
+          libraryCql = readSourceToString(librarySource);
+        } finally {
+          librarySource.close();
+        }
+
         includedLibrariesCql.putIfAbsent(
-            l.getIdentifier().getId() + "-" + l.getIdentifier().getVersion(),
-            new String(
-                librarySourceProvider
-                    .getLibrarySource(l.getLibrary().getIdentifier())
-                    .readAllBytes(),
-                StandardCharsets.UTF_8));
+            l.getIdentifier().getId() + "-" + l.getIdentifier().getVersion(), libraryCql);
       } catch (IOException e) {
         throw new RuntimeException(e);
       }
@@ -91,28 +101,41 @@ public abstract class CqlTooling {
     return includedLibrariesCql;
   }
 
-  // we need to default errorSeverity to Error, but also allow for warnings
-  protected CqlTranslator runTranslator(
+  private String readSourceToString(Source source) throws IOException {
+    try {
+      StringBuilder content = new StringBuilder();
+      byte[] buffer = new byte[8192]; // 8KB buffer
+
+      // Read from source in chunks using readAtMostTo
+      int bytesRead;
+      while ((bytesRead = source.readAtMostTo(buffer, 0, buffer.length)) > 0) {
+        content.append(new String(buffer, 0, bytesRead, StandardCharsets.UTF_8));
+      }
+
+      return content.toString();
+    } finally {
+      source.close();
+    }
+  }
+
+  protected RequestData buildRequestData(
       String cql,
       String accessToken,
       CqlLibraryService cqlLibraryService,
       CqlCompilerException.ErrorSeverity errorSeverity) {
     cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
-    RequestData requestData =
-        RequestData.builder()
-            .cqlData(cql)
-            .errorSeverity(errorSeverity)
-            .signatures(LibraryBuilder.SignatureLevel.All)
-            .annotations(true)
-            .locators(true)
-            .disableListDemotion(true)
-            .disableListPromotion(true)
-            .disableMethodInvocation(false)
-            .validateUnits(true)
-            .resultTypes(true)
-            .build();
-
-    return processCqlData(requestData);
+    return RequestData.builder()
+        .cqlData(cql)
+        .errorSeverity(errorSeverity)
+        .signatures(LibraryBuilder.SignatureLevel.All)
+        .annotations(true)
+        .locators(true)
+        .disableListDemotion(true)
+        .disableListPromotion(true)
+        .disableMethodInvocation(false)
+        .validateUnits(true)
+        .resultTypes(true)
+        .build();
   }
 
   protected CqlTranslator processCqlData(RequestData requestData) {
@@ -130,9 +153,7 @@ public abstract class CqlTooling {
     } else if (usingProperties.getVersion() != null
         && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
       ModelIdentifier modelIdentifier =
-          new ModelIdentifier()
-              .withId(usingProperties.getLibraryType())
-              .withVersion(usingProperties.getVersion());
+          new ModelIdentifier(usingProperties.getLibraryType(), null, usingProperties.getVersion());
       ModelManager modelManager = modelManagerFactory.getModelManager(modelIdentifier);
       return new TranslationResource(modelManager, true);
     } else {

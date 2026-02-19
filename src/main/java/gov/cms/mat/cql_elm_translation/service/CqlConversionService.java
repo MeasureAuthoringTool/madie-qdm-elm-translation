@@ -25,8 +25,10 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
-import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.cql.cql2elm.tracking.Trackable;
+import org.cqframework.cql.elm.serializing.DefaultElmLibraryWriterProvider;
+import org.cqframework.cql.elm.serializing.ElmLibraryWriterProvider;
+import org.cqframework.cql.cql2elm.tracking.TrackBack;
 import org.hl7.elm.r1.CodeDef;
 import org.hl7.elm.r1.CodeSystemDef;
 import org.hl7.elm.r1.Element;
@@ -39,7 +41,6 @@ import org.hl7.elm.r1.VersionedIdentifier;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -194,9 +195,8 @@ public class CqlConversionService extends CqlTooling {
   }
 
   public String convertToJson(Library library, LibraryContentType contentType) throws IOException {
-    StringWriter writer = new StringWriter();
-    ElmLibraryWriterFactory.getWriter(contentType.mimeType()).write(library, writer);
-    return writer.getBuffer().toString();
+    ElmLibraryWriterProvider writer = DefaultElmLibraryWriterProvider.INSTANCE;
+    return writer.create(contentType.mimeType()).writeAsString(library);
   }
 
   private void logErrors(List<CqlCompilerException> exceptions) {
@@ -246,7 +246,7 @@ public class CqlConversionService extends CqlTooling {
     List<Integer> lines = new ArrayList<>();
     if (CollectionUtils.isNotEmpty(defs)) {
       for (Element def : defs) {
-        List<TrackBack> trackBacks = def.getTrackbacks();
+        List<TrackBack> trackBacks = Trackable.INSTANCE.getTrackbacks(def);
         if (CollectionUtils.isNotEmpty(trackBacks)) {
           for (TrackBack trackBack : trackBacks) {
             if ("start".equalsIgnoreCase(type)) {
