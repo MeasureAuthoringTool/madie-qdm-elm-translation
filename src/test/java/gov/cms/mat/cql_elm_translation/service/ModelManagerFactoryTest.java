@@ -226,4 +226,54 @@ public class ModelManagerFactoryTest {
     // Malformed dependency, so knownModelIdentifiers should be empty
     assertThat(factory.getKnownModelIdentifiers().size(), is(0));
   }
+
+  /**
+   * Verifies that when resolveModel throws a runtime exception for one dependency, processing
+   * continues and the next dependency is still registered successfully. This addresses the bug
+   * where an exception from resolveModel was halting the entire forEach loop instead of being
+   * caught and skipped.
+   */
+  @Test
+  void testProcessImplementationGuideResolveModelExceptionDoesNotHaltNextDependency()
+      throws IOException {
+    ImplementationGuide ig = new ImplementationGuide();
+    ig.setId("MainIG");
+    ig.setVersion("2.0.0");
+
+    // First dep — buildModelManager will throw a runtime exception (simulating resolveModel fail)
+    ImplementationGuideDependsOnComponent failingDep = new ImplementationGuideDependsOnComponent();
+    failingDep.setId("FailingDep");
+    failingDep.setVersion("1.0.0");
+
+    // Second dep — buildModelManager should succeed
+    ImplementationGuideDependsOnComponent successDep = new ImplementationGuideDependsOnComponent();
+    successDep.setId("SuccessfulDep");
+    successDep.setVersion("2.0.0");
+
+    ig.setDependsOn(List.of(failingDep, successDep));
+
+    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+    ModelManager successManager = mock(ModelManager.class);
+
+    // First call throws a runtime exception (mimics resolveModel failure), second call succeeds
+    doThrow(new RuntimeException("Simulated resolveModel failure"))
+        .doReturn(successManager)
+        .when(factory)
+        .buildModelManager(any(), any());
+
+    // Should NOT throw — exception must be swallowed and loop must continue
+    assertDoesNotThrow(() -> factory.processImplementationGuide(ig));
+
+    // The failing dep must NOT be in the map
+    assertThat(
+        factory.getKnownModelIdentifiers().stream()
+            .noneMatch(id -> id.getId().equals("FailingDep")),
+        is(true));
+
+    // The successful dep MUST be in the map, proving the loop continued after the failure
+    assertThat(
+        factory.getKnownModelIdentifiers(),
+        hasItem(
+            allOf(hasProperty("id", is("SuccessfulDep")), hasProperty("version", is("2.0.0")))));
+  }
 }
