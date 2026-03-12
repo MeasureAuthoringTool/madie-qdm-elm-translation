@@ -7,7 +7,6 @@ import org.cqframework.cql.cql2elm.ModelManager;
 import org.cqframework.fhir.npm.LibraryLoader;
 import org.cqframework.fhir.npm.NpmModelInfoProvider;
 import org.cqframework.fhir.npm.NpmPackageManager;
-import org.cqframework.fhir.npm.NpmPackageManagerException;
 import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.fhir.r5.context.ILoggingService;
@@ -61,8 +60,15 @@ public class ModelManagerFactory implements ILoggingService {
             .forEach(
                 path -> {
                   String fileName = "igs/" + path.getFileName().toString();
-                  ImplementationGuide ig = fhirUtil.loadImplementationGuide(fileName);
-                  processImplementationGuide(ig);
+                  try {
+                    ImplementationGuide ig = fhirUtil.loadImplementationGuide(fileName);
+                    processImplementationGuide(ig);
+                  } catch (Exception e) {
+                    log.error(
+                        "Error processing IG file: {}, skipping and continuing with next file.",
+                        fileName,
+                        e);
+                  }
                 });
       }
     } catch (Exception e) {
@@ -89,9 +95,9 @@ public class ModelManagerFactory implements ILoggingService {
                   }
                   log.info(
                       "ModelManager created for dependsOn: {}#{}", dep.getUri(), dep.getVersion());
-                } catch (IOException | NpmPackageManagerException e) {
-                  log.info(
-                      "Error occurred and failed to created ModelManager created for dependsOn: {}#{}",
+                } catch (Exception e) {
+                  log.error(
+                      "Error occurred and failed to create ModelManager for dependsOn: {}#{}, skipping and continuing with next dependency.",
                       dep.getUri(),
                       dep.getVersion(),
                       e);
