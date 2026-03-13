@@ -97,7 +97,8 @@ public class ModelManagerFactory implements ILoggingService {
                       "ModelManager created for dependsOn: {}#{}", dep.getUri(), dep.getVersion());
                 } catch (Exception e) {
                   log.error(
-                      "Error occurred and failed to create ModelManager for dependsOn: {}#{}, skipping and continuing with next dependency.",
+                      "Error occurred and failed to create ModelManager for dependsOn: {}#{}, skipping "
+                          + "and continuing with next dependency.",
                       dep.getUri(),
                       dep.getVersion(),
                       e);
