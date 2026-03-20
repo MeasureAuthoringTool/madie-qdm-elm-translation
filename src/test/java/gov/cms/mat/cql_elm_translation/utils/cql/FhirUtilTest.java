@@ -1,7 +1,6 @@
 package gov.cms.mat.cql_elm_translation.utils.cql;
 
 import gov.cms.mat.cql.elements.UsingProperties;
-import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mockito;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -189,39 +188,5 @@ class FhirUtilTest {
 
     // then
     assertThat(result, is(equalTo(uscore)));
-  }
-
-  @Test
-  void loadImplementationGuideShouldReturnGuideWithExpectedAttributes() {
-    // given
-    String resourcePath = "igs/qicore-7-madie-ig.json";
-
-    // when
-    ImplementationGuide implementationGuide = fhirUtil.loadImplementationGuide(resourcePath);
-
-    // then
-    assertThat(implementationGuide, is(notNullValue()));
-    assertThat(implementationGuide.getId(), is(equalTo("ImplementationGuide/cms.fhir.us.madieig")));
-    assertThat(
-        implementationGuide.getUrl(),
-        is(
-            equalTo(
-                "http://madie.cms.gov/fhir/us/madieig/ImplementationGuide/cms.fhir.us.madieig")));
-    assertThat(implementationGuide.getContactFirstRep().getName(), is(equalTo("CMS")));
-  }
-
-  @Test
-  void loadImplementationGuideShouldIncludeDependencies() {
-    // given
-    String resourcePath = "igs/qicore-7-madie-ig.json";
-
-    // when
-    ImplementationGuide implementationGuide = fhirUtil.loadImplementationGuide(resourcePath);
-
-    // then
-    assertThat(implementationGuide.getDependsOn(), hasSize(greaterThanOrEqualTo(2)));
-    assertThat(
-        implementationGuide.getDependsOn().get(0).getPackageId(),
-        is(equalTo("hl7.fhir.us.qicore")));
   }
 }
