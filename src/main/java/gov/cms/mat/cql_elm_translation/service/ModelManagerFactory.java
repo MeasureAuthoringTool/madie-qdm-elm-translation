@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.utils.ImplementationGuideLoader;
 import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -22,8 +23,6 @@ import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
-import java.nio.file.Paths;
-import java.nio.file.Files;
 
 @Slf4j
 @Service
@@ -48,32 +47,7 @@ public class ModelManagerFactory implements ILoggingService {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
 
-    try {
-      // igs live in resources/igs directory
-      var igsDir = ModelManagerFactory.class.getClassLoader().getResource("igs");
-      if (igsDir != null) {
-        var uri = igsDir.toURI();
-        var igsPath = Paths.get(uri);
-        Files.list(igsPath)
-            // all igs are json files
-            .filter(path -> path.toString().endsWith(".json"))
-            .forEach(
-                path -> {
-                  String fileName = "igs/" + path.getFileName().toString();
-                  try {
-                    ImplementationGuide ig = fhirUtil.loadImplementationGuide(fileName);
-                    processImplementationGuide(ig);
-                  } catch (Exception e) {
-                    log.error(
-                        "Error processing IG file: {}, skipping and continuing with next file.",
-                        fileName,
-                        e);
-                  }
-                });
-      }
-    } catch (Exception e) {
-      log.error("Error initializing ModelManagerFactory IGs", e);
-    }
+    ImplementationGuideLoader.load().forEach(this::processImplementationGuide);
   }
 
   public void processImplementationGuide(ImplementationGuide ig) {
