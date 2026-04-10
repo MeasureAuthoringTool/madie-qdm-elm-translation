@@ -1,7 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.cql_elm_translator.utils.ImplementationGuideLoader;
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -12,10 +11,8 @@ import org.hl7.cql.model.ModelIdentifier;
 import org.hl7.cql.model.ModelInfoProvider;
 import org.hl7.fhir.r5.context.ILoggingService;
 import org.hl7.fhir.r5.model.ImplementationGuide;
-import org.hl7.fhir.utilities.npm.FilesystemPackageCacheManager;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
@@ -42,8 +39,7 @@ public class ModelManagerFactory implements ILoggingService {
     logger.debug(message);
   }
 
-  public ModelManagerFactory(
-      @Value("${madie.fhir-cache}") String fhirCachePath, @Autowired final FhirUtil fhirUtil) {
+  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath) {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
 
@@ -120,13 +116,8 @@ public class ModelManagerFactory implements ILoggingService {
 
   private ModelInfoProvider buildNpmModelInfoProvider(ImplementationGuide implementationGuide)
       throws IOException {
-    FilesystemPackageCacheManager.Builder fspcmBuilder =
-        new FilesystemPackageCacheManager.Builder();
-    if (StringUtils.isNotBlank(fhirCachePath)) {
-      fspcmBuilder = fspcmBuilder.withCacheFolder(fhirCachePath);
-    }
-    FilesystemPackageCacheManager fspcm = fspcmBuilder.build();
-    NpmPackageManager packageManager = new NpmPackageManager(implementationGuide, fspcm);
+    NpmPackageManager packageManager =
+        ImplementationGuideLoader.buildPackageManager(fhirCachePath, implementationGuide);
     LibraryLoader reader = new LibraryLoader("5.0");
     return new NpmModelInfoProvider(packageManager.getNpmList(), reader, this);
   }

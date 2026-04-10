@@ -47,7 +47,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
-      modelManagerFactory = new ModelManagerFactory("/tmp/fake-cache", fhirUtil);
+      modelManagerFactory = new ModelManagerFactory("/tmp/fake-cache");
     }
   }
 
@@ -174,7 +174,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenReturn(List.of(ig));
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
       doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
       try {
         factory.processImplementationGuide(ig);
@@ -193,7 +193,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
       factory.processImplementationGuide(ig);
       // No dependencies, so knownModelIdentifiers should be empty
       assertThat(factory.getKnownModelIdentifiers().size(), is(0));
@@ -212,7 +212,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
       doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
       factory.processImplementationGuide(ig);
       // Only dependency ModelIdentifier should be present
@@ -234,7 +234,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
       factory.processImplementationGuide(ig);
       // Malformed dependency, so knownModelIdentifiers should be empty
       assertThat(factory.getKnownModelIdentifiers().size(), is(0));
@@ -269,7 +269,7 @@ public class ModelManagerFactoryTest {
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache", fhirUtil));
+      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
       ModelManager successManager = mock(ModelManager.class);
 
       // First call throws a runtime exception (mimics resolveModel failure), second call succeeds
