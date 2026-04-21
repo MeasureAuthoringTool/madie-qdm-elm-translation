@@ -213,13 +213,32 @@ public class ModelManagerFactoryTest {
         mockStatic(ImplementationGuideLoader.class)) {
       mockedLoader.when(ImplementationGuideLoader::load).thenAnswer(inv -> List.of());
       ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
-      doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
+      doAnswer(
+              inv -> {
+                // mock the behavior of CQFramework to update the input parameter
+                ModelIdentifier inputIdentifier = inv.getArgument(0);
+                inputIdentifier.setSystem("some-system");
+                return mock(ModelManager.class);
+              })
+          .when(factory)
+          .buildModelManager(any(), any());
       factory.processImplementationGuide(ig);
       // Only dependency ModelIdentifier should be present
       assertThat(
           factory.getKnownModelIdentifiers(),
-          hasItem(allOf(hasProperty("id", is("DepIG")), hasProperty("version", is("1.0.0")))));
-      assertThat(factory.getKnownModelIdentifiers().size(), is(1));
+          hasItem(
+              allOf(
+                  hasProperty("id", is("DepIG")),
+                  hasProperty("system", is("some-system")),
+                  hasProperty("version", is("1.0.0")))));
+      assertThat(
+          factory.getKnownModelIdentifiers(),
+          hasItem(
+              allOf(
+                  hasProperty("id", is("DepIG")),
+                  hasProperty("system", is(nullValue())),
+                  hasProperty("version", is("1.0.0")))));
+      assertThat(factory.getKnownModelIdentifiers().size(), is(2));
     }
   }
 
