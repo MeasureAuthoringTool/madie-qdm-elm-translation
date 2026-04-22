@@ -84,6 +84,8 @@ public class ModelManagerFactory implements ILoggingService {
       throw new IllegalArgumentException("Model name cannot be null or empty");
     }
 
+    log.info("Retrieving ModelManager for model: {}; Known model identifiers [{}]", identifier, modelManagers.keySet());
+
     // If model is not known, create a new ModelManager without the NpmModelInfoProvider
     return modelManagers.computeIfAbsent(
         identifier,
