@@ -57,11 +57,12 @@ public class ModelManagerFactory implements ILoggingService {
                       new ModelIdentifier(dep.getId(), null, dep.getVersion());
                   ModelManager modelManager = buildModelManager(identifier, ig);
                   modelManagers.put(identifier, modelManager);
+
+                  // cqframework seems to be updating the system of the ModelIdentifier input
+                  // parameter
                   if (StringUtils.isNotBlank(identifier.getSystem())) {
                     modelManagers.put(
-                        new ModelIdentifier(
-                            identifier.getId(), identifier.getSystem(), identifier.getVersion()),
-                        modelManager);
+                        new ModelIdentifier(dep.getId(), null, dep.getVersion()), modelManager);
                   }
                   log.info(
                       "ModelManager created for dependsOn: {}#{}", dep.getUri(), dep.getVersion());
