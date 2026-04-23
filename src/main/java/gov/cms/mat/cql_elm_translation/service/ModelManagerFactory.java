@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.cql_elm_translator.utils.ImplementationGuideLoader;
+import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -14,6 +15,8 @@ import org.hl7.fhir.r5.model.ImplementationGuide;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.event.ApplicationReadyEvent;
+import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -25,9 +28,30 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ModelManagerFactory implements ILoggingService {
 
+  public static enum ModelLoadingState {
+    NOT_LOADED,
+    LOADING,
+    LOADED,
+    ERROR_FAILED
+  }
+
+  @Data
+  public static class ModelLoadingInfo {
+    @Setter(AccessLevel.NONE)
+    private final ModelIdentifier modelIdentifier;
+    private volatile ModelLoadingState loadingState;
+    private volatile String errorMessage;
+
+    public ModelLoadingInfo(ModelIdentifier modelIdentifier) {
+      this.modelIdentifier = modelIdentifier;
+      this.loadingState = ModelLoadingState.NOT_LOADED;
+    }
+  }
+
   private final String fhirCachePath;
 
   private final Map<ModelIdentifier, ModelManager> modelManagers = new ConcurrentHashMap<>();
+  private final Map<ModelIdentifier, ModelLoadingInfo> modelLoadingInfos = new ConcurrentHashMap<>();
 
   private final Logger logger = LoggerFactory.getLogger(ModelManagerFactory.class);
 
@@ -35,14 +59,17 @@ public class ModelManagerFactory implements ILoggingService {
     logger.info(message);
   }
 
-  public void logDebugMessage(ILoggingService.LogCategory category, String message) {
+  public void logDebugMessage(LogCategory category, String message) {
     logger.debug(message);
   }
 
   public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath) {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
+  }
 
+  @EventListener(ApplicationReadyEvent.class)
+  public void onApplicationReady() {
     ImplementationGuideLoader.load().forEach(this::processImplementationGuide);
   }
 
@@ -52,9 +79,13 @@ public class ModelManagerFactory implements ILoggingService {
           .filter(dep -> StringUtils.isNotBlank(dep.getId()))
           .forEach(
               dep -> {
+                ModelLoadingInfo info = null;
                 try {
                   ModelIdentifier identifier =
                       new ModelIdentifier(dep.getId(), null, dep.getVersion());
+                  info = new ModelLoadingInfo(identifier);
+                  info.setLoadingState(ModelLoadingState.LOADING);
+                  modelLoadingInfos.put(identifier, info);
                   ModelManager modelManager = buildModelManager(identifier, ig);
                   modelManagers.put(identifier, modelManager);
 
@@ -66,6 +97,7 @@ public class ModelManagerFactory implements ILoggingService {
                   }
                   log.info(
                       "ModelManager created for dependsOn: {}#{}", dep.getUri(), dep.getVersion());
+                  info.setLoadingState(ModelLoadingState.LOADED);
                 } catch (Exception e) {
                   log.error(
                       "Error occurred and failed to create ModelManager for dependsOn: {}#{}, skipping "
@@ -73,9 +105,17 @@ public class ModelManagerFactory implements ILoggingService {
                       dep.getUri(),
                       dep.getVersion(),
                       e);
+                  if (info != null) {
+                    info.setLoadingState(ModelLoadingState.ERROR_FAILED);
+                    info.setErrorMessage(e.getMessage());
+                  }
                 }
               });
     }
+  }
+
+  public List<ModelLoadingInfo> getModelLoadingInfos() {
+    return modelLoadingInfos.values().stream().toList();
   }
 
   public ModelManager getModelManager(ModelIdentifier identifier) {
