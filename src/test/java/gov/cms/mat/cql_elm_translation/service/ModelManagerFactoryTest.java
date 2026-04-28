@@ -95,7 +95,7 @@ public class ModelManagerFactoryTest {
   }
 
   @Test
-  void testGetModelManagerWithNullIdentifierThrowsException() {
+  void testGetModelManagerWithNullIdentifierThrowsExceptionForNull() {
     // given / when
     Exception exception =
         assertThrows(

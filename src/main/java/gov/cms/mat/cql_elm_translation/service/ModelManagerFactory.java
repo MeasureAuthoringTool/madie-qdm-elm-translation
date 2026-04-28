@@ -62,11 +62,11 @@ public class ModelManagerFactory implements ILoggingService {
           .filter(dep -> StringUtils.isNotBlank(dep.getId()))
           .forEach(
               dep -> {
-                ModelLoadingInfo info = null;
+                ModelIdentifier identifier =
+                    new ModelIdentifier(dep.getId(), null, dep.getVersion());
+                ModelLoadingInfo info = new ModelLoadingInfo(identifier);
+                ;
                 try {
-                  ModelIdentifier identifier =
-                      new ModelIdentifier(dep.getId(), null, dep.getVersion());
-                  info = new ModelLoadingInfo(identifier);
                   info.setLoadingState(ModelLoadingState.LOADING);
                   modelLoadingInfos.put(identifier, info);
                   ModelManager modelManager = buildModelManager(identifier, ig);
@@ -88,10 +88,8 @@ public class ModelManagerFactory implements ILoggingService {
                       dep.getUri(),
                       dep.getVersion(),
                       e);
-                  if (info != null) {
-                    info.setLoadingState(ModelLoadingState.ERROR_FAILED);
-                    info.setErrorMessage(e.getMessage());
-                  }
+                  info.setLoadingState(ModelLoadingState.ERROR_FAILED);
+                  info.setErrorMessage(e.getMessage());
                 }
               });
     }
@@ -102,7 +100,7 @@ public class ModelManagerFactory implements ILoggingService {
   }
 
   public ModelManager getModelManager(ModelIdentifier identifier) {
-    if (identifier == null || StringUtils.isEmpty(identifier.getId())) {
+    if (identifier == null) {
       log.error("Model name cannot be null or empty");
       throw new IllegalArgumentException("Model name cannot be null or empty");
     }
