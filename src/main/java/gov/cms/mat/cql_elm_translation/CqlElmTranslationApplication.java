@@ -26,7 +26,6 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import jakarta.annotation.PostConstruct;
 
 import java.util.TimeZone;
-import java.util.concurrent.TimeUnit;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
@@ -50,10 +49,7 @@ public class CqlElmTranslationApplication {
   public CacheManager cacheManager() {
     CaffeineCacheManager cacheManager =
         new CaffeineCacheManager("cqlLibraries", "effectiveDataRequirementsCache");
-    cacheManager.setCaffeine(
-        Caffeine.newBuilder()
-            .expireAfterWrite(1, TimeUnit.HOURS) // Cache expires after 1 hour
-            .maximumSize(50)); // Maximum 50 entries
+    cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(500));
     return cacheManager;
   }
 
