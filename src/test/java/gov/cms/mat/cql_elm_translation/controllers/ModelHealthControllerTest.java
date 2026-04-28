@@ -40,7 +40,7 @@ class ModelHealthControllerTest {
   // ── getKnownModels ────────────────────────────────────────────────────────
 
   @Test
-  void testGetKnownModels_returnsEmptyListWhenNoModelsLoaded() {
+  void testGetKnownModelsReturnsEmptyListWhenNoModelsLoaded() {
     // given
     when(modelManagerFactory.getKnownModelIdentifiers()).thenReturn(Collections.emptyList());
 
@@ -54,7 +54,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetKnownModels_returnsSingleIdentifier() {
+  void testGetKnownModelsReturnsSingleIdentifier() {
     // given
     when(modelManagerFactory.getKnownModelIdentifiers()).thenReturn(List.of(fhirIdentifier));
 
@@ -70,7 +70,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetKnownModels_returnsMultipleIdentifiers() {
+  void testGetKnownModelsReturnsMultipleIdentifiers() {
     // given
     when(modelManagerFactory.getKnownModelIdentifiers())
         .thenReturn(List.of(fhirIdentifier, qiCoreIdentifier));
@@ -89,7 +89,7 @@ class ModelHealthControllerTest {
   // ── getLoadingInfo ────────────────────────────────────────────────────────
 
   @Test
-  void testGetLoadingInfo_returnsEmptyListWhenNonePresent() {
+  void testGetLoadingInfoReturnsEmptyListWhenNonePresent() {
     // given
     when(modelManagerFactory.getModelLoadingInfos()).thenReturn(Collections.emptyList());
 
@@ -103,7 +103,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetLoadingInfo_returnsInfoWithDefaultNotLoadedState() {
+  void testGetLoadingInfoReturnsInfoWithDefaultNotLoadedState() {
     // given
     ModelLoadingInfo info = new ModelLoadingInfo(fhirIdentifier);
     when(modelManagerFactory.getModelLoadingInfos()).thenReturn(List.of(info));
@@ -120,7 +120,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetLoadingInfo_returnsInfoWithLoadedState() {
+  void testGetLoadingInfoReturnsInfoWithLoadedState() {
     // given
     ModelLoadingInfo info = new ModelLoadingInfo(fhirIdentifier);
     info.setLoadingState(ModelLoadingState.LOADED);
@@ -137,7 +137,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetLoadingInfo_returnsInfoWithErrorState() {
+  void testGetLoadingInfoReturnsInfoWithErrorState() {
     // given
     ModelLoadingInfo info = new ModelLoadingInfo(fhirIdentifier);
     info.setLoadingState(ModelLoadingState.ERROR_FAILED);
@@ -156,7 +156,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetLoadingInfo_returnsInfoWithLoadingState() {
+  void testGetLoadingInfoReturnsInfoWithLoadingState() {
     // given
     ModelLoadingInfo info = new ModelLoadingInfo(qiCoreIdentifier);
     info.setLoadingState(ModelLoadingState.LOADING);
@@ -174,7 +174,7 @@ class ModelHealthControllerTest {
   }
 
   @Test
-  void testGetLoadingInfo_returnsMultipleInfoEntries() {
+  void testGetLoadingInfoReturnsMultipleInfoEntries() {
     // given
     ModelLoadingInfo info1 = new ModelLoadingInfo(fhirIdentifier);
     info1.setLoadingState(ModelLoadingState.LOADED);
