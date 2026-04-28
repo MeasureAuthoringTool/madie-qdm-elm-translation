@@ -15,7 +15,6 @@ public class SecurityConfig {
     "/swagger/**",
     "/swagger-ui/**",
     "/actuator/**",
-    "/models/**",
     "/mat/translator/cqlToElm/**"
     // other public endpoints of your API may be appended to this array
   };

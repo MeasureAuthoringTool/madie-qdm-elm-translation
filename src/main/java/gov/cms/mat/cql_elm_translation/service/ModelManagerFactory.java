@@ -1,6 +1,8 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.cql_elm_translator.utils.ImplementationGuideLoader;
+import gov.cms.mat.cql_elm_translation.dto.ModelLoadingInfo;
+import gov.cms.mat.cql_elm_translation.dto.ModelLoadingState;
 import lombok.*;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -28,30 +30,11 @@ import java.util.concurrent.ConcurrentHashMap;
 @Service
 public class ModelManagerFactory implements ILoggingService {
 
-  public static enum ModelLoadingState {
-    NOT_LOADED,
-    LOADING,
-    LOADED,
-    ERROR_FAILED
-  }
-
-  @Data
-  public static class ModelLoadingInfo {
-    @Setter(AccessLevel.NONE)
-    private final ModelIdentifier modelIdentifier;
-    private volatile ModelLoadingState loadingState;
-    private volatile String errorMessage;
-
-    public ModelLoadingInfo(ModelIdentifier modelIdentifier) {
-      this.modelIdentifier = modelIdentifier;
-      this.loadingState = ModelLoadingState.NOT_LOADED;
-    }
-  }
-
   private final String fhirCachePath;
 
   private final Map<ModelIdentifier, ModelManager> modelManagers = new ConcurrentHashMap<>();
-  private final Map<ModelIdentifier, ModelLoadingInfo> modelLoadingInfos = new ConcurrentHashMap<>();
+  private final Map<ModelIdentifier, ModelLoadingInfo> modelLoadingInfos =
+      new ConcurrentHashMap<>();
 
   private final Logger logger = LoggerFactory.getLogger(ModelManagerFactory.class);
 
@@ -124,7 +107,7 @@ public class ModelManagerFactory implements ILoggingService {
       throw new IllegalArgumentException("Model name cannot be null or empty");
     }
 
-    log.info("Retrieving ModelManager for model: {}; Known model identifiers [{}]", identifier, modelManagers.keySet());
+    log.info("Retrieving ModelManager for model: {}", identifier);
 
     // If model is not known, create a new ModelManager without the NpmModelInfoProvider
     return modelManagers.computeIfAbsent(
