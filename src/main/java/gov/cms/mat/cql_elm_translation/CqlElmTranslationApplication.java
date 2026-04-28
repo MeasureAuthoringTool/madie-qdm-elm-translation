@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation;
 
-import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -10,9 +9,10 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
 import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
+import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
-import org.springframework.cache.concurrent.ConcurrentMapCache;
-import org.springframework.cache.support.SimpleCacheManager;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
@@ -23,13 +23,13 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import jakarta.annotation.PostConstruct;
 
-import java.util.List;
 import java.util.TimeZone;
 
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
-@Import({CqlLibraryService.class, RestTemplate.class})
+@Import(RestTemplate.class)
+@EnableCaching
 public class CqlElmTranslationApplication {
 
   public static void main(String[] args) {
@@ -45,8 +45,8 @@ public class CqlElmTranslationApplication {
 
   @Bean
   public CacheManager cacheManager() {
-    SimpleCacheManager cacheManager = new SimpleCacheManager();
-    cacheManager.setCaches(List.of(new ConcurrentMapCache("cqlLibraries")));
+    CaffeineCacheManager cacheManager = new CaffeineCacheManager("cqlLibraries");
+    cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(500));
     return cacheManager;
   }
 
