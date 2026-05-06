@@ -15,7 +15,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.Import;
+import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
@@ -28,7 +28,6 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
-@Import(RestTemplate.class)
 @EnableCaching
 public class CqlElmTranslationApplication {
 
@@ -41,6 +40,12 @@ public class CqlElmTranslationApplication {
   public void init() {
     TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
     log.info("Set timezone to UTC.");
+  }
+
+  @Bean
+  @Primary
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
   }
 
   @Bean

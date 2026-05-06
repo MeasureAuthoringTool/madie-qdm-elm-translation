@@ -7,7 +7,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
 // TODO: Remove this class and its associated tests once madie-qdm-elm-translation is upgraded
-// to a version of madie-translator-commons (will upgrade in MAT-9441) that includes built-in caching in CqlLibraryService.
+// to a version of madie-translator-commons (will upgrade in MAT-9441) that includes built-in
+// caching in CqlLibraryService.
 // This class exists because qdm-elm cannot upgrade to the newer madie-translator-commons due to
 // an incompatibility between info.cqframework:3.29.0 (used by qdm-elm) and
 // org.cqframework:4.7.0 (pulled in by the newer commons).
