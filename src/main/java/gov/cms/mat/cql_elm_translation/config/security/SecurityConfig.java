@@ -1,13 +1,16 @@
 package gov.cms.mat.cql_elm_translation.config.security;
 
+import gov.cms.mat.cql_elm_translation.clients.UserRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfig {
 
   private static final String[] AUTH_WHITELIST = {
@@ -22,7 +25,8 @@ public class SecurityConfig {
   private static final String[] CSRF_WHITELIST = {"/mat/translator/cqlToElm/**"};
 
   @Bean
-  public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+  public SecurityFilterChain filterChain(HttpSecurity http, UserRoleConverter roleConverter)
+      throws Exception {
 
     http.cors()
         .and()
@@ -36,6 +40,8 @@ public class SecurityConfig {
         .permitAll()
         .and()
         .authorizeHttpRequests()
+        .requestMatchers("/admin/**")
+        .hasRole("MADIE-ADMIN")
         .anyRequest()
         .authenticated()
         .and()
@@ -44,6 +50,7 @@ public class SecurityConfig {
         .and()
         .oauth2ResourceServer()
         .jwt()
+        .jwtAuthenticationConverter(roleConverter)
         .and()
         .and()
         .headers()

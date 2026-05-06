@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
+import gov.cms.mat.cql_elm_translation.clients.UserServiceClient;
 import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
@@ -31,6 +32,7 @@ class EffectiveDataRequirementControllerMVCTest {
 
   private static final String TEST_USER_ID = "john_doe";
 
+  @MockitoBean private UserServiceClient userServiceClient;
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean EffectiveDataRequirementService effectiveDataRequirementService;
