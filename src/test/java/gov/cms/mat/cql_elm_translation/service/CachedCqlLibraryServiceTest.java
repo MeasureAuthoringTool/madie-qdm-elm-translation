@@ -2,7 +2,6 @@ package gov.cms.mat.cql_elm_translation.service;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import gov.cms.madie.cql_elm_translator.exceptions.LibraryResourceLoaderException;
-import org.springframework.cache.Cache;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -19,7 +18,6 @@ import org.springframework.web.client.RestTemplate;
 
 import java.net.URI;
 
-import static org.junit.jupiter.api.Assertions.assertInstanceOf;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
@@ -81,18 +79,27 @@ class CachedCqlLibraryServiceTest {
         .when(restTemplate)
         .exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
 
-    Cache.ValueRetrievalException ex1 =
-        assertThrows(
-            Cache.ValueRetrievalException.class,
-            () -> cachedCqlLibraryService.getLibraryCql(NAME, VERSION, ACCESS_TOKEN));
-    assertInstanceOf(LibraryResourceLoaderException.class, ex1.getCause());
+    assertThrows(
+        LibraryResourceLoaderException.class,
+        () -> cachedCqlLibraryService.getLibraryCql(NAME, VERSION, ACCESS_TOKEN));
 
-    Cache.ValueRetrievalException ex2 =
-        assertThrows(
-            Cache.ValueRetrievalException.class,
-            () -> cachedCqlLibraryService.getLibraryCql(NAME, VERSION, ACCESS_TOKEN));
-    assertInstanceOf(LibraryResourceLoaderException.class, ex2.getCause());
+    assertThrows(
+        LibraryResourceLoaderException.class,
+        () -> cachedCqlLibraryService.getLibraryCql(NAME, VERSION, ACCESS_TOKEN));
 
     verify(restTemplate, times(2)).exchange(any(URI.class), any(), any(), eq(String.class));
+  }
+
+  @Test
+  void getLibraryCqlThrowsWhenVersionIsNull() {
+    HttpClientErrorException notFound = mock(HttpClientErrorException.NotFound.class);
+    doThrow(notFound)
+        .when(restTemplate)
+        .exchange(any(URI.class), eq(HttpMethod.GET), any(HttpEntity.class), eq(String.class));
+
+    assertThrows(
+        LibraryResourceLoaderException.class,
+        () -> cachedCqlLibraryService.getLibraryCql(NAME, null, ACCESS_TOKEN));
+    verify(restTemplate, times(1)).exchange(any(URI.class), any(), any(), eq(String.class));
   }
 }
