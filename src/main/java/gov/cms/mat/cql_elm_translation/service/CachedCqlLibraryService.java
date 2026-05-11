@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import org.springframework.cache.Cache;
 import org.springframework.cache.CacheManager;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
@@ -25,8 +26,12 @@ public class CachedCqlLibraryService extends CqlLibraryService {
 
   @Override
   public String getLibraryCql(String name, String version, String accessToken) {
-    return cacheManager
-        .getCache("cqlLibraries")
-        .get(name + "_" + version, () -> super.getLibraryCql(name, version, accessToken));
+    try {
+      return cacheManager
+          .getCache("cqlLibraries")
+          .get(name + "_" + version, () -> super.getLibraryCql(name, version, accessToken));
+    } catch (Cache.ValueRetrievalException e) {
+      throw (RuntimeException) e.getCause();
+    }
   }
 }
