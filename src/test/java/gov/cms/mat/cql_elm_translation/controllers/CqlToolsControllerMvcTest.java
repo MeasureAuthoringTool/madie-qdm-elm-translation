@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.mat.cql_elm_translation.clients.UserServiceClient;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import org.apache.http.HttpStatus;
@@ -29,6 +30,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 @WebMvcTest({CqlToolsController.class})
 public class CqlToolsControllerMvcTest {
   private static final String TEST_USER_ID = "john_doe";
+  @MockitoBean private UserServiceClient userServiceClient;
   @MockitoBean private DataCriteriaService dataCriteriaService;
   @MockitoBean private CqlParsingService cqlParsingService;
 
