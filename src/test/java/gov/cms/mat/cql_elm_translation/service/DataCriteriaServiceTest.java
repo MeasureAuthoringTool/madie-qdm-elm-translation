@@ -146,9 +146,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
             + ")";
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        new TranslationResource(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
         .when(cqlLibraryService)
@@ -243,9 +240,6 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     Measure measure = Measure.builder().cql(cql).groups(Collections.singletonList(group)).build();
 
     RequestData data = requestData.toBuilder().cqlData(cql).build();
-    CqlTranslator translator =
-        new TranslationResource(false)
-            .buildTranslator(data.getCqlDataInputStream(), data.createMap(), data.getSourceInfo());
 
     Mockito.doNothing()
         .when(cqlLibraryService)

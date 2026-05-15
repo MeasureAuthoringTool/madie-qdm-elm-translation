@@ -305,7 +305,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   void testValidateRetrieveIfNoRetrieveFoundShouldNotRaiseErrors() {
     RequestData requestData =
         RequestData.builder()
-            .cqlData("")
+            .cqlData(
+                "library NoRetrieve version '0.0.000'\n"
+                    + "using QDM version '5.6'\n"
+                    + "context Patient\n"
+                    + "define \"Initial Population\": true")
             .errorSeverity(CqlCompilerException.ErrorSeverity.Info)
             .annotations(false)
             .locators(true)
