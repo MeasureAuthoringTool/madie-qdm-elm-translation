@@ -61,40 +61,40 @@ public abstract class CqlTooling {
     return cqlTools;
   }
 
-    protected TranslationArtifacts buildTranslationArtifacts(
-            String cql,
-            String accessToken,
-            CqlLibraryService cqlLibraryService,
-            CqlCompilerException.ErrorSeverity errorSeverity) {
-        return buildTranslationArtifacts(
-                buildRequestData(cql, accessToken, cqlLibraryService, errorSeverity));
-    }
+  protected TranslationArtifacts buildTranslationArtifacts(
+      String cql,
+      String accessToken,
+      CqlLibraryService cqlLibraryService,
+      CqlCompilerException.ErrorSeverity errorSeverity) {
+    return buildTranslationArtifacts(
+        buildRequestData(cql, accessToken, cqlLibraryService, errorSeverity));
+  }
 
-    protected TranslationArtifacts buildTranslationArtifacts(RequestData requestData) {
-        TranslationResource translationResource = getTranslationResource(requestData);
-        CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
-        return new TranslationArtifacts(cqlTranslator, getTranslatedLibraries(translationResource));
-    }
+  protected TranslationArtifacts buildTranslationArtifacts(RequestData requestData) {
+    TranslationResource translationResource = getTranslationResource(requestData);
+    CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
+    return new TranslationArtifacts(cqlTranslator, getTranslatedLibraries(translationResource));
+  }
 
-    protected RequestData buildRequestData(
-            String cql,
-            String accessToken,
-            CqlLibraryService cqlLibraryService,
-            CqlCompilerException.ErrorSeverity errorSeverity) {
-        cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
-        return RequestData.builder()
-                .cqlData(cql)
-                .errorSeverity(errorSeverity)
-                .signatures(LibraryBuilder.SignatureLevel.All)
-                .annotations(true)
-                .locators(true)
-                .disableListDemotion(true)
-                .disableListPromotion(true)
-                .disableMethodInvocation(false)
-                .validateUnits(true)
-                .resultTypes(true)
-                .build();
-    }
+  protected RequestData buildRequestData(
+      String cql,
+      String accessToken,
+      CqlLibraryService cqlLibraryService,
+      CqlCompilerException.ErrorSeverity errorSeverity) {
+    cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
+    return RequestData.builder()
+        .cqlData(cql)
+        .errorSeverity(errorSeverity)
+        .signatures(LibraryBuilder.SignatureLevel.All)
+        .annotations(true)
+        .locators(true)
+        .disableListDemotion(true)
+        .disableListPromotion(true)
+        .disableMethodInvocation(false)
+        .validateUnits(true)
+        .resultTypes(true)
+        .build();
+  }
 
   protected Map<String, String> getIncludedLibrariesCql(
       MadieLibrarySourceProvider librarySourceProvider,
