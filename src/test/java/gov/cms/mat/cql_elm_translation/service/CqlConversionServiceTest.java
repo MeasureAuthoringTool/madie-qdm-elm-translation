@@ -17,7 +17,9 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.cqframework.cql.cql2elm.tracking.TrackBack;
 import org.hl7.elm.r1.Library;
+import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -29,6 +31,7 @@ import java.io.File;
 import java.io.IOException;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
@@ -43,9 +46,11 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
 @SpringBootTest
@@ -324,5 +329,107 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
     service.validateRetrieve(cqlTranslator);
     assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testValidateRetrieveWithSimpleLocatorUsesStartAsEnd() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    doReturn(buildLibraryWithSingleRetrieve("10:2", "Encounter")).when(cqlTranslator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    CqlCompilerException exception = cqlTranslator.getExceptions().get(0);
+    TrackBack locator = exception.getLocator();
+    assertThat(locator.getStartLine(), is(equalTo(10)));
+    assertThat(locator.getStartChar(), is(equalTo(2)));
+    assertThat(locator.getEndLine(), is(equalTo(10)));
+    assertThat(locator.getEndChar(), is(equalTo(2)));
+  }
+
+  @Test
+  void testValidateRetrieveWithInvalidLocatorFallsBackToZeros() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    doReturn(buildLibraryWithSingleRetrieve("invalid-locator", "Encounter"))
+        .when(cqlTranslator)
+        .toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    CqlCompilerException exception = cqlTranslator.getExceptions().get(0);
+    TrackBack locator = exception.getLocator();
+    assertThat(locator.getStartLine(), is(equalTo(0)));
+    assertThat(locator.getStartChar(), is(equalTo(0)));
+    assertThat(locator.getEndLine(), is(equalTo(0)));
+    assertThat(locator.getEndChar(), is(equalTo(0)));
+  }
+
+  @Test
+  void testValidateRetrieveWithNullElmDoesNotAddErrors() {
+    CqlTranslator translator = mock(CqlTranslator.class);
+    doReturn(null).when(translator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(translator).getExceptions();
+
+    service.validateRetrieve(translator);
+
+    assertThat(translator.getExceptions().size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetTranslatedLibrariesForCqlFiltersMainLibraryFromIncludedMap() throws IOException {
+    CqlConversionService conversionService = spy(service);
+    String cql =
+        "library Main version '1.0.0'\n"
+            + "using QDM version '5.6'\n"
+            + "context Patient\n"
+            + "define \"Initial Population\": true";
+
+    CqlTranslator translator =
+        new TranslationResource(false)
+            .buildTranslator(requestData.toBuilder().cqlData(cql).build());
+
+    CompiledLibrary mainLibrary = translator.getTranslatedLibrary();
+    Map<String, CompiledLibrary> includedLibraries = Map.of("Main", mainLibrary);
+    CqlTooling.TranslationArtifacts artifacts =
+        new CqlTooling.TranslationArtifacts(translator, includedLibraries);
+
+    doReturn(artifacts)
+        .when(conversionService)
+        .buildTranslationArtifacts(
+            eq(cql),
+            eq("token"),
+            eq(cqlLibraryService),
+            eq(CqlCompilerException.ErrorSeverity.Error));
+    doReturn(Map.of()).when(conversionService).getIncludedLibrariesCql(any(), any());
+
+    List<TranslatedLibrary> libraries =
+        conversionService.getTranslatedLibrariesForCql(
+            cql, "token", CqlCompilerException.ErrorSeverity.Error);
+
+    assertThat(libraries.size(), is(equalTo(1)));
+    assertThat(libraries.get(0).getName(), is(equalTo("Main")));
+  }
+
+  private Library buildLibraryWithSingleRetrieve(String locator, String dataType) {
+    Retrieve retrieve = new Retrieve();
+    retrieve.setLocator(locator);
+    retrieve.setDataType(new javax.xml.namespace.QName("urn:test", dataType));
+
+    org.hl7.elm.r1.ExpressionDef expressionDef = new org.hl7.elm.r1.ExpressionDef();
+    expressionDef.setName("RetrieveDef");
+    expressionDef.setExpression(retrieve);
+
+    Library.Statements statements = new Library.Statements();
+    statements.getDef().add(expressionDef);
+
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("TestLibrary");
+    identifier.setVersion("1.0.0");
+
+    Library library = new Library();
+    library.setIdentifier(identifier);
+    library.setStatements(statements);
+    return library;
   }
 }
