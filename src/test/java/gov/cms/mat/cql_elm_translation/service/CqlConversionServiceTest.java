@@ -18,6 +18,7 @@ import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
 import org.cqframework.cql.cql2elm.tracking.TrackBack;
+import org.hl7.elm.r1.CodeFilterElement;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -409,6 +410,83 @@ class CqlConversionServiceTest implements ResourceFileUtil {
 
     assertThat(libraries.size(), is(equalTo(1)));
     assertThat(libraries.get(0).getName(), is(equalTo("Main")));
+  }
+
+  @Test
+  void testValidateRetrieveSkipsPatientRetrieve() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    doReturn(buildLibraryWithSingleRetrieve("10:2-10:15", "Patient")).when(cqlTranslator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testValidateRetrieveSkipsRetrieveWithBlankLocator() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    doReturn(buildLibraryWithSingleRetrieve("", "Encounter")).when(cqlTranslator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testValidateRetrieveSkipsRetrieveWithCodeFilter() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    Library library = buildLibraryWithSingleRetrieve("10:2-10:15", "Encounter");
+    // Add a code filter to the retrieve so it should be skipped
+    Retrieve retrieve = (Retrieve) library.getStatements().getDef().get(0).getExpression();
+    retrieve.getCodeFilter().add(new CodeFilterElement());
+    doReturn(library).when(cqlTranslator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    assertThat(cqlTranslator.getExceptions().size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testValidateRetrieveWithRangeLocatorParsesCorrectly() {
+    CqlTranslator cqlTranslator = mock(CqlTranslator.class);
+    doReturn(buildLibraryWithSingleRetrieve("5:3-7:10", "Encounter")).when(cqlTranslator).toELM();
+    doReturn(new ArrayList<CqlCompilerException>()).when(cqlTranslator).getExceptions();
+
+    service.validateRetrieve(cqlTranslator);
+
+    CqlCompilerException exception = cqlTranslator.getExceptions().get(0);
+    TrackBack locator = exception.getLocator();
+    assertThat(locator.getStartLine(), is(equalTo(5)));
+    assertThat(locator.getStartChar(), is(equalTo(3)));
+    assertThat(locator.getEndLine(), is(equalTo(7)));
+    assertThat(locator.getEndChar(), is(equalTo(10)));
+  }
+
+  @Test
+  void testConvertToJsonWithXmlContentType() throws IOException {
+    Library library = new Library();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("TestLib");
+    identifier.setVersion("1.0.0");
+    library.setIdentifier(identifier);
+    String result = service.convertToJson(library, LibraryContentType.XML);
+    assertNotNull(result);
+    assertTrue(result.contains("TestLib"));
+  }
+
+  @Test
+  void testConvertToJsonWithJsonContentType() throws IOException {
+    Library library = new Library();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("TestLib");
+    identifier.setVersion("1.0.0");
+    library.setIdentifier(identifier);
+    String result = service.convertToJson(library, LibraryContentType.JSON);
+    assertNotNull(result);
+    assertTrue(result.contains("TestLib"));
   }
 
   private Library buildLibraryWithSingleRetrieve(String locator, String dataType) {

@@ -173,5 +173,18 @@ class CqlToolingTest {
     assertNotNull(artifacts.getTranslatedLibraries());
   }
 
+  @Test
+  void testGetIncludedLibrariesCqlSkipsNullEntry() {
+    MadieLibrarySourceProvider librarySourceProvider = mock(MadieLibrarySourceProvider.class);
+
+    Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
+    translatedLibraries.put("NullLib", null);
+
+    Map<String, String> includedLibraries =
+        tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
+
+    assertThat(includedLibraries.size(), is(equalTo(0)));
+  }
+
   private static class TestableCqlTooling extends CqlTooling {}
 }
