@@ -13,14 +13,18 @@ import org.cqframework.cql.cql2elm.utils.SourceKt;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.Test;
+import org.mockito.MockedConstruction;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
@@ -184,6 +188,44 @@ class CqlToolingTest {
         tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
 
     assertThat(includedLibraries.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testParseCqlWrapsIOExceptionFromGenerate() throws IOException {
+    TestableCqlTooling spyTooling = org.mockito.Mockito.spy(new TestableCqlTooling());
+    CqlLibraryService cqlLibraryService = mock(CqlLibraryService.class);
+    CqlTranslator translator = mock(CqlTranslator.class);
+    CqlTooling.TranslationArtifacts artifacts =
+        new CqlTooling.TranslationArtifacts(translator, new HashMap<>());
+
+    doReturn(artifacts)
+        .when(spyTooling)
+        .buildTranslationArtifacts(
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.anyString(),
+            org.mockito.ArgumentMatchers.any(),
+            org.mockito.ArgumentMatchers.any());
+    doReturn(Map.of())
+        .when(spyTooling)
+        .getIncludedLibrariesCql(
+            org.mockito.ArgumentMatchers.any(), org.mockito.ArgumentMatchers.any());
+
+    try (MockedConstruction<gov.cms.madie.cql_elm_translator.utils.cql.CQLTools> mocked =
+        org.mockito.Mockito.mockConstruction(
+            gov.cms.madie.cql_elm_translator.utils.cql.CQLTools.class,
+            (mock, context) -> doThrow(new IOException("boom")).when(mock).generate())) {
+      RuntimeException exception =
+          assertThrows(
+              RuntimeException.class,
+              () ->
+                  spyTooling.parseCql(
+                      "library Test version '1.0.0'\nusing QDM version '5.6'\ncontext Patient",
+                      "token",
+                      cqlLibraryService,
+                      Set.of("Initial Population")));
+      assertThat(exception.getCause().getMessage(), is(equalTo("boom")));
+      assertThat(mocked.constructed().size(), is(equalTo(1)));
+    }
   }
 
   private static class TestableCqlTooling extends CqlTooling {}
