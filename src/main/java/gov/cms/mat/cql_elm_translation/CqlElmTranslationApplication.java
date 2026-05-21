@@ -52,6 +52,7 @@ public class CqlElmTranslationApplication {
   }
 
   @Bean
+  @Primary
   public CacheManager cacheManager() {
     CaffeineCacheManager cacheManager = new CaffeineCacheManager("cqlLibraries");
     cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(500));

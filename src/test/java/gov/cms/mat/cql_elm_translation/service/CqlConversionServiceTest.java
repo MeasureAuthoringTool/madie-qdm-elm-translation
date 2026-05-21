@@ -30,6 +30,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.io.File;
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.util.ArrayList;
@@ -41,6 +42,7 @@ import static org.hamcrest.CoreMatchers.equalTo;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
@@ -487,6 +489,53 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     String result = service.convertToJson(library, LibraryContentType.JSON);
     assertNotNull(result);
     assertTrue(result.contains("TestLib"));
+  }
+
+  @Test
+  void testIsMainLibraryReturnsFalseForNullIdentifierAndVersionMismatch() throws Exception {
+    Method method =
+        CqlConversionService.class.getDeclaredMethod(
+            "isMainLibrary", CompiledLibrary.class, String.class, String.class);
+    method.setAccessible(true);
+
+    CompiledLibrary withoutIdentifier = new CompiledLibrary();
+    boolean nullIdentifierResult =
+        (boolean) method.invoke(service, withoutIdentifier, "Main", "1.0.0");
+    assertFalse(nullIdentifierResult);
+
+    CompiledLibrary withIdentifier = new CompiledLibrary();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setId("Main");
+    identifier.setVersion("1.0.0");
+    withIdentifier.setIdentifier(identifier);
+
+    boolean versionMismatchResult =
+        (boolean) method.invoke(service, withIdentifier, "Main", "2.0.0");
+    assertFalse(versionMismatchResult);
+  }
+
+  @Test
+  void testIsPatientRetrieveReturnsFalseWhenRetrieveOrDatatypeMissing() throws Exception {
+    Method method =
+        CqlConversionService.class.getDeclaredMethod("isPatientRetrieve", Retrieve.class);
+    method.setAccessible(true);
+
+    boolean nullRetrieveResult = (boolean) method.invoke(service, new Object[] {null});
+    assertFalse(nullRetrieveResult);
+
+    Retrieve retrieveWithoutDatatype = new Retrieve();
+    boolean nullDatatypeResult = (boolean) method.invoke(service, retrieveWithoutDatatype);
+    assertFalse(nullDatatypeResult);
+  }
+
+  @Test
+  void testParseLocatorReturnsZerosForBlankLocator() throws Exception {
+    Method method = CqlConversionService.class.getDeclaredMethod("parseLocator", String.class);
+    method.setAccessible(true);
+
+    int[] parsed = (int[]) method.invoke(service, "  ");
+
+    assertArrayEquals(new int[] {0, 0, 0, 0}, parsed);
   }
 
   private Library buildLibraryWithSingleRetrieve(String locator, String dataType) {

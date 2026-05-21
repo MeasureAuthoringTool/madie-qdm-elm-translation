@@ -16,6 +16,7 @@ import org.junit.jupiter.api.Test;
 import org.mockito.MockedConstruction;
 
 import java.io.IOException;
+import java.lang.reflect.Method;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
@@ -188,6 +189,81 @@ class CqlToolingTest {
         tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
 
     assertThat(includedLibraries.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetIncludedLibrariesCqlSkipsCompiledLibraryWithNullIdentifierId() {
+    MadieLibrarySourceProvider librarySourceProvider = mock(MadieLibrarySourceProvider.class);
+
+    CompiledLibrary compiledLibrary = new CompiledLibrary();
+    VersionedIdentifier identifier = new VersionedIdentifier();
+    identifier.setVersion("1.0.0");
+    compiledLibrary.setIdentifier(identifier);
+
+    Map<String, CompiledLibrary> translatedLibraries = Map.of("NoId", compiledLibrary);
+
+    Map<String, String> includedLibraries =
+        tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
+
+    assertThat(includedLibraries.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetTranslatedLibrariesSkipsInvalidEntriesWithoutFallbackIdentifier() {
+    TranslationResource translationResource = mock(TranslationResource.class);
+    LibraryManager libraryManager = mock(LibraryManager.class);
+
+    CompiledLibrary nullCompiledLibrary = null;
+
+    CompiledLibrary nullCompiledIdentifierLibrary = new CompiledLibrary();
+
+    CompiledLibrary nullCompiledIdentifierIdLibrary = new CompiledLibrary();
+    VersionedIdentifier nullIdIdentifier = new VersionedIdentifier();
+    nullCompiledIdentifierIdLibrary.setIdentifier(nullIdIdentifier);
+
+    VersionedIdentifier nullIdFallbackIdentifier = new VersionedIdentifier();
+    Map<VersionedIdentifier, CompiledLibrary> compiledLibraries = new HashMap<>();
+    compiledLibraries.put(new VersionedIdentifier(), nullCompiledLibrary);
+    compiledLibraries.put(new VersionedIdentifier(), nullCompiledIdentifierLibrary);
+    compiledLibraries.put(nullIdFallbackIdentifier, nullCompiledIdentifierIdLibrary);
+
+    doReturn(libraryManager).when(translationResource).getLibraryManager();
+    doReturn(compiledLibraries).when(libraryManager).getCompiledLibraries();
+
+    Map<String, CompiledLibrary> translatedLibraries =
+        tooling.getTranslatedLibraries(translationResource);
+
+    assertThat(translatedLibraries.size(), is(equalTo(0)));
+  }
+
+  @Test
+  void testGetLibrarySourceSafelyReturnsNullForNullLibraryAndMissingElmIdentifier()
+      throws Exception {
+    Method method =
+        CqlTooling.class.getDeclaredMethod(
+            "getLibrarySourceSafely", MadieLibrarySourceProvider.class, CompiledLibrary.class);
+    method.setAccessible(true);
+
+    MadieLibrarySourceProvider librarySourceProvider = mock(MadieLibrarySourceProvider.class);
+
+    Object nullLibraryResult =
+        method.invoke(tooling, librarySourceProvider, new Object[] {null}[0]);
+    assertThat(nullLibraryResult, is(equalTo(null)));
+
+    CompiledLibrary withoutElmLibrary = new CompiledLibrary();
+    VersionedIdentifier compiledIdentifier = new VersionedIdentifier();
+    compiledIdentifier.setId("HasCompiledId");
+    withoutElmLibrary.setIdentifier(compiledIdentifier);
+    Object missingElmLibraryResult =
+        method.invoke(tooling, librarySourceProvider, withoutElmLibrary);
+    assertThat(missingElmLibraryResult, is(equalTo(null)));
+
+    CompiledLibrary withoutElmIdentifier = new CompiledLibrary();
+    withoutElmIdentifier.setIdentifier(compiledIdentifier);
+    withoutElmIdentifier.setLibrary(new Library());
+    Object missingElmIdentifierResult =
+        method.invoke(tooling, librarySourceProvider, withoutElmIdentifier);
+    assertThat(missingElmIdentifierResult, is(equalTo(null)));
   }
 
   @Test
