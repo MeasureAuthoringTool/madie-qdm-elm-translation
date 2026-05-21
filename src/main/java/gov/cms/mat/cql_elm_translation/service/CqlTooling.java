@@ -15,6 +15,7 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import kotlinx.io.SourcesKt;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -30,17 +31,16 @@ public abstract class CqlTooling {
       CqlLibraryService cqlLibraryService,
       Set<String> parentExpressions) {
     // Run Translator to compile libraries
-    CqlTranslator cqlTranslator =
-        runTranslator(
+    TranslationArtifacts translationArtifacts =
+        buildTranslationArtifacts(
             cql, accessToken, cqlLibraryService, CqlCompilerException.ErrorSeverity.Error);
-    Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
-    cqlTranslator
-        .getTranslatedLibraries()
-        .forEach((key, value) -> translatedLibraries.put(key.getId(), value));
+    CqlTranslator cqlTranslator = translationArtifacts.getTranslator();
+    Map<String, CompiledLibrary> translatedLibraries =
+        translationArtifacts.getTranslatedLibraries();
     // if no parentExpressions provided, consider all expressions from main CQL
     Set<String> topLevelExpressions;
     if (CollectionUtils.isEmpty(parentExpressions)) {
-      topLevelExpressions = getParentExpressions(cql);
+      topLevelExpressions = getParentExpressions();
     } else {
       topLevelExpressions = parentExpressions;
     }
@@ -48,7 +48,7 @@ public abstract class CqlTooling {
     CQLTools cqlTools =
         new CQLTools(
             cql,
-            getIncludedLibrariesCql(new MadieLibrarySourceProvider(), cqlTranslator),
+            getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translatedLibraries),
             topLevelExpressions,
             cqlTranslator,
             translatedLibraries);
@@ -61,57 +61,130 @@ public abstract class CqlTooling {
     return cqlTools;
   }
 
-  protected Map<String, String> getIncludedLibrariesCql(
-      MadieLibrarySourceProvider librarySourceProvider, CqlTranslator cqlTranslator) {
-    Map<String, String> includedLibrariesCql = new HashMap<>();
-    for (CompiledLibrary l : cqlTranslator.getTranslatedLibraries().values()) {
-      try {
-        includedLibrariesCql.putIfAbsent(
-            l.getIdentifier().getId() + "-" + l.getIdentifier().getVersion(),
-            new String(
-                librarySourceProvider
-                    .getLibrarySource(l.getLibrary().getIdentifier())
-                    .readAllBytes(),
-                StandardCharsets.UTF_8));
-      } catch (IOException e) {
-        throw new RuntimeException(e);
-      }
-    }
-    return includedLibrariesCql;
+  protected TranslationArtifacts buildTranslationArtifacts(
+      String cql,
+      String accessToken,
+      CqlLibraryService cqlLibraryService,
+      CqlCompilerException.ErrorSeverity errorSeverity) {
+    return buildTranslationArtifacts(
+        buildRequestData(cql, accessToken, cqlLibraryService, errorSeverity));
   }
 
-  protected CqlTranslator runTranslator(
+  protected TranslationArtifacts buildTranslationArtifacts(RequestData requestData) {
+    TranslationResource translationResource = getTranslationResource(requestData);
+    CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
+    return new TranslationArtifacts(cqlTranslator, getTranslatedLibraries(translationResource));
+  }
+
+  protected RequestData buildRequestData(
       String cql,
       String accessToken,
       CqlLibraryService cqlLibraryService,
       CqlCompilerException.ErrorSeverity errorSeverity) {
     cqlLibraryService.setUpLibrarySourceProvider(cql, accessToken);
-    RequestData requestData =
-        RequestData.builder()
-            .cqlData(cql)
-            .errorSeverity(errorSeverity)
-            .signatures(LibraryBuilder.SignatureLevel.All)
-            .annotations(true)
-            .locators(true)
-            .disableListDemotion(true)
-            .disableListPromotion(true)
-            .disableMethodInvocation(false)
-            .validateUnits(true)
-            .resultTypes(true)
-            .build();
+    return RequestData.builder()
+        .cqlData(cql)
+        .errorSeverity(errorSeverity)
+        .signatures(LibraryBuilder.SignatureLevel.All)
+        .annotations(true)
+        .locators(true)
+        .disableListDemotion(true)
+        .disableListPromotion(true)
+        .disableMethodInvocation(false)
+        .validateUnits(true)
+        .resultTypes(true)
+        .build();
+  }
 
-    return processCqlData(requestData);
+  protected Map<String, String> getIncludedLibrariesCql(
+      MadieLibrarySourceProvider librarySourceProvider,
+      Map<String, CompiledLibrary> translatedLibraries) {
+    Map<String, String> includedLibrariesCql = new HashMap<>();
+    for (CompiledLibrary l : translatedLibraries.values()) {
+      if (l == null || l.getIdentifier() == null || l.getIdentifier().getId() == null) {
+        continue;
+      }
+      var librarySource = getLibrarySourceSafely(librarySourceProvider, l);
+      if (librarySource == null) {
+        continue;
+      }
+      String libraryText =
+          new String(SourcesKt.readByteArray(librarySource), StandardCharsets.UTF_8);
+      includedLibrariesCql.putIfAbsent(
+          l.getIdentifier().getId() + "-" + l.getIdentifier().getVersion(), libraryText);
+    }
+    return includedLibrariesCql;
+  }
+
+  private kotlinx.io.Source getLibrarySourceSafely(
+      MadieLibrarySourceProvider librarySourceProvider, CompiledLibrary library) {
+    if (library == null
+        || library.getLibrary() == null
+        || library.getLibrary().getIdentifier() == null) {
+      return null;
+    }
+    try {
+      return librarySourceProvider.getLibrarySource(library.getLibrary().getIdentifier());
+    } catch (RuntimeException ex) {
+      return null;
+    }
+  }
+
+  protected Map<String, CompiledLibrary> getTranslatedLibraries(
+      TranslationResource translationResource) {
+    Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
+    if (translationResource == null || translationResource.getLibraryManager() == null) {
+      return translatedLibraries;
+    }
+    translationResource
+        .getLibraryManager()
+        .getCompiledLibraries()
+        .forEach(
+            (identifier, compiledLibrary) -> {
+              if (compiledLibrary != null
+                  && compiledLibrary.getIdentifier() != null
+                  && compiledLibrary.getIdentifier().getId() != null) {
+                translatedLibraries.put(compiledLibrary.getIdentifier().getId(), compiledLibrary);
+              } else if (compiledLibrary != null
+                  && identifier != null
+                  && identifier.getId() != null) {
+                translatedLibraries.put(identifier.getId(), compiledLibrary);
+              }
+            });
+    return translatedLibraries;
   }
 
   protected CqlTranslator processCqlData(RequestData requestData) {
+    return getTranslationResource(requestData).buildTranslator(requestData);
+  }
+
+  protected TranslationResource getTranslationResource(RequestData requestData) {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties = cqlTextParser.getUsing();
     return new TranslationResource(
-            usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()))
-        .buildTranslator(requestData);
+        usingProperties != null && "FHIR".equals(usingProperties.getLibraryType()));
   }
 
-  private Set<String> getParentExpressions(String cql) {
+  protected static class TranslationArtifacts {
+    private final CqlTranslator translator;
+    private final Map<String, CompiledLibrary> translatedLibraries;
+
+    protected TranslationArtifacts(
+        CqlTranslator translator, Map<String, CompiledLibrary> translatedLibraries) {
+      this.translator = translator;
+      this.translatedLibraries = translatedLibraries;
+    }
+
+    protected CqlTranslator getTranslator() {
+      return translator;
+    }
+
+    protected Map<String, CompiledLibrary> getTranslatedLibraries() {
+      return translatedLibraries;
+    }
+  }
+
+  private Set<String> getParentExpressions() {
 
     // CqlParserListener listener = new CqlParserListener(cql);
     CQLModel cqlModel = new CQLModel();

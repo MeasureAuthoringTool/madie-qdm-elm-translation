@@ -1,7 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -13,12 +12,14 @@ import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.MapUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
+import org.cqframework.cql.cql2elm.CqlSemanticException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryContentType;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
-import org.cqframework.cql.elm.serializing.ElmLibraryWriterFactory;
-import org.cqframework.cql.elm.tracking.TrackBack;
+import org.cqframework.cql.cql2elm.tracking.TrackBack;
+import org.cqframework.cql.elm.visiting.BaseElmLibraryVisitor;
 import org.hl7.elm.r1.CodeSystemRef;
+import org.hl7.elm.r1.Element;
 import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
@@ -116,11 +117,12 @@ public class CqlConversionService extends CqlTooling {
     if (StringUtils.isBlank(cql)) {
       return Collections.emptyList();
     }
-    CqlTranslator translator = runTranslator(cql, accessToken, cqlLibraryService, errorSeverity);
+    TranslationArtifacts translationArtifacts =
+        buildTranslationArtifacts(cql, accessToken, cqlLibraryService, errorSeverity);
+    CqlTranslator translator = translationArtifacts.getTranslator();
     TranslatedLibrary translatedMeasureLib =
         buildTranslatedLibrary(translator.getTranslatedLibrary().getLibrary(), cql);
-    Map<VersionedIdentifier, CompiledLibrary> includedLibraries =
-        translator.getTranslatedLibraries();
+    Map<String, CompiledLibrary> includedLibraries = translationArtifacts.getTranslatedLibraries();
     List<TranslatedLibrary> libraries = new ArrayList<>();
     libraries.add(translatedMeasureLib);
     // if no included libraries, return only measure library
@@ -129,11 +131,17 @@ public class CqlConversionService extends CqlTooling {
     }
     // get the cql for included libraries
     Map<String, String> cqlMap =
-        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translator);
+        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), includedLibraries);
 
     // create TranslatedLibrary for each included library
     List<TranslatedLibrary> translatedIncludeLibs =
         includedLibraries.values().stream()
+            .filter(
+                compiledLibrary ->
+                    !isMainLibrary(
+                        compiledLibrary,
+                        translatedMeasureLib.getName(),
+                        translatedMeasureLib.getVersion()))
             .map(compiledLibrary -> buildTranslatedLibrary(compiledLibrary, cqlMap))
             .toList();
     libraries.addAll(translatedIncludeLibs);
@@ -165,18 +173,27 @@ public class CqlConversionService extends CqlTooling {
    * @param cqlTranslator - an instance of CqlTranslator
    */
   public void validateRetrieve(CqlTranslator cqlTranslator) {
-    List<Retrieve> retrieves = cqlTranslator.toRetrieves();
-    if (!CollectionUtils.isEmpty(cqlTranslator.toRetrieves())) {
+    List<Retrieve> retrieves = getRetrieves(cqlTranslator.toELM());
+    if (!CollectionUtils.isEmpty(retrieves)) {
       List<CqlCompilerException> exceptions =
           retrieves.stream()
               .filter(
                   retrieve ->
-                      retrieve.getCodes() == null || retrieve.getCodes() instanceof CodeSystemRef)
+                      !isPatientRetrieve(retrieve)
+                          && StringUtils.isNotBlank(retrieve.getLocator())
+                          && (retrieve.getCodes() == null
+                              || retrieve.getCodes() instanceof CodeSystemRef)
+                          && CollectionUtils.isEmpty(retrieve.getCodeFilter()))
               .map(
                   retrieve -> {
-                    TrackBack trackable = retrieve.getTrackbacks().get(0);
-                    return new CqlCompilerException(
-                        "Retrieves must contain a code or value set filter", trackable);
+                    TrackBack trackable =
+                        buildTrackBack(retrieve, cqlTranslator.toELM().getIdentifier());
+                    return (CqlCompilerException)
+                        new CqlSemanticException(
+                            "Retrieves must contain a code or value set filter",
+                            trackable,
+                            CqlCompilerException.ErrorSeverity.Error,
+                            null);
                   })
               .toList();
       if (!CollectionUtils.isEmpty(exceptions)) {
@@ -201,9 +218,78 @@ public class CqlConversionService extends CqlTooling {
   }
 
   public String convertToJson(Library library, LibraryContentType contentType) throws IOException {
-    StringWriter writer = new StringWriter();
-    ElmLibraryWriterFactory.getWriter(contentType.mimeType()).write(library, writer);
-    return writer.getBuffer().toString();
+    if (contentType == LibraryContentType.XML) {
+      return CqlTranslator.convertToXml(library);
+    }
+    return CqlTranslator.convertToJson(library);
+  }
+
+  private boolean isMainLibrary(CompiledLibrary compiledLibrary, String name, String version) {
+    VersionedIdentifier identifier = compiledLibrary.getIdentifier();
+    return identifier != null
+        && StringUtils.equals(identifier.getId(), name)
+        && StringUtils.equals(identifier.getVersion(), version);
+  }
+
+  private List<Retrieve> getRetrieves(Library rootLibrary) {
+    if (rootLibrary == null) {
+      return Collections.emptyList();
+    }
+
+    RetrieveCollector collector = new RetrieveCollector();
+    collector.visitLibrary(rootLibrary, null);
+    return collector.retrieves;
+  }
+
+  private boolean isPatientRetrieve(Retrieve retrieve) {
+    return retrieve != null
+        && retrieve.getDataType() != null
+        && "Patient".equals(retrieve.getDataType().getLocalPart());
+  }
+
+  private TrackBack buildTrackBack(Retrieve retrieve, VersionedIdentifier libraryIdentifier) {
+    int[] position = parseLocator(retrieve.getLocator());
+    return new TrackBack(libraryIdentifier, position[0], position[1], position[2], position[3]);
+  }
+
+  private int[] parseLocator(String locator) {
+    if (StringUtils.isBlank(locator)) {
+      return new int[] {0, 0, 0, 0};
+    }
+
+    Matcher rangeMatcher = Pattern.compile("(\\d+):(\\d+)-(\\d+):(\\d+)").matcher(locator);
+    if (rangeMatcher.find()) {
+      return new int[] {
+        Integer.parseInt(rangeMatcher.group(1)),
+        Integer.parseInt(rangeMatcher.group(2)),
+        Integer.parseInt(rangeMatcher.group(3)),
+        Integer.parseInt(rangeMatcher.group(4))
+      };
+    }
+
+    Matcher startMatcher = Pattern.compile("(\\d+):(\\d+)").matcher(locator);
+    if (startMatcher.find()) {
+      int startLine = Integer.parseInt(startMatcher.group(1));
+      int startChar = Integer.parseInt(startMatcher.group(2));
+      return new int[] {startLine, startChar, startLine, startChar};
+    }
+
+    return new int[] {0, 0, 0, 0};
+  }
+
+  private static class RetrieveCollector extends BaseElmLibraryVisitor<Void, Void> {
+    private final List<Retrieve> retrieves = new ArrayList<>();
+
+    @Override
+    protected Void defaultResult(Element elm, Void context) {
+      return null;
+    }
+
+    @Override
+    public Void visitRetrieve(Retrieve elm, Void context) {
+      retrieves.add(elm);
+      return super.visitRetrieve(elm, context);
+    }
   }
 
   private void logErrors(List<CqlCompilerException> exceptions) {

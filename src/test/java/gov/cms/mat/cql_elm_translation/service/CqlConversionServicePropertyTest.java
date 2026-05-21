@@ -90,16 +90,14 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void process_locators() {
-    String locatorTag = "\"locator\" : ";
-
+  void process_locators() throws JsonProcessingException {
     String jsonDefault = getJson();
-    assertTrue(jsonDefault.contains(locatorTag));
+    assertTrue(containsField(new ObjectMapper().readTree(jsonDefault), "locator"));
 
     locators = Boolean.FALSE;
 
     String jsonSignatureLevelNone = getJson();
-    assertFalse(jsonSignatureLevelNone.contains(locatorTag));
+    assertFalse(containsField(new ObjectMapper().readTree(jsonSignatureLevelNone), "locator"));
 
     assertNotEquals(jsonDefault, jsonSignatureLevelNone); // data changed
   }
@@ -157,6 +155,33 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
       }
     }
     return null;
+  }
+
+  private boolean containsField(JsonNode node, String fieldName) {
+    if (node == null) {
+      return false;
+    }
+
+    if (node.isObject()) {
+      if (node.has(fieldName)) {
+        return true;
+      }
+
+      Iterator<JsonNode> fields = node.elements();
+      while (fields.hasNext()) {
+        if (containsField(fields.next(), fieldName)) {
+          return true;
+        }
+      }
+    } else if (node.isArray()) {
+      for (JsonNode child : node) {
+        if (containsField(child, fieldName)) {
+          return true;
+        }
+      }
+    }
+
+    return false;
   }
 
   private String getJson() {

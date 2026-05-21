@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation;
 
+import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -15,6 +16,7 @@ import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.Primary;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
@@ -28,6 +30,7 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
+@Import(CqlLibraryService.class)
 @EnableCaching
 public class CqlElmTranslationApplication {
 
@@ -49,6 +52,7 @@ public class CqlElmTranslationApplication {
   }
 
   @Bean
+  @Primary
   public CacheManager cacheManager() {
     CaffeineCacheManager cacheManager = new CaffeineCacheManager("cqlLibraries");
     cacheManager.setCaffeine(Caffeine.newBuilder().maximumSize(500));
