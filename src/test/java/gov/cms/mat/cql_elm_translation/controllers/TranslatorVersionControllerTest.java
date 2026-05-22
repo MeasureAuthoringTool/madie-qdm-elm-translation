@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.cqframework.cql_to_elm.BuildConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -96,6 +97,40 @@ public class TranslatorVersionControllerTest {
 
     // Then
     assertThat(output, is(notNullValue()));
+  }
+
+  @Test
+  public void testGetBuildConfigVersion() {
+    // When
+    String output = translatorVersionController.getBuildConfigVersion();
+
+    // Then
+    assertThat(output, is(equalTo(BuildConfig.IMPLEMENTATION_VERSION)));
+  }
+
+  @Test
+  public void testGetPackageImplementationVersionReturnsValue() {
+    // Given
+    when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
+    when(translatorPackage.getImplementationVersion()).thenReturn("4.8.0");
+
+    // When
+    String output = translatorVersionController.getPackageImplementationVersion();
+
+    // Then
+    assertThat(output, is(equalTo("4.8.0")));
+  }
+
+  @Test
+  public void testGetPackageImplementationVersionReturnsNullWhenPackageMissing() {
+    // Given
+    when(translatorVersionController.getTranslatorPackage()).thenReturn(null);
+
+    // When
+    String output = translatorVersionController.getPackageImplementationVersion();
+
+    // Then
+    assertThat(output, is(nullValue()));
   }
 
   @Test
