@@ -23,6 +23,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionIsDraft() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn("1.2.3");
 
@@ -37,7 +38,8 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionWithVersionLookupFailure() {
     // Given
-    when(translatorVersionController.getTranslatorPackage()).thenReturn(null);
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
+    when(translatorVersionController.getPackageImplementationVersion()).thenReturn(null);
 
     // When
     ResponseEntity<String> results = translatorVersionController.getTranslatorVersion(true);
@@ -49,6 +51,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionForNullImplementationVersion() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn(null);
 
@@ -62,6 +65,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionForBlankImplementationVersion() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn("");
 
@@ -92,5 +96,18 @@ public class TranslatorVersionControllerTest {
 
     // Then
     assertThat(output, is(notNullValue()));
+  }
+
+  @Test
+  public void testGetTranslatorVersionPrefersBuildConfigVersion() {
+    // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn("4.8.0");
+
+    // When
+    ResponseEntity<String> results = translatorVersionController.getTranslatorVersion(true);
+
+    // Then
+    assertThat(results.getStatusCode(), is(equalTo(HttpStatus.OK)));
+    assertThat(results.getBody(), is(equalTo("4.8.0")));
   }
 }
