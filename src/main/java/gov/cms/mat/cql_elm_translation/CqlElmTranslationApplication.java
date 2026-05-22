@@ -53,6 +53,7 @@ public class CqlElmTranslationApplication {
   }
 
   @Bean
+  @Primary
   public CacheManager cacheManager() {
     CaffeineCacheManager cacheManager =
         new CaffeineCacheManager("cqlLibraries", "effectiveDataRequirementsCache");
