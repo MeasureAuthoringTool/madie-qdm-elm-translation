@@ -101,8 +101,6 @@
       </exclusions>
     </dependency>
 
-    <!--  Dependencies required to use cql to elm translator from cqFramework  -->
-
     <dependency>
       <groupId>javax.ws.rs</groupId>
       <artifactId>javax.ws.rs-api</artifactId>
@@ -216,7 +214,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>3.1.2</version>
+      <version>3.1.3</version>
     </dependency>
 
     <dependency>
