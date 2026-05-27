@@ -15,7 +15,7 @@
 
   <properties>
     <cqframework.version>4.8.0</cqframework.version>
-    <hapi.fhir.version>8.8.0</hapi.fhir.version>
+    <hapi.fhir.version>8.10.0</hapi.fhir.version>
     <jackson.version>2.21.2</jackson.version>
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
