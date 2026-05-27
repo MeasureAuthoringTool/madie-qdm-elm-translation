@@ -5,6 +5,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
+import org.cqframework.cql_to_elm.BuildConfig;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
@@ -23,6 +24,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionIsDraft() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn("1.2.3");
 
@@ -37,7 +39,8 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionWithVersionLookupFailure() {
     // Given
-    when(translatorVersionController.getTranslatorPackage()).thenReturn(null);
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
+    when(translatorVersionController.getPackageImplementationVersion()).thenReturn(null);
 
     // When
     ResponseEntity<String> results = translatorVersionController.getTranslatorVersion(true);
@@ -49,6 +52,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionForNullImplementationVersion() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn(null);
 
@@ -62,6 +66,7 @@ public class TranslatorVersionControllerTest {
   @Test
   public void testGetTranslatorVersionForBlankImplementationVersion() {
     // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn(null);
     when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
     when(translatorPackage.getImplementationVersion()).thenReturn("");
 
@@ -92,5 +97,52 @@ public class TranslatorVersionControllerTest {
 
     // Then
     assertThat(output, is(notNullValue()));
+  }
+
+  @Test
+  public void testGetBuildConfigVersion() {
+    // When
+    String output = translatorVersionController.getBuildConfigVersion();
+
+    // Then
+    assertThat(output, is(equalTo(BuildConfig.IMPLEMENTATION_VERSION)));
+  }
+
+  @Test
+  public void testGetPackageImplementationVersionReturnsValue() {
+    // Given
+    when(translatorVersionController.getTranslatorPackage()).thenReturn(translatorPackage);
+    when(translatorPackage.getImplementationVersion()).thenReturn("4.8.0");
+
+    // When
+    String output = translatorVersionController.getPackageImplementationVersion();
+
+    // Then
+    assertThat(output, is(equalTo("4.8.0")));
+  }
+
+  @Test
+  public void testGetPackageImplementationVersionReturnsNullWhenPackageMissing() {
+    // Given
+    when(translatorVersionController.getTranslatorPackage()).thenReturn(null);
+
+    // When
+    String output = translatorVersionController.getPackageImplementationVersion();
+
+    // Then
+    assertThat(output, is(nullValue()));
+  }
+
+  @Test
+  public void testGetTranslatorVersionPrefersBuildConfigVersion() {
+    // Given
+    when(translatorVersionController.getBuildConfigVersion()).thenReturn("4.8.0");
+
+    // When
+    ResponseEntity<String> results = translatorVersionController.getTranslatorVersion(true);
+
+    // Then
+    assertThat(results.getStatusCode(), is(equalTo(HttpStatus.OK)));
+    assertThat(results.getBody(), is(equalTo("4.8.0")));
   }
 }
