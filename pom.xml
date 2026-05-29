@@ -15,7 +15,7 @@
 
   <properties>
     <cqframework.version>4.8.0</cqframework.version>
-    <hapi.fhir.version>8.8.0</hapi.fhir.version>
+    <hapi.fhir.version>8.10.0</hapi.fhir.version>
     <jackson.version>2.21.2</jackson.version>
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
@@ -295,6 +295,12 @@
       <groupId>org.jetbrains.kotlin</groupId>
       <artifactId>kotlin-reflect</artifactId>
       <version>2.2.10</version>
+    </dependency>
+
+    <dependency>
+      <groupId>com.github.ben-manes.caffeine</groupId>
+      <artifactId>caffeine</artifactId>
+      <version>3.2.4</version>
     </dependency>
 
     <dependency>
