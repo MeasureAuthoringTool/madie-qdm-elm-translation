@@ -31,6 +31,7 @@ import java.util.concurrent.ConcurrentHashMap;
 public class ModelManagerFactory implements ILoggingService {
 
   private final String fhirCachePath;
+  private final String igResourcePattern;
 
   private final Map<ModelIdentifier, ModelManager> modelManagers = new ConcurrentHashMap<>();
   private final Map<ModelIdentifier, ModelLoadingInfo> modelLoadingInfos =
@@ -46,14 +47,15 @@ public class ModelManagerFactory implements ILoggingService {
     logger.debug(message);
   }
 
-  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath) {
+  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath, @Value("${ig.resource.pattern:classpath*:igs/*.json}") String igResourcePattern) {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
+    this.igResourcePattern = igResourcePattern;
   }
 
   @EventListener(ApplicationReadyEvent.class)
   public void onApplicationReady() {
-    ImplementationGuideLoader.load().forEach(this::processImplementationGuide);
+    ImplementationGuideLoader.load(igResourcePattern).forEach(this::processImplementationGuide);
   }
 
   public void processImplementationGuide(ImplementationGuide ig) {
