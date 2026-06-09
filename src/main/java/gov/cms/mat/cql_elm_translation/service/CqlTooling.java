@@ -15,6 +15,7 @@ import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
 import org.cqframework.cql.cql2elm.model.CompiledLibrary;
+import org.hl7.elm.r1.VersionedIdentifier;
 import kotlinx.io.SourcesKt;
 
 import java.io.IOException;
@@ -23,8 +24,25 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
 
+/**
+ * Base class for QDM CQL tooling. Compiles a measure's CQL (and its included libraries) via the
+ * cqframework translator and produces a {@link CQLTools} instance that exposes the parsed/analyzed
+ * artifacts (dependency graph, value sets, codes, definitions, etc.).
+ */
 @RequiredArgsConstructor
 public abstract class CqlTooling {
+
+  /**
+   * Compiles the given CQL, gathers the source of every included library, and builds a fully
+   * generated {@link CQLTools} for downstream analysis.
+   *
+   * @param cql the main measure CQL to compile
+   * @param accessToken bearer token used to resolve included library sources
+   * @param cqlLibraryService service that wires up the library source provider
+   * @param parentExpressions expressions to treat as top-level; when empty, all expressions from
+   *     the main CQL are used
+   * @return a generated {@link CQLTools} instance
+   */
   protected CQLTools parseCql(
       String cql,
       String accessToken,
@@ -48,7 +66,8 @@ public abstract class CqlTooling {
     CQLTools cqlTools =
         new CQLTools(
             cql,
-            getIncludedLibrariesCql(new MadieLibrarySourceProvider(), translatedLibraries),
+            getIncludedLibrariesCql(
+                new MadieLibrarySourceProvider(), translationArtifacts.getCompiledLibraries()),
             topLevelExpressions,
             cqlTranslator,
             translatedLibraries);
@@ -70,10 +89,17 @@ public abstract class CqlTooling {
         buildRequestData(cql, accessToken, cqlLibraryService, errorSeverity));
   }
 
+  /**
+   * Runs the translator and bundles the results: the {@link CqlTranslator}, the id-keyed compiled
+   * library map, and the full version-keyed compiled library map.
+   */
   protected TranslationArtifacts buildTranslationArtifacts(RequestData requestData) {
     TranslationResource translationResource = getTranslationResource(requestData);
     CqlTranslator cqlTranslator = translationResource.buildTranslator(requestData);
-    return new TranslationArtifacts(cqlTranslator, getTranslatedLibraries(translationResource));
+    return new TranslationArtifacts(
+        cqlTranslator,
+        getTranslatedLibraries(translationResource),
+        translationResource.getLibraryManager().getCompiledLibraries());
   }
 
   protected RequestData buildRequestData(
@@ -96,11 +122,16 @@ public abstract class CqlTooling {
         .build();
   }
 
+  /**
+   * Resolves the raw CQL text for every compiled library, keyed by {@code id-version}. Iterating
+   * the full version-keyed map ensures multiple versions of the same library id are all retained.
+   * Libraries with missing identifiers or unresolvable sources are skipped.
+   */
   protected Map<String, String> getIncludedLibrariesCql(
       MadieLibrarySourceProvider librarySourceProvider,
-      Map<String, CompiledLibrary> translatedLibraries) {
+      Map<VersionedIdentifier, CompiledLibrary> compiledLibraries) {
     Map<String, String> includedLibrariesCql = new HashMap<>();
-    for (CompiledLibrary l : translatedLibraries.values()) {
+    for (CompiledLibrary l : compiledLibraries.values()) {
       if (l == null || l.getIdentifier() == null || l.getIdentifier().getId() == null) {
         continue;
       }
@@ -116,6 +147,10 @@ public abstract class CqlTooling {
     return includedLibrariesCql;
   }
 
+  /**
+   * Null-safe wrapper around the source provider that returns {@code null} instead of throwing when
+   * a library has no identifier or its source cannot be resolved.
+   */
   private kotlinx.io.Source getLibrarySourceSafely(
       MadieLibrarySourceProvider librarySourceProvider, CompiledLibrary library) {
     if (library == null
@@ -130,6 +165,10 @@ public abstract class CqlTooling {
     }
   }
 
+  /**
+   * Flattens the library manager's compiled libraries into a map keyed by library id (no version).
+   * Note: when multiple versions of the same id are present, the last one wins.
+   */
   protected Map<String, CompiledLibrary> getTranslatedLibraries(
       TranslationResource translationResource) {
     Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
@@ -168,11 +207,15 @@ public abstract class CqlTooling {
   protected static class TranslationArtifacts {
     private final CqlTranslator translator;
     private final Map<String, CompiledLibrary> translatedLibraries;
+    private final Map<VersionedIdentifier, CompiledLibrary> compiledLibraries;
 
     protected TranslationArtifacts(
-        CqlTranslator translator, Map<String, CompiledLibrary> translatedLibraries) {
+        CqlTranslator translator,
+        Map<String, CompiledLibrary> translatedLibraries,
+        Map<VersionedIdentifier, CompiledLibrary> compiledLibraries) {
       this.translator = translator;
       this.translatedLibraries = translatedLibraries;
+      this.compiledLibraries = compiledLibraries;
     }
 
     protected CqlTranslator getTranslator() {
@@ -181,6 +224,10 @@ public abstract class CqlTooling {
 
     protected Map<String, CompiledLibrary> getTranslatedLibraries() {
       return translatedLibraries;
+    }
+
+    protected Map<VersionedIdentifier, CompiledLibrary> getCompiledLibraries() {
+      return compiledLibraries;
     }
   }
 

@@ -395,7 +395,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     CompiledLibrary mainLibrary = translator.getTranslatedLibrary();
     Map<String, CompiledLibrary> includedLibraries = Map.of("Main", mainLibrary);
     CqlTooling.TranslationArtifacts artifacts =
-        new CqlTooling.TranslationArtifacts(translator, includedLibraries);
+        new CqlTooling.TranslationArtifacts(translator, includedLibraries, Map.of());
 
     doReturn(artifacts)
         .when(conversionService)

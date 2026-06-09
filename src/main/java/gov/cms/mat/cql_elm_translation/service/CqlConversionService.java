@@ -129,9 +129,11 @@ public class CqlConversionService extends CqlTooling {
     if (MapUtils.isEmpty(includedLibraries)) {
       return libraries;
     }
-    // get the cql for included libraries
+    // get the cql for included libraries (use the full compiled-library set so multiple
+    // versions of the same library id are all retained, keyed by id-version)
     Map<String, String> cqlMap =
-        getIncludedLibrariesCql(new MadieLibrarySourceProvider(), includedLibraries);
+        getIncludedLibrariesCql(
+            new MadieLibrarySourceProvider(), translationArtifacts.getCompiledLibraries());
 
     // create TranslatedLibrary for each included library
     List<TranslatedLibrary> translatedIncludeLibs =
