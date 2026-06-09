@@ -137,11 +137,10 @@ class CqlToolingTest {
         .when(librarySourceProvider)
         .getLibrarySource(runtimeElmIdentifier);
 
-    Map<String, CompiledLibrary> translatedLibraries =
-        Map.of(
-            "ValidLib", validLibrary,
-            "Missing", missingIdentifierLibrary,
-            "BoomLib", runtimeFailureLibrary);
+    Map<VersionedIdentifier, CompiledLibrary> translatedLibraries = new HashMap<>();
+    translatedLibraries.put(validCompiledIdentifier, validLibrary);
+    translatedLibraries.put(new VersionedIdentifier().withId("Missing"), missingIdentifierLibrary);
+    translatedLibraries.put(runtimeCompiledIdentifier, runtimeFailureLibrary);
 
     Map<String, String> includedLibraries =
         tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
@@ -182,8 +181,8 @@ class CqlToolingTest {
   void testGetIncludedLibrariesCqlSkipsNullEntry() {
     MadieLibrarySourceProvider librarySourceProvider = mock(MadieLibrarySourceProvider.class);
 
-    Map<String, CompiledLibrary> translatedLibraries = new HashMap<>();
-    translatedLibraries.put("NullLib", null);
+    Map<VersionedIdentifier, CompiledLibrary> translatedLibraries = new HashMap<>();
+    translatedLibraries.put(new VersionedIdentifier().withId("NullLib"), null);
 
     Map<String, String> includedLibraries =
         tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
@@ -200,7 +199,8 @@ class CqlToolingTest {
     identifier.setVersion("1.0.0");
     compiledLibrary.setIdentifier(identifier);
 
-    Map<String, CompiledLibrary> translatedLibraries = Map.of("NoId", compiledLibrary);
+    Map<VersionedIdentifier, CompiledLibrary> translatedLibraries =
+        Map.of(new VersionedIdentifier().withId("NoId"), compiledLibrary);
 
     Map<String, String> includedLibraries =
         tooling.getIncludedLibrariesCql(librarySourceProvider, translatedLibraries);
@@ -272,7 +272,7 @@ class CqlToolingTest {
     CqlLibraryService cqlLibraryService = mock(CqlLibraryService.class);
     CqlTranslator translator = mock(CqlTranslator.class);
     CqlTooling.TranslationArtifacts artifacts =
-        new CqlTooling.TranslationArtifacts(translator, new HashMap<>());
+        new CqlTooling.TranslationArtifacts(translator, new HashMap<>(), new HashMap<>());
 
     doReturn(artifacts)
         .when(spyTooling)
