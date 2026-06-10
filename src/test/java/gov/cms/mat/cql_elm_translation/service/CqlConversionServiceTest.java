@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.service;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
@@ -13,7 +14,7 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.exceptions.InternalServerException;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
+import org.apache.commons.lang3.StringUtils;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -47,8 +48,7 @@ import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.Assertions.fail;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.spy;
@@ -60,7 +60,7 @@ import gov.cms.mat.cql.elements.UsingProperties;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest
+@SpringBootTest(properties = {"madie.ig-resource-pattern=classpath:igs/*.json"})
 class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Mock RestTemplate restTemplate;
@@ -96,6 +96,24 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     lenient()
         .when(modelManagerFactory.getModelManager(any(ModelIdentifier.class)))
         .thenReturn(mock(ModelManager.class));
+    lenient()
+        .when(
+            fhirUtil.getMinVersionForNpm(
+                argThat(
+                    usingProperties ->
+                        usingProperties != null
+                            && StringUtils.equalsIgnoreCase(
+                                "FHIR", usingProperties.getLibraryType()))))
+        .thenReturn("5.0.0");
+    lenient()
+        .when(
+            fhirUtil.getMinVersionForNpm(
+                argThat(
+                    usingProperties ->
+                        usingProperties != null
+                            && StringUtils.equalsIgnoreCase(
+                                "QICORE", usingProperties.getLibraryType()))))
+        .thenReturn("7.0.0");
   }
 
   @Test

@@ -47,7 +47,9 @@ public class ModelManagerFactory implements ILoggingService {
     logger.debug(message);
   }
 
-  public ModelManagerFactory(@Value("${madie.fhir-cache}") String fhirCachePath, @Value("${ig.resource.pattern:classpath*:igs/*.json}") String igResourcePattern) {
+  public ModelManagerFactory(
+      @Value("${madie.fhir-cache}") String fhirCachePath,
+      @Value("${madie.ig-resource-pattern:classpath*:igs/*.json}") String igResourcePattern) {
     log.info("Initializing ModelManagerFactory");
     this.fhirCachePath = fhirCachePath;
     this.igResourcePattern = igResourcePattern;

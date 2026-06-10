@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.MadieLibrarySourceProvider;
@@ -8,7 +9,6 @@ import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
 import gov.cms.madie.cql_elm_translator.utils.cql.CQLTools;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLModel;
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import gov.cms.mat.cql_elm_translation.utils.cql.VersionUtil;
 import kotlinx.io.Source;
 import lombok.RequiredArgsConstructor;
@@ -146,10 +146,12 @@ public abstract class CqlTooling {
     CqlTextParser cqlTextParser = new CqlTextParser(requestData.getCqlData());
     UsingProperties usingProperties =
         fhirUtil.getMostSpecificFhirModel(cqlTextParser.getAllUsings());
+
+    final String minNpmVersion = fhirUtil.getMinVersionForNpm(usingProperties);
     // Treat any QICore/FHIR version >= baseline (MIN_FHIR_VERSION)
     if (usingProperties != null
         && usingProperties.getVersion() != null
-        && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), MIN_FHIR_VERSION)) {
+        && VersionUtil.isVersionAtLeast(usingProperties.getVersion(), minNpmVersion)) {
       ModelIdentifier modelIdentifier =
           new ModelIdentifier(usingProperties.getLibraryType(), null, usingProperties.getVersion());
       ModelManager modelManager = modelManagerFactory.getModelManager(modelIdentifier);
