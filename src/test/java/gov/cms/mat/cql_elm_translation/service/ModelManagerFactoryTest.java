@@ -1,9 +1,9 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.madie.cql_elm_translator.utils.ImplementationGuideLoader;
 import gov.cms.mat.cql_elm_translation.dto.ModelLoadingInfo;
 import gov.cms.mat.cql_elm_translation.dto.ModelLoadingState;
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.io.FileUtils;
 import org.cqframework.cql.cql2elm.ModelManager;
@@ -47,7 +47,7 @@ public class ModelManagerFactoryTest {
     reset(fhirUtil);
     // Constructor no longer calls ImplementationGuideLoader.load() — that moved to
     // onApplicationReady()
-    modelManagerFactory = new ModelManagerFactory("/tmp/fake-cache");
+    modelManagerFactory = new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json");
   }
 
   @Test
@@ -194,8 +194,9 @@ public class ModelManagerFactoryTest {
 
     try (MockedStatic<ImplementationGuideLoader> mockedLoader =
         mockStatic(ImplementationGuideLoader.class)) {
-      mockedLoader.when(ImplementationGuideLoader::load).thenReturn(List.of(ig));
-      ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+      mockedLoader.when(() -> ImplementationGuideLoader.load(anyString())).thenReturn(List.of(ig));
+      ModelManagerFactory factory =
+          spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
       doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
 
       // when / then
@@ -231,7 +232,8 @@ public class ModelManagerFactoryTest {
     dep.setVersion("1.0.0");
     ig.setDependsOn(List.of(dep));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     doAnswer(
             inv -> {
               // mock the behavior of CQFramework mutating the system of the input identifier
@@ -303,7 +305,8 @@ public class ModelManagerFactoryTest {
 
     ig.setDependsOn(List.of(failingDep, successDep));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     ModelManager successManager = mock(ModelManager.class);
     doThrow(new RuntimeException("Simulated resolveModel failure"))
         .doReturn(successManager)
@@ -347,7 +350,8 @@ public class ModelManagerFactoryTest {
     dep.setVersion("7.0.0");
     ig.setDependsOn(List.of(dep));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     doReturn(mock(ModelManager.class)).when(factory).buildModelManager(any(), any());
     factory.processImplementationGuide(ig);
 
@@ -372,7 +376,8 @@ public class ModelManagerFactoryTest {
     dep.setVersion("1.0.0");
     ig.setDependsOn(List.of(dep));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     doThrow(new RuntimeException("Model load failed"))
         .when(factory)
         .buildModelManager(any(), any());
@@ -420,7 +425,8 @@ public class ModelManagerFactoryTest {
     dep2.setVersion("2.0.0");
     ig.setDependsOn(List.of(dep1, dep2));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     doReturn(mock(ModelManager.class))
         .doReturn(mock(ModelManager.class))
         .when(factory)
@@ -460,7 +466,8 @@ public class ModelManagerFactoryTest {
     dep2.setVersion("2.0.0");
     ig.setDependsOn(List.of(dep1, dep2));
 
-    ModelManagerFactory factory = spy(new ModelManagerFactory("/tmp/fake-cache"));
+    ModelManagerFactory factory =
+        spy(new ModelManagerFactory("/tmp/fake-cache", "classpath:igs/*.json"));
     doReturn(mock(ModelManager.class))
         .doThrow(new RuntimeException("Failed to build"))
         .when(factory)

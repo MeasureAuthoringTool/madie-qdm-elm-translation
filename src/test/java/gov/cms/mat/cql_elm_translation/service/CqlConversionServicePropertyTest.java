@@ -4,11 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.cqframework.cql.cql2elm.CqlTranslator;
 import org.cqframework.cql.cql2elm.LibraryBuilder;
@@ -25,6 +25,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyList;
 import static org.mockito.Mockito.when;
 
@@ -61,6 +62,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_Good() {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     CqlTranslator cqlTranslator = buildCqlTranslator();
     assertTrue(cqlTranslator.getErrors().isEmpty());
     assertFalse(cqlTranslator.toJson().contains("CqlToElmError"));
@@ -68,6 +70,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_SignatureLevelOverloads() {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     String jsonDefault = getJson();
 
     signatureLevel = LibraryBuilder.SignatureLevel.Overloads;
@@ -79,6 +82,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_annotations() {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     String jsonDefault = getJson();
 
     annotations = Boolean.FALSE;
@@ -90,6 +94,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_locators() {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     String locatorTag = "\"locator\":";
 
     String jsonDefault = getJson();
@@ -105,6 +110,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void process_validateUnits() {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     String jsonDefault = getJson();
 
     validateUnits = Boolean.FALSE;
@@ -116,6 +122,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
 
   @Test
   void testProcessCqlDataWithErrors() throws JsonProcessingException {
+    when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
     when(fhirUtil.getMostSpecificFhirModel(anyList()))

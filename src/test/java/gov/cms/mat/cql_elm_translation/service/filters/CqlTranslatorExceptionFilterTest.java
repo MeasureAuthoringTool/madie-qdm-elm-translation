@@ -19,7 +19,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
 
-@SpringBootTest
+@SpringBootTest(properties = {"madie.ig-resource-pattern=classpath:igs/*.json"})
 public class CqlTranslatorExceptionFilterTest {
 
   private String cqlData;

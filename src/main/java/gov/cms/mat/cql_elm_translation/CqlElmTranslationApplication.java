@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation;
 
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
@@ -31,7 +32,7 @@ import java.util.TimeZone;
 @SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
 @Configuration
 @Slf4j
-@Import(CqlLibraryService.class)
+@Import({CqlLibraryService.class, FhirUtil.class})
 @EnableCaching
 public class CqlElmTranslationApplication {
 

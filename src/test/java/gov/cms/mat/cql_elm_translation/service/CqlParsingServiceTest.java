@@ -1,5 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service;
 
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql.CqlTextParser;
 import gov.cms.mat.cql.elements.UsingProperties;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
@@ -10,7 +11,6 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 
 import static org.hamcrest.CoreMatchers.nullValue;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

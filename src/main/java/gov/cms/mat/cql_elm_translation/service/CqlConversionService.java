@@ -3,6 +3,7 @@ package gov.cms.mat.cql_elm_translation.service;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
@@ -15,7 +16,6 @@ import gov.cms.mat.cql_elm_translation.exceptions.MissingLibraryCqlCompilerExcep
 import gov.cms.mat.cql_elm_translation.service.filters.CqlTranslatorExceptionFilter;
 import gov.cms.mat.cql_elm_translation.service.support.CqlExceptionErrorProcessor;
 
-import gov.cms.mat.cql_elm_translation.utils.cql.FhirUtil;
 import lombok.extern.slf4j.Slf4j;
 import net.minidev.json.JSONArray;
 
