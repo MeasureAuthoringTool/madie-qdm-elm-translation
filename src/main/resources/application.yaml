@@ -4,6 +4,9 @@ server:
     context-path: /api/qdm
 
 spring:
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
   profiles:
     active: local
 

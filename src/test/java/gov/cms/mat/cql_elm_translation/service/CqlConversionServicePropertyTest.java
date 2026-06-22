@@ -1,9 +1,9 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
@@ -90,7 +90,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void process_locators() throws JsonProcessingException {
+  void process_locators() throws JacksonException {
     String jsonDefault = getJson();
     assertTrue(containsField(new ObjectMapper().readTree(jsonDefault), "locator"));
 
@@ -114,7 +114,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrors() throws JsonProcessingException {
+  void testProcessCqlDataWithErrors() throws JacksonException {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
     CqlConversionPayload cqlConversionPayload = cqlConversionService.translateCqlToElm(requestData);
@@ -167,9 +167,8 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
         return true;
       }
 
-      Iterator<JsonNode> fields = node.elements();
-      while (fields.hasNext()) {
-        if (containsField(fields.next(), fieldName)) {
+      for (JsonNode child : node.values()) {
+        if (containsField(child, fieldName)) {
           return true;
         }
       }

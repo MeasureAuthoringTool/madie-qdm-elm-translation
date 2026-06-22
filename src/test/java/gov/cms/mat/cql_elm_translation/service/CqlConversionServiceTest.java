@@ -1,8 +1,8 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
@@ -24,9 +24,10 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -56,7 +57,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Mock private CqlLibraryService cqlLibraryService;
@@ -100,7 +101,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       JsonNode libraryNode = jsonNode.at("/errorExceptions");
       assertNotNull(libraryNode);
       assertTrue(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -126,7 +127,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       JsonNode libraryNode = jsonNode.at("/errorExceptions");
       assertNotNull(libraryNode);
       assertFalse(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -152,7 +153,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
       JsonNode libraryNode = jsonNode.at("/errorExceptions");
       assertNotNull(libraryNode);
       assertTrue(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -190,7 +191,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
                           .asText()
                           .contains("Model Type and version are required")));
       assertTrue(foundMessage.get());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -270,9 +271,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Test
   void testGetTranslatedLibrariesForCqlIncludedLibraryNull() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
-    doReturn(null)
-        .when(cqlLibraryService)
-        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
 
     List<TranslatedLibrary> libraries =
         service.getTranslatedLibrariesForCql(
