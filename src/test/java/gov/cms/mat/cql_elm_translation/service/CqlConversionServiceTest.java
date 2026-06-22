@@ -1,8 +1,8 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
@@ -25,9 +25,10 @@ import org.hl7.elm.r1.Library;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.web.client.RestTemplate;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -60,7 +61,7 @@ import gov.cms.mat.cql.elements.UsingProperties;
 import static org.hamcrest.Matchers.notNullValue;
 import static org.mockito.Mockito.when;
 
-@SpringBootTest(properties = {"madie.ig-resource-pattern=classpath:igs/*.json"})
+@ExtendWith(MockitoExtension.class)
 class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Mock RestTemplate restTemplate;
@@ -251,7 +252,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
           is(
               equalTo(
                   "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -290,7 +291,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
               equalTo(
                   "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
 
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -364,7 +365,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
             }
           });
       assertTrue(foundMessage.get());
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }
@@ -421,7 +422,7 @@ class CqlConversionServiceTest implements ResourceFileUtil {
           is(
               equalTo(
                   "Library SupplementalDataElements Version 4.0.000 is already in use in this library.")));
-    } catch (JsonProcessingException e) {
+    } catch (JacksonException e) {
       fail(e.getMessage());
     }
   }

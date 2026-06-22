@@ -1,16 +1,20 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlBuilderLookup;
+import gov.cms.mat.cql_elm_translation.clients.UserRoleConverter;
 import gov.cms.mat.cql_elm_translation.clients.UserServiceClient;
+import gov.cms.mat.cql_elm_translation.config.security.SecurityConfig;
 import gov.cms.mat.cql_elm_translation.service.CqlParsingService;
 import gov.cms.mat.cql_elm_translation.service.DataCriteriaService;
 import org.apache.http.HttpStatus;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -28,11 +32,13 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.user;
 
 @WebMvcTest({CqlToolsController.class})
+@Import({SecurityConfig.class, UserRoleConverter.class})
 public class CqlToolsControllerMvcTest {
   private static final String TEST_USER_ID = "john_doe";
   @MockitoBean private UserServiceClient userServiceClient;
   @MockitoBean private DataCriteriaService dataCriteriaService;
   @MockitoBean private CqlParsingService cqlParsingService;
+  @MockitoBean private JwtDecoder jwtDecoder;
 
   @Autowired private MockMvc mockMvc;
 
