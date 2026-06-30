@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -121,7 +120,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrors() throws JacksonException {
+  void testProcessCqlDataWithErrors() {
     when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();

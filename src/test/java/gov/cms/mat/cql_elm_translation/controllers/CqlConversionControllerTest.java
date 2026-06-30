@@ -19,7 +19,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 
@@ -108,7 +107,7 @@ class CqlConversionControllerTest implements ResourceFileUtil {
   }
 
   @Test
-  void translatorOptionsRemoverEmptyAnnotations() throws JacksonException {
+  void translatorOptionsRemoverEmptyAnnotations() {
 
     String json = getData("/fhir4_std_lib_empty_array_annotations.json");
 

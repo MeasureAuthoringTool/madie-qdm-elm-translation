@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
@@ -239,22 +238,18 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
 
-      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNodeEx);
-      assertFalse(libraryNodeEx.isMissingNode());
-      assertThat(libraryNodeEx.isArray(), is(true));
-      assertThat(
-          libraryNodeEx.get(0).get("message").textValue(),
-          is(
-              equalTo(
-                  "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
-    } catch (JacksonException e) {
-      fail(e.getMessage());
-    }
+    JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNodeEx);
+    assertFalse(libraryNodeEx.isMissingNode());
+    assertThat(libraryNodeEx.isArray(), is(true));
+    assertThat(
+        libraryNodeEx.get(0).get("message").textValue(),
+        is(
+            equalTo(
+                "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
   }
 
   @Test
@@ -277,23 +272,18 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
 
-      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNodeEx);
-      assertFalse(libraryNodeEx.isMissingNode());
-      assertThat(libraryNodeEx.isArray(), is(true));
-      assertThat(
-          libraryNodeEx.get(0).get("message").textValue(),
-          is(
-              equalTo(
-                  "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
-
-    } catch (JacksonException e) {
-      fail(e.getMessage());
-    }
+    JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNodeEx);
+    assertFalse(libraryNodeEx.isMissingNode());
+    assertThat(libraryNodeEx.isArray(), is(true));
+    assertThat(
+        libraryNodeEx.get(0).get("message").textValue(),
+        is(
+            equalTo(
+                "FHIRHelpers is required as an included library for QI-Core. Please add the appropriate version of FHIRHelpers to your CQL.")));
   }
 
   @Test
@@ -346,28 +336,24 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
 
-      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNodeEx);
-      assertFalse(libraryNodeEx.isMissingNode());
-      assertThat(libraryNodeEx.isArray(), is(true));
+    JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNodeEx);
+    assertFalse(libraryNodeEx.isMissingNode());
+    assertThat(libraryNodeEx.isArray(), is(true));
 
-      final AtomicBoolean foundMessage = new AtomicBoolean(false);
-      libraryNodeEx.forEach(
-          node -> {
-            if (node.get("message")
-                .asText()
-                .contains("Library SupplementalDataElements is already in use in this library.")) {
-              foundMessage.set(true);
-            }
-          });
-      assertTrue(foundMessage.get());
-    } catch (JacksonException e) {
-      fail(e.getMessage());
-    }
+    final AtomicBoolean foundMessage = new AtomicBoolean(false);
+    libraryNodeEx.forEach(
+        node -> {
+          if (node.get("message")
+              .asText()
+              .contains("Library SupplementalDataElements is already in use in this library.")) {
+            foundMessage.set(true);
+          }
+        });
+    assertTrue(foundMessage.get());
   }
 
   @Test
@@ -408,23 +394,19 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
 
-      JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNodeEx);
-      assertFalse(libraryNodeEx.isMissingNode());
-      assertThat(libraryNodeEx.isArray(), is(true));
-      JsonNode finalNode = libraryNodeEx.get(libraryNodeEx.size() - 1);
-      assertThat(
-          finalNode.get("message").textValue(),
-          is(
-              equalTo(
-                  "Library SupplementalDataElements Version 4.0.000 is already in use in this library.")));
-    } catch (JacksonException e) {
-      fail(e.getMessage());
-    }
+    JsonNode libraryNodeEx = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNodeEx);
+    assertFalse(libraryNodeEx.isMissingNode());
+    assertThat(libraryNodeEx.isArray(), is(true));
+    JsonNode finalNode = libraryNodeEx.get(libraryNodeEx.size() - 1);
+    assertThat(
+        finalNode.get("message").textValue(),
+        is(
+            equalTo(
+                "Library SupplementalDataElements Version 4.0.000 is already in use in this library.")));
   }
 
   @Test
