@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.node.ArrayNode;
@@ -90,7 +89,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void process_locators() throws JacksonException {
+  void process_locators() {
     String jsonDefault = getJson();
     assertTrue(containsField(new ObjectMapper().readTree(jsonDefault), "locator"));
 
@@ -114,7 +113,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrors() throws JacksonException {
+  void testProcessCqlDataWithErrors() {
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
     CqlConversionPayload cqlConversionPayload = cqlConversionService.translateCqlToElm(requestData);

@@ -1,6 +1,5 @@
 package gov.cms.mat.cql_elm_translation.service.support;
 
-import tools.jackson.core.JacksonException;
 import tools.jackson.databind.JsonNode;
 import tools.jackson.databind.ObjectMapper;
 import tools.jackson.databind.json.JsonMapper;
@@ -51,7 +50,7 @@ public class CqlExceptionErrorProcessor {
     }
   }
 
-  private String addErrorsToJson() throws JacksonException {
+  private String addErrorsToJson() {
     JsonNode rootNode = mapper.readTree(json);
 
     ObjectNode updatedNode = (ObjectNode) rootNode;
