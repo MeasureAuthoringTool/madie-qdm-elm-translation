@@ -19,10 +19,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonMappingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
@@ -109,8 +107,7 @@ class CqlConversionControllerTest implements ResourceFileUtil {
   }
 
   @Test
-  void translatorOptionsRemoverEmptyAnnotations()
-      throws JsonMappingException, JsonProcessingException {
+  void translatorOptionsRemoverEmptyAnnotations() {
 
     String json = getData("/fhir4_std_lib_empty_array_annotations.json");
 

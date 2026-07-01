@@ -1,15 +1,18 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
 import gov.cms.madie.cql_elm_translator.dto.CqlLibraryDetails;
+import gov.cms.mat.cql_elm_translation.clients.UserRoleConverter;
 import gov.cms.mat.cql_elm_translation.clients.UserServiceClient;
+import gov.cms.mat.cql_elm_translation.config.security.SecurityConfig;
 import gov.cms.mat.cql_elm_translation.service.EffectiveDataRequirementService;
 import org.apache.http.HttpStatus;
 import org.junit.jupiter.api.Test;
-import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.boot.webmvc.test.autoconfigure.WebMvcTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
+import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -20,6 +23,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -28,6 +32,7 @@ import static org.springframework.security.test.web.servlet.request.SecurityMock
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest({EffectiveDataRequirementController.class})
+@Import({SecurityConfig.class, UserRoleConverter.class})
 class EffectiveDataRequirementControllerMVCTest {
 
   private static final String TEST_USER_ID = "john_doe";
@@ -36,8 +41,9 @@ class EffectiveDataRequirementControllerMVCTest {
   @Autowired private MockMvc mockMvc;
 
   @MockitoBean EffectiveDataRequirementService effectiveDataRequirementService;
+  @MockitoBean private JwtDecoder jwtDecoder;
 
-  @Mock org.hl7.fhir.r5.model.Library r5Libray;
+  private final org.hl7.fhir.r5.model.Library r5Libray = mock(org.hl7.fhir.r5.model.Library.class);
 
   @Test
   public void testGetEffectiveDataRequirementsThrowsExceptionWhenLibraryDetailsIsnull()

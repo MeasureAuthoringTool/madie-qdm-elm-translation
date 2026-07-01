@@ -7,6 +7,9 @@ cql-translator:
   version: @cqframework.version@
 
 spring:
+  jackson:
+    deserialization:
+      fail-on-null-for-primitives: false
   profiles:
     active: local
 

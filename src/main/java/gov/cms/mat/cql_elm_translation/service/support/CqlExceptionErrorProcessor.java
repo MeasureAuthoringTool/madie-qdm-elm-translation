@@ -1,9 +1,8 @@
 package gov.cms.mat.cql_elm_translation.service.support;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import gov.cms.mat.fhir.rest.dto.MatCqlConversionException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.collections4.CollectionUtils;
@@ -50,7 +49,7 @@ public class CqlExceptionErrorProcessor {
     }
   }
 
-  private String addErrorsToJson() throws JsonProcessingException {
+  private String addErrorsToJson() {
     JsonNode rootNode = mapper.readTree(json);
 
     ObjectNode updatedNode = (ObjectNode) rootNode;

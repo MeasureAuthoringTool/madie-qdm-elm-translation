@@ -1,9 +1,9 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.core.JacksonException;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ObjectNode;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql_elm_translation.service.CqlConversionService;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
@@ -20,9 +20,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.io.IOException;
 import java.io.UncheckedIOException;
-import java.util.Iterator;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/cql/translator")
@@ -116,20 +115,16 @@ public class CqlConversionController {
 
         for (int i = 0; i < annotationNode.size(); i++) {
           // remove translator options that are not the version
-          if (annotationNode.get(i).has("translatorOptions")) {
-            Iterator<String> fieldNames = annotationNode.get(i).fieldNames();
-            while (fieldNames.hasNext()) {
-              if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
-                fieldNames.remove();
-              }
-            }
+          if (annotationNode.get(i).has("translatorOptions")
+              && annotationNode.get(i) instanceof ObjectNode optionsNode) {
+            optionsNode.retain("translatorVersion");
           }
         }
 
         return rootNode.toPrettyString();
 
-      } catch (JsonProcessingException e) {
-        throw new UncheckedIOException(e);
+      } catch (JacksonException e) {
+        throw new UncheckedIOException(new IOException(e));
       }
     }
   }

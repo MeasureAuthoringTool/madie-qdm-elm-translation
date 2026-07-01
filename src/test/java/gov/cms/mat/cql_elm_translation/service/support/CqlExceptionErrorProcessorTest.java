@@ -1,7 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service.support;
 
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import gov.cms.mat.cql_elm_translation.ResourceFileUtil;
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 

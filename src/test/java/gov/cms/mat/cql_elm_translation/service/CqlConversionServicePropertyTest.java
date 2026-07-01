@@ -1,9 +1,8 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.node.ArrayNode;
 import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.mat.cql.elements.UsingProperties;
@@ -121,7 +120,7 @@ class CqlConversionServicePropertyTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrors() throws JsonProcessingException {
+  void testProcessCqlDataWithErrors() {
     when(fhirUtil.getMinVersionForNpm(any(UsingProperties.class))).thenReturn("7.0.0");
     cqlData = getData("/cv_populations.cql");
     RequestData requestData = buildRequestData();
