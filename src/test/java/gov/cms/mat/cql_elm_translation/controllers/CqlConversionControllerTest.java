@@ -7,7 +7,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 
-import java.io.UncheckedIOException;
+import tools.jackson.core.JacksonException;
 
 import org.cqframework.cql.cql2elm.CqlCompilerException;
 import org.junit.jupiter.api.Test;
@@ -131,6 +131,6 @@ class CqlConversionControllerTest implements ResourceFileUtil {
     CqlConversionController.TranslatorOptionsRemover translatorOptionsRemover =
         new CqlConversionController.TranslatorOptionsRemover(json);
 
-    assertThrows(UncheckedIOException.class, () -> translatorOptionsRemover.clean());
+    assertThrows(JacksonException.class, () -> translatorOptionsRemover.clean());
   }
 }
