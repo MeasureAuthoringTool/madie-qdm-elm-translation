@@ -1,6 +1,6 @@
 package gov.cms.mat.cql_elm_translation.service.filters;
 
-import com.fasterxml.jackson.databind.JsonNode;
+import tools.jackson.databind.JsonNode;
 import org.apache.commons.lang3.StringUtils;
 
 import java.util.Optional;

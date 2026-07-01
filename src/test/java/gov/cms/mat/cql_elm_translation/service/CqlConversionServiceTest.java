@@ -1,8 +1,7 @@
 package gov.cms.mat.cql_elm_translation.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
 import gov.cms.madie.cql_elm_translator.utils.cql.cql_translator.TranslationResource;
 import gov.cms.madie.models.dto.TranslatedLibrary;
 import gov.cms.mat.cql.CqlTextParser;
@@ -24,9 +23,10 @@ import org.hl7.elm.r1.Retrieve;
 import org.hl7.elm.r1.VersionedIdentifier;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.boot.test.context.SpringBootTest;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +47,6 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNull;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.junit.jupiter.api.Assertions.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.nullable;
@@ -56,7 +55,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
 
-@SpringBootTest
+@ExtendWith(MockitoExtension.class)
 class CqlConversionServiceTest implements ResourceFileUtil {
 
   @Mock private CqlLibraryService cqlLibraryService;
@@ -94,15 +93,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertTrue(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
+    JsonNode libraryNode = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNode);
+    assertTrue(libraryNode.isMissingNode());
   }
 
   @Test
@@ -120,15 +115,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertFalse(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
+    JsonNode libraryNode = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNode);
+    assertFalse(libraryNode.isMissingNode());
   }
 
   @Test
@@ -146,15 +137,11 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
-      assertTrue(libraryNode.isMissingNode());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
+    JsonNode libraryNode = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNode);
+    assertTrue(libraryNode.isMissingNode());
   }
 
   @Test
@@ -174,25 +161,21 @@ class CqlConversionServiceTest implements ResourceFileUtil {
     assertNotNull(payload);
     String resultJson = payload.getJson();
     ObjectMapper objectMapper = new ObjectMapper();
-    try {
-      JsonNode jsonNode = objectMapper.readTree(resultJson);
-      assertNotNull(jsonNode);
-      JsonNode libraryNode = jsonNode.at("/errorExceptions");
-      assertNotNull(libraryNode);
+    JsonNode jsonNode = objectMapper.readTree(resultJson);
+    assertNotNull(jsonNode);
+    JsonNode libraryNode = jsonNode.at("/errorExceptions");
+    assertNotNull(libraryNode);
 
-      assertFalse(libraryNode.isMissingNode());
-      final AtomicBoolean foundMessage = new AtomicBoolean(Boolean.FALSE);
-      libraryNode.forEach(
-          node ->
-              foundMessage.set(
-                  foundMessage.get()
-                      || node.get("message")
-                          .asText()
-                          .contains("Model Type and version are required")));
-      assertTrue(foundMessage.get());
-    } catch (JsonProcessingException e) {
-      fail(e.getMessage());
-    }
+    assertFalse(libraryNode.isMissingNode());
+    final AtomicBoolean foundMessage = new AtomicBoolean(Boolean.FALSE);
+    libraryNode.forEach(
+        node ->
+            foundMessage.set(
+                foundMessage.get()
+                    || node.get("message")
+                        .asText()
+                        .contains("Model Type and version are required")));
+    assertTrue(foundMessage.get());
   }
 
   @Test
@@ -270,9 +253,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   @Test
   void testGetTranslatedLibrariesForCqlIncludedLibraryNull() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
-    doReturn(null)
-        .when(cqlLibraryService)
-        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), nullable(String.class));
 
     List<TranslatedLibrary> libraries =
         service.getTranslatedLibrariesForCql(

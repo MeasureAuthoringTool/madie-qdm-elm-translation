@@ -6,13 +6,17 @@ import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLDefinition;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLIncludeLibrary;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLParameter;
 import gov.cms.madie.cql_elm_translator.utils.cql.parsing.model.CQLValueSet;
+import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import java.util.Set;
 
 @Data
 @Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class CqlLookups {
   private String context;
   private String library;

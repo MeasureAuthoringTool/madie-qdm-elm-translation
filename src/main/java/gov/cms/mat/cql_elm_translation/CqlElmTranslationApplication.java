@@ -1,14 +1,15 @@
 package gov.cms.mat.cql_elm_translation;
 
 import gov.cms.madie.cql_elm_translator.service.CqlLibraryService;
+import gov.cms.madie.cql_elm_translator.utils.FhirUtil;
 import gov.cms.mat.cql_elm_translation.config.logging.LogInterceptor;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityFilter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.autoconfigure.data.mongo.MongoDataAutoConfiguration;
-import org.springframework.boot.autoconfigure.mongo.MongoAutoConfiguration;
+import org.springframework.boot.data.mongodb.autoconfigure.DataMongoAutoConfiguration;
+import org.springframework.boot.mongodb.autoconfigure.MongoAutoConfiguration;
 import org.springframework.boot.web.servlet.FilterRegistrationBean;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import org.springframework.cache.CacheManager;
@@ -27,10 +28,10 @@ import jakarta.annotation.PostConstruct;
 
 import java.util.TimeZone;
 
-@SpringBootApplication(exclude = {MongoAutoConfiguration.class, MongoDataAutoConfiguration.class})
+@SpringBootApplication(exclude = {MongoAutoConfiguration.class, DataMongoAutoConfiguration.class})
 @Configuration
 @Slf4j
-@Import(CqlLibraryService.class)
+@Import({CqlLibraryService.class, FhirUtil.class})
 @EnableCaching
 public class CqlElmTranslationApplication {
 

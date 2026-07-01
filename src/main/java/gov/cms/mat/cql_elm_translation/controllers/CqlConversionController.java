@@ -1,9 +1,9 @@
 package gov.cms.mat.cql_elm_translation.controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
+import tools.jackson.databind.JsonNode;
+import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.json.JsonMapper;
+import tools.jackson.databind.node.ObjectNode;
 
 import gov.cms.mat.cql.dto.CqlConversionPayload;
 import gov.cms.madie.cql_elm_translator.utils.cql.data.RequestData;
@@ -20,10 +20,6 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-
-import java.io.UncheckedIOException;
-import java.util.Iterator;
-import java.util.Objects;
 
 @RestController
 @RequestMapping(path = "/cql/translator")
@@ -98,40 +94,30 @@ public class CqlConversionController {
     }
 
     String clean() {
+      ObjectMapper objectMapper = JsonMapper.builder().build();
+      JsonNode rootNode = objectMapper.readTree(json);
+      JsonNode libraryNode = rootNode.get("library");
+      JsonNode annotationNode = libraryNode.get("annotation");
 
-      try {
-        ObjectMapper objectMapper = new ObjectMapper();
-        JsonNode rootNode = objectMapper.readTree(json);
-        JsonNode libraryNode = rootNode.get("library");
-        JsonNode annotationNode = libraryNode.get("annotation");
-
-        if (annotationNode == null || annotationNode.isMissingNode()) {
-          return json;
-        }
-
-        if (annotationNode.isEmpty() && libraryNode instanceof ObjectNode) {
-          ObjectNode objectNode = (ObjectNode) libraryNode;
-          objectNode.remove("annotation");
-          return rootNode.toPrettyString();
-        }
-
-        for (int i = 0; i < annotationNode.size(); i++) {
-          // remove translator options that are not the version
-          if (annotationNode.get(i).has("translatorOptions")) {
-            Iterator<String> fieldNames = annotationNode.get(i).fieldNames();
-            while (fieldNames.hasNext()) {
-              if (!Objects.equals(fieldNames.next(), "translatorVersion")) {
-                fieldNames.remove();
-              }
-            }
-          }
-        }
-
-        return rootNode.toPrettyString();
-
-      } catch (JsonProcessingException e) {
-        throw new UncheckedIOException(e);
+      if (annotationNode == null || annotationNode.isMissingNode()) {
+        return json;
       }
+
+      if (annotationNode.isEmpty() && libraryNode instanceof ObjectNode) {
+        ObjectNode objectNode = (ObjectNode) libraryNode;
+        objectNode.remove("annotation");
+        return rootNode.toPrettyString();
+      }
+
+      for (int i = 0; i < annotationNode.size(); i++) {
+        // remove translator options that are not the version
+        if (annotationNode.get(i).has("translatorOptions")
+            && annotationNode.get(i) instanceof ObjectNode annotationObject) {
+          annotationObject.retain("translatorVersion");
+        }
+      }
+
+      return rootNode.toPrettyString();
     }
   }
 }

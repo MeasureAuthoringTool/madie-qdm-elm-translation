@@ -4,12 +4,15 @@ import gov.cms.mat.cql_elm_translation.clients.UserRoleConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
+@EnableWebSecurity
 @EnableMethodSecurity
 public class SecurityConfig {
 
@@ -28,35 +31,28 @@ public class SecurityConfig {
   public SecurityFilterChain filterChain(HttpSecurity http, UserRoleConverter roleConverter)
       throws Exception {
 
-    http.cors()
-        .and()
-        .csrf()
-        .ignoringRequestMatchers(CSRF_WHITELIST)
-        .and()
-        .authorizeHttpRequests()
-        .requestMatchers(HttpMethod.PUT, "/mat/translator/cqlToElm/**")
-        .permitAll()
-        .requestMatchers(AUTH_WHITELIST)
-        .permitAll()
-        .and()
-        .authorizeHttpRequests()
-        .requestMatchers("/admin/**")
-        .hasRole("MADIE-ADMIN")
-        .anyRequest()
-        .authenticated()
-        .and()
-        .sessionManagement()
-        .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
-        .and()
-        .oauth2ResourceServer()
-        .jwt()
-        .jwtAuthenticationConverter(roleConverter)
-        .and()
-        .and()
-        .headers()
-        .xssProtection()
-        .and()
-        .contentSecurityPolicy("script-src 'self'");
+    http.cors(Customizer.withDefaults())
+        .csrf(csrf -> csrf.ignoringRequestMatchers(CSRF_WHITELIST))
+        .authorizeHttpRequests(
+            authorize ->
+                authorize
+                    .requestMatchers(HttpMethod.PUT, "/mat/translator/cqlToElm/**")
+                    .permitAll()
+                    .requestMatchers(AUTH_WHITELIST)
+                    .permitAll()
+                    .requestMatchers("/admin/**")
+                    .hasRole("MADIE-ADMIN")
+                    .anyRequest()
+                    .authenticated())
+        .sessionManagement(
+            session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .oauth2ResourceServer(
+            oauth2 -> oauth2.jwt(jwt -> jwt.jwtAuthenticationConverter(roleConverter)))
+        .headers(
+            headers ->
+                headers
+                    .xssProtection(Customizer.withDefaults())
+                    .contentSecurityPolicy(csp -> csp.policyDirectives("script-src 'self'")));
 
     return http.build();
   }
