@@ -14,7 +14,7 @@
   <description>Translates CQL to ELM for MADiE</description>
 
   <properties>
-    <cqframework.version>4.8.0</cqframework.version>
+    <cqframework.version>5.0.0</cqframework.version>
     <hapi.fhir.version>8.10.0</hapi.fhir.version>
     <java.version>17</java.version>
     <mvn.checkstyle.file>madie-checkstyle.xml</mvn.checkstyle.file>
@@ -275,7 +275,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>3.5.0</version>
+      <version>3.6.0</version>
     </dependency>
     <dependency>
       <groupId>gov.cms.madie</groupId>
