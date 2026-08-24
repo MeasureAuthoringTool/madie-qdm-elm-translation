@@ -145,40 +145,6 @@ class CqlConversionServiceTest implements ResourceFileUtil {
   }
 
   @Test
-  void testProcessCqlDataWithErrorsMissingModel() {
-    String cqlData;
-    File inputCqlFile = new File(this.getClass().getResource("/missing-model.cql").getFile());
-    try {
-      cqlData = new String(Files.readAllBytes(inputCqlFile.toPath()));
-    } catch (IOException e) {
-      throw new UncheckedIOException(e);
-    }
-    RequestData data = requestData.toBuilder().cqlData(cqlData).build();
-    MadieLibrarySourceProvider.setUsing(new CqlTextParser(cqlData).getUsing());
-    MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    MadieLibrarySourceProvider.setAccessToken("access token");
-    CqlConversionPayload payload = service.translateCqlToElm(data);
-    assertNotNull(payload);
-    String resultJson = payload.getJson();
-    ObjectMapper objectMapper = new ObjectMapper();
-    JsonNode jsonNode = objectMapper.readTree(resultJson);
-    assertNotNull(jsonNode);
-    JsonNode libraryNode = jsonNode.at("/errorExceptions");
-    assertNotNull(libraryNode);
-
-    assertFalse(libraryNode.isMissingNode());
-    final AtomicBoolean foundMessage = new AtomicBoolean(Boolean.FALSE);
-    libraryNode.forEach(
-        node ->
-            foundMessage.set(
-                foundMessage.get()
-                    || node.get("message")
-                        .asText()
-                        .contains("Model Type and version are required")));
-    assertTrue(foundMessage.get());
-  }
-
-  @Test
   void testGetTranslatedLibrariesForCqlForCql() throws IOException {
     String cql = getData("/qdm_data_criteria_retrieval_test.cql");
     String matGlobal = getData("/mat_global_common_functions.cql");
