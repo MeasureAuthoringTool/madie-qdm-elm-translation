@@ -37,8 +37,7 @@ import static org.hamcrest.MatcherAssert.assertThat;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
@@ -180,10 +179,13 @@ public class DataCriteriaServiceTest implements ResourceFileUtil {
     Measure measure = Measure.builder().cql(cql).groups(Collections.singletonList(group)).build();
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(cql).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(matGlobalCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doReturn(matGlobalCql)
+        .when(cqlLibraryService)
+        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), eq(null), eq(null));
 
     CqlTranslator translator = new TranslationResource(false).buildTranslator(requestData);
-    verify(cqlLibraryService).getLibraryCql(any(), any(), any());
+    verify(cqlLibraryService)
+        .getLibraryCql(eq("MATGlobalCommonFunctions"), eq("7.0.000"), eq(null), eq(null));
     Mockito.doNothing()
         .when(cqlLibraryService)
         .setUpLibrarySourceProvider(anyString(), anyString());
