@@ -50,7 +50,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
   void testCallstack() {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
     Map<String, Set<CQLDefinition>> definitionCallstacks =
         cqlParsingService.getDefinitionCallstacks(qiCoreMeasureCql, "token");
@@ -145,7 +145,7 @@ public class CqlParsingServiceTest implements ResourceFileUtil {
   void testGetCqlBuilderLookups() {
     MadieLibrarySourceProvider.setUsing(new CqlTextParser(qiCoreMeasureCql).getUsing());
     MadieLibrarySourceProvider.setCqlLibraryService(cqlLibraryService);
-    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any());
+    doReturn(qiCoreHelperCql).when(cqlLibraryService).getLibraryCql(any(), any(), any(), any());
     doNothing().when(cqlLibraryService).setUpLibrarySourceProvider(anyString(), anyString());
     CqlBuilderLookup lookup = cqlParsingService.getCqlBuilderLookups(qiCoreMeasureCql, "token");
     assertThat(lookup.getParameters().size(), is(3));
