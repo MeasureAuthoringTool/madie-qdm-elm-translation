@@ -1,6 +1,7 @@
 package gov.cms.mat.cql_elm_translation.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 import gov.cms.mat.cql_elm_translation.CqlElmTranslationApplication;
 import gov.cms.mat.cql_elm_translation.clients.UserRoleConverter;
 import gov.cms.mat.cql_elm_translation.config.security.SecurityConfig;
@@ -22,13 +23,17 @@ import org.springframework.boot.webmvc.autoconfigure.actuate.web.WebMvcEndpointM
 import org.springframework.cache.CacheManager;
 import org.springframework.cache.caffeine.CaffeineCache;
 import org.springframework.cache.caffeine.CaffeineCacheManager;
+import org.springframework.cache.concurrent.ConcurrentMapCache;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
@@ -81,6 +86,58 @@ class CacheInspectionEndpointTest {
     assertThat((Long) memory.get("heapCommittedBytes"))
         .isGreaterThanOrEqualTo((Long) memory.get("heapUsedBytes"));
     assertThat((Long) memory.get("heapMaxBytes")).isNotZero();
+  }
+
+  @Test
+  void inspectShouldReportMissingAndNonCaffeineCachesWithoutExposingEntries() {
+    CacheManager manager = mock(CacheManager.class);
+    ConcurrentMapCache cache = new ConcurrentMapCache("other");
+    cache.put("sensitive-key", "sensitive-value");
+    when(manager.getCacheNames()).thenReturn(List.of("missing", "other"));
+    when(manager.getCache("other")).thenReturn(cache);
+
+    Map<String, Object> result = new CacheInspectionEndpoint(manager).inspect();
+
+    assertThat(result.get("missing"))
+        .isEqualTo(Map.of("type", "N/A", "message", "Cache not found"));
+    assertThat(result.get("other"))
+        .isEqualTo(
+            Map.of(
+                "type", "ConcurrentMapCache",
+                "message", "Cache statistics are only available for Caffeine caches"));
+    assertThat(cache.get("sensitive-key", String.class)).isEqualTo("sensitive-value");
+  }
+
+  @Test
+  void inspectShouldReportSuccessfulAndFailedCacheLoads() {
+    LoadingCache<Object, Object> nativeCache =
+        Caffeine.newBuilder()
+            .recordStats()
+            .build(
+                key -> {
+                  if (key.equals("failed")) {
+                    throw new IllegalStateException("load failed");
+                  }
+                  return "loaded";
+                });
+    CaffeineCache cache = new CaffeineCache("loading", nativeCache);
+    CacheManager manager = mock(CacheManager.class);
+    when(manager.getCacheNames()).thenReturn(List.of("loading"));
+    when(manager.getCache("loading")).thenReturn(cache);
+
+    assertThat(nativeCache.get("success")).isEqualTo("loaded");
+    assertThat(nativeCache.get("success")).isEqualTo("loaded");
+    assertThatThrownBy(() -> nativeCache.get("failed")).isInstanceOf(IllegalStateException.class);
+
+    Map<?, ?> stats = (Map<?, ?>) new CacheInspectionEndpoint(manager).inspect().get("loading");
+
+    assertThat(stats.get("statsEnabled")).isEqualTo(true);
+    assertThat(stats.get("loadCount")).isEqualTo(2L);
+    assertThat(stats.get("entryCount")).isEqualTo(1L);
+    assertThat(stats.get("hitCount")).isEqualTo(1L);
+    assertThat(stats.get("missCount")).isEqualTo(2L);
+    assertThat(stats.get("hitRate")).isEqualTo("33.33%");
+    assertThat(stats.get("averageLoadPenaltyMs")).asString().matches("\\d+\\.\\d{2}");
   }
 
   @ParameterizedTest

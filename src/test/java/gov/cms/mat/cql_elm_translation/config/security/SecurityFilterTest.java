@@ -117,4 +117,30 @@ class SecurityFilterTest {
     assertEquals(403, servletResponse.getStatus());
     verifyNoInteractions(filterChain);
   }
+
+  @Test
+  void contextPrefixedHealthGetShouldNotRequireApiKey() throws ServletException, IOException {
+    filterChain = mock(FilterChain.class);
+    servletRequest.setContextPath("/api/qdm");
+    servletRequest.setRequestURI("/api/qdm/actuator/health");
+    servletRequest.setMethod("GET");
+
+    securityFilter.doFilter(servletRequest, servletResponse, filterChain);
+
+    assertEquals(200, servletResponse.getStatus());
+    verify(filterChain).doFilter(servletRequest, servletResponse);
+  }
+
+  @Test
+  void disabledApiKeyEnforcementAllowsOtherEndpoints() throws ServletException, IOException {
+    filterChain = mock(FilterChain.class);
+    ReflectionTestUtils.setField(securityFilter, "matApiKey", "DISABLED");
+    servletRequest.setRequestURI("/api/qdm/other");
+    servletRequest.setMethod("POST");
+
+    securityFilter.doFilter(servletRequest, servletResponse, filterChain);
+
+    assertEquals(200, servletResponse.getStatus());
+    verify(filterChain).doFilter(servletRequest, servletResponse);
+  }
 }
