@@ -235,7 +235,7 @@
     <dependency>
       <groupId>gov.cms.madie</groupId>
       <artifactId>madie-translator-commons</artifactId>
-      <version>3.12.4</version>
+      <version>3.12.5</version>
     </dependency>
 
     <dependency>
